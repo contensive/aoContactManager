@@ -486,7 +486,7 @@ Private Function GetFormSearch(StatusMessage As String, IsAdminPath As Boolean) 
     '
     Dim SubTab As Long
     Dim RQS As String
-    Dim Nav As New ccNav.MenuLiveTabClass
+    Dim Nav As New MenuLiveTabClass
     Dim Header As String
     Dim AdminUI As Object
     Dim Content As String
@@ -1893,7 +1893,7 @@ Private Function GetFormDetail(DetailMemberID As Long, StatusMessage As String, 
     '
     Dim SubTab As Long
     Dim RQS As String
-    Dim Nav As New ccNav.MenuLiveTabClass
+    Dim Nav As New MenuLiveTabClass
     Dim Header As String
     Dim AdminUI As Object
     Dim Content As String
@@ -2371,7 +2371,7 @@ ErrorTrap:
 Private Function GetFormDetail_TabGroup(CSMember As Long) As String
     On Error GoTo ErrorTrap
     '
-    Dim f As New FastString.FastStringClass
+    Dim f As New fastStringClass
     Dim Copy As String
     Dim SQL As String
     Dim CS As Long
@@ -2656,7 +2656,7 @@ Private Function GetFormDetail_TabHomes(CSMember As Long) As String
     Dim ColAlign() As String
     Dim ColWidth() As String
     Dim Cells() As String
-    Dim Tab0 As New FastString.FastStringClass
+    Dim Tab0 As New fastStringClass
     Dim AdminUI As Object
     Dim Stream As String
     Dim SQLWhere As String

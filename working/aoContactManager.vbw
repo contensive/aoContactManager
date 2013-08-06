@@ -1,3 +1,6 @@
 CMngrClass = 23, 23, 666, 610, Z
 ccCommonModule = 46, 46, 1046, 633, 
 kmaCommonModule = 69, 69, 1069, 656, 
+fastStringClass = 136, 136, 1302, 784, C
+MenuLiveTabClass = 170, 170, 1336, 818, 
+MenuComboTabClass = 204, 204, 1370, 852, 
