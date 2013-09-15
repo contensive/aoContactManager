@@ -24,7 +24,7 @@ Const FormList = 2
 Const FormDetails = 3
 '
 Private Csv As Object
-Private Main As Object
+Private main As Object
 'Private Main As MainClass
 '
 '========================================================================
@@ -44,7 +44,7 @@ End Function
 '
 Public Sub Init(MainObject As Object)
 'Public Sub Init(MainObject As ccWeb3.MainClass)
-    Set Main = MainObject
+    Set main = MainObject
     Exit Sub
     '
     ' ----- Error Trap
@@ -106,10 +106,10 @@ Public Function GetContent(OptionString As String) As String
     Dim IsGoMethodEnabled As Boolean
     Dim IsAdminPath As Boolean
     '
-    If Not (Main Is Nothing) Then
-        Set AdminUI = CreateObject("ccWeb3.AdminUIClass")
-        IsAdminPath = (UCase(Main.getAddonOption("source", OptionString)) = "ADMIN")
-        If Not Main.IsAdmin Then
+    If Not (main Is Nothing) Then
+        Set AdminUI = getAdminUI(main)
+        IsAdminPath = (UCase(main.getAddonOption("source", OptionString)) = "ADMIN")
+        If Not main.IsAdmin Then
             '
             ' You must be admin to use this feature
             '
@@ -117,30 +117,30 @@ Public Function GetContent(OptionString As String) As String
                 '
                 ' Admin site, but not an admin
                 '
-                GetContent = AdminUI.GetFormBodyAdminOnly(Main)
-                GetContent = AdminUI.GetBody(Main, "Contact Manager", ButtonCancelAll, "", False, False, GetContent, "", 0, "")
+                GetContent = AdminUI.GetFormBodyAdminOnly(main)
+                GetContent = AdminUI.GetBody(main, "Contact Manager", ButtonCancelAll, "", False, False, GetContent, "", 0, "")
             Else
                 '
                 ' Public site, not an admin
                 '
-                GetContent = AdminUI.GetFormBodyAdminOnly(Main)
-                GetContent = AdminUI.GetBody(Main, "Contact Manager", "", "", False, False, GetContent, "", 0, "")
+                GetContent = AdminUI.GetFormBodyAdminOnly(main)
+                GetContent = AdminUI.GetBody(main, "Contact Manager", "", "", False, False, GetContent, "", 0, "")
             End If
         Else
             '
-            PeopleCID = Main.GetContentID("people")
-            RQS = Main.RefreshQueryString
-            TabNumber = Main.GetStreamInteger("tab")
-            DetailMemberID = Main.GetStreamInteger(RequestNameMemberID)
-            ContactSearchCriteria = Main.GetMemberProperty("ContactSearchCriteria", ContactSearchCriteria)
-            ContactGroupCriteria = Main.GetMemberProperty("ContactGroupCriteria", "")
-            ContactContentCriteria = Main.GetMemberProperty("ContactContentID", PeopleCID)
-            IsGoMethodEnabled = kmaEncodeBoolean(Main.GetSiteProperty("EnableExtensionGoMethod", "0"))
+            PeopleCID = main.GetContentID("people")
+            RQS = main.RefreshQueryString
+            TabNumber = main.GetStreamInteger("tab")
+            DetailMemberID = main.GetStreamInteger(RequestNameMemberID)
+            ContactSearchCriteria = main.GetMemberProperty("ContactSearchCriteria", ContactSearchCriteria)
+            ContactGroupCriteria = main.GetMemberProperty("ContactGroupCriteria", "")
+            ContactContentCriteria = main.GetMemberProperty("ContactContentID", PeopleCID)
+            IsGoMethodEnabled = kmaEncodeBoolean(main.GetSiteProperty("EnableExtensionGoMethod", "0"))
             '
-            Call Main.AddRefreshQueryString("tab", TabNumber)
+            Call main.AddRefreshQueryString("tab", TabNumber)
             '
-            FormID = Main.GetStreamInteger(RequestNameFormID)
-            Button = Main.GetStreamText("Button")
+            FormID = main.GetStreamInteger(RequestNameFormID)
+            Button = main.GetStreamText("Button")
             If FormID = 0 Then
                 '
                 ' ----- Set default form
@@ -185,18 +185,18 @@ Public Function GetContent(OptionString As String) As String
                                 ContactSearchCriteria = ""
                                 ContactGroupCriteria = ""
                                 ContactContentCriteria = ""
-                                Call Main.SetMemberProperty("ContactSearchCriteria", ContactSearchCriteria)
-                                Call Main.SetMemberProperty("ContactGroupCriteria", ContactGroupCriteria)
-                                Call Main.SetMemberProperty("ContactContentID", ContactContentCriteria)
+                                Call main.SetMemberProperty("ContactSearchCriteria", ContactSearchCriteria)
+                                Call main.SetMemberProperty("ContactGroupCriteria", ContactGroupCriteria)
+                                Call main.SetMemberProperty("ContactContentID", ContactContentCriteria)
                                 FormID = FormSearch
                             Case ButtonApply
                                 '
                                 ' Add to or remove from group
                                 '
-                                RowCount = Main.GetStreamInteger("M.Count")
-                                GroupID = Main.GetStreamInteger("GroupID")
-                                GroupToolAction = Main.GetStreamInteger("GroupToolAction")
-                                GroupToolSelect = Main.GetStreamInteger("GroupToolSelect")
+                                RowCount = main.GetStreamInteger("M.Count")
+                                GroupID = main.GetStreamInteger("GroupID")
+                                GroupToolAction = main.GetStreamInteger("GroupToolAction")
+                                GroupToolSelect = main.GetStreamInteger("GroupToolSelect")
                                 SQLCriteria = ""
                                 Call BuildSearch(SQLCriteria, SearchCaption)
                                 Select Case GroupToolAction
@@ -208,17 +208,17 @@ Public Function GetContent(OptionString As String) As String
                                             '
                                             ' Group required and not provided
                                             '
-                                            Call Main.AddUserError("Please select a Target Group for this operation")
+                                            Call main.AddUserError("Please select a Target Group for this operation")
                                         ElseIf GroupToolSelect = 0 Then
                                             '
                                             ' Add selection to Group
                                             '
                                             If (RowCount > 0) Then
-                                                GroupName = Main.GetGroupByID(GroupID)
+                                                GroupName = main.GetGroupByID(GroupID)
                                                 For RowPointer = 0 To RowCount - 1
-                                                    If Main.GetStreamBoolean("M." & RowPointer) Then
-                                                        memberID = Main.GetStreamInteger("MID." & RowPointer)
-                                                        Call Main.AddGroupMember(GroupName, memberID)
+                                                    If main.GetStreamBoolean("M." & RowPointer) Then
+                                                        memberID = main.GetStreamInteger("MID." & RowPointer)
+                                                        Call main.AddGroupMember(GroupName, memberID)
                                                     End If
                                                 Next
                                             End If
@@ -226,7 +226,7 @@ Public Function GetContent(OptionString As String) As String
                                             '
                                             ' Add everyone in search criteria to this group
                                             '
-                                            CCID = Main.GetContentID("Member Rules")
+                                            CCID = main.GetContentID("Member Rules")
                                             SQL = "insert into ccMemberRules (Active,ContentControlID,GroupID,MemberID )" _
                                                 & " select 1," & CCID & "," & GroupID & ",ccMembers.ID" _
                                                 & " from (ccMembers" _
@@ -235,7 +235,7 @@ Public Function GetContent(OptionString As String) As String
                                                 & " " & SQLCriteria _
                                                 & " and InGroups.MemberID is null" _
                                                 & ""
-                                            Call Main.ExecuteSQL("default", SQL)
+                                            Call main.ExecuteSQL("default", SQL)
                                         End If
                                     Case 2
                                         '
@@ -245,17 +245,17 @@ Public Function GetContent(OptionString As String) As String
                                             '
                                             ' Group required and not provided
                                             '
-                                            Call Main.AddUserError("Please select a Target Group for this operation")
+                                            Call main.AddUserError("Please select a Target Group for this operation")
                                         ElseIf GroupToolSelect = 0 Then
                                             '
                                             ' Remove selection from Group
                                             '
                                             If (RowCount > 0) Then
-                                                GroupName = Main.GetGroupByID(GroupID)
+                                                GroupName = main.GetGroupByID(GroupID)
                                                 For RowPointer = 0 To RowCount - 1
-                                                    If Main.GetStreamBoolean("M." & RowPointer) Then
-                                                        memberID = Main.GetStreamInteger("MID." & RowPointer)
-                                                        Call Main.DeleteContentRecords("Member Rules", "(GroupID=" & GroupID & ")and(MemberID=" & memberID & ")")
+                                                    If main.GetStreamBoolean("M." & RowPointer) Then
+                                                        memberID = main.GetStreamInteger("MID." & RowPointer)
+                                                        Call main.DeleteContentRecords("Member Rules", "(GroupID=" & GroupID & ")and(MemberID=" & memberID & ")")
                                                     End If
                                                 Next
                                             End If
@@ -269,14 +269,14 @@ Public Function GetContent(OptionString As String) As String
                                                 & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )" _
                                                 & " " & SQLCriteria _
                                                 & ")"
-                                            Call Main.ExecuteSQL("default", SQL)
+                                            Call main.ExecuteSQL("default", SQL)
                                         End If
                                     Case 3
                                         '
                                         ' ----- Export
                                         '
-                                        If Main.SiteProperty_BuildVersion < "3.3.452" Then
-                                            Call Main.AddUserError("This operation requires a database upgrade for this site. Use the Contensive Application Manager to upgrade your site.")
+                                        If main.SiteProperty_BuildVersion < "3.3.452" Then
+                                            Call main.AddUserError("This operation requires a database upgrade for this site. Use the Contensive Application Manager to upgrade your site.")
                                             StatusMessage = "<P>There was a problem requesting your download. Your Contensive database needs to be updated.<P>"
                                         Else
                                             ExportName = SearchCaption
@@ -289,10 +289,10 @@ Dim Aborttask As Boolean
                                                 ExportName = "Selected rows from " & ExportName
                                                 RowSQL = ""
                                                 If (RowCount > 0) Then
-                                                    GroupName = Main.GetGroupByID(GroupID)
+                                                    GroupName = main.GetGroupByID(GroupID)
                                                     For RowPointer = 0 To RowCount - 1
-                                                        If Main.GetStreamBoolean("M." & RowPointer) Then
-                                                            memberID = Main.GetStreamInteger("MID." & RowPointer)
+                                                        If main.GetStreamBoolean("M." & RowPointer) Then
+                                                            memberID = main.GetStreamInteger("MID." & RowPointer)
                                                             RowSQL = RowSQL & "OR(ccMembers.ID=" & memberID & ")"
                                                         End If
                                                     Next
@@ -301,7 +301,7 @@ Dim Aborttask As Boolean
                                                         ' nothing selected, abort export
                                                         '
                                                         Aborttask = True
-                                                        Call Main.TestPoint("No contacts to export")
+                                                        Call main.TestPoint("No contacts to export")
                                                         StatusMessage = "<P>You requested to only download the selected entries, and none were selected.<P>"
                                                     ElseIf SQLCriteria = "" Then
                                                         '
@@ -323,14 +323,14 @@ Dim Aborttask As Boolean
                                             If Not Aborttask Then
                                             SQLFrom = "ccMembers"
                                             JoinTableCnt = 0
-                                            If Main.GetMemberProperty("ContactGroupCriteria", "") <> "" Then
+                                            If main.GetMemberProperty("ContactGroupCriteria", "") <> "" Then
                                                 SQLFrom = "(" & SQLFrom & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )"
                                             End If
-                                            ContentID = kmaEncodeInteger(Main.GetMemberProperty("ContactContentID", Main.GetContentID("people")))
-                                            CS = Main.OpenCSContent("Content Fields", "ContentID=" & ContentID, "EditSortPriority", True, False, False, "Name,Caption,Type,LookupContentID")
-                                            Do While Main.IsCSOK(CS)
-                                                FieldName = Main.GetCStext(CS, "name")
-                                                Select Case Main.GetCSInteger(CS, "type")
+                                            ContentID = kmaEncodeInteger(main.GetMemberProperty("ContactContentID", main.GetContentID("people")))
+                                            CS = main.OpenCSContent("Content Fields", "ContentID=" & ContentID, "EditSortPriority", True, False, False, "Name,Caption,Type,LookupContentID")
+                                            Do While main.IsCSOK(CS)
+                                                FieldName = main.GetCStext(CS, "name")
+                                                Select Case main.GetCSInteger(CS, "type")
                                                     Case FieldTypeLookup
                                                         '
                                                         ' just add the ID into the list
@@ -365,11 +365,11 @@ Dim Aborttask As Boolean
                                                         SelectList = SelectList & ",ccMembers." & FieldName
                                                         FieldNameList = FieldNameList & "," & FieldName
                                                 End Select
-                                                Call Main.NextCSRecord(CS)
+                                                Call main.NextCSRecord(CS)
                                             Loop
-                                            Call Main.CloseCS(CS)
+                                            Call main.CloseCS(CS)
                                             If SelectList = "" Then
-                                                Call Main.TestPoint("Export All Contacts, but no fields were found to export")
+                                                Call main.TestPoint("Export All Contacts, but no fields were found to export")
                                                 StatusMessage = "<P>There was a problem requesting your download.<P>"
                                             Else
                                                 SelectList = Mid(SelectList, 2)
@@ -378,9 +378,9 @@ Dim Aborttask As Boolean
                                                 End If
                                                 'ExportName = CStr(Now()) & " snapshot of " & LCase(ExportName)
                                                 SQL = "select Distinct " & SelectList & " from " & SQLFrom & SQLCriteria
-                                                Call Main.RequestTask("BuildCSV", SQL, ExportName, "MemberExport-" & CStr(Main.GetRandomLong) & ".csv")
-                                                Call Main.TestPoint("Export All Contacts, SQL=" & SQL)
-                                                StatusMessage = "<P>Your download request has been submitted and will be available on the <a href=" & Main.SiteProperty_AdminURL & "?af=30>Download Requests</a> page shortly.<P>"
+                                                Call main.RequestTask("BuildCSV", SQL, ExportName, "MemberExport-" & CStr(main.GetRandomLong) & ".csv")
+                                                Call main.TestPoint("Export All Contacts, SQL=" & SQL)
+                                                StatusMessage = "<P>Your download request has been submitted and will be available on the <a href=" & main.SiteProperty_AdminURL & "?af=30>Download Requests</a> page shortly.<P>"
                                             End If
                                             End If
                                         End If
@@ -394,11 +394,11 @@ Dim Aborttask As Boolean
                                             '
                                             RecordCnt = 0
                                             If (RowCount > 0) Then
-                                                GroupName = Main.GetGroupByID(GroupID)
+                                                GroupName = main.GetGroupByID(GroupID)
                                                 For RowPointer = 0 To RowCount - 1
-                                                    If Main.GetStreamBoolean("M." & RowPointer) Then
-                                                        memberID = Main.GetStreamInteger("MID." & RowPointer)
-                                                        Call Main.ExecuteSQL("default", "update ccMembers set AllowBulkEmail=1 where ID=" & memberID)
+                                                    If main.GetStreamBoolean("M." & RowPointer) Then
+                                                        memberID = main.GetStreamInteger("MID." & RowPointer)
+                                                        Call main.ExecuteSQL("default", "update ccMembers set AllowBulkEmail=1 where ID=" & memberID)
                                                         RecordCnt = RecordCnt + 1
                                                     End If
                                                 Next
@@ -414,13 +414,13 @@ Dim Aborttask As Boolean
                                                 & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )" _
                                                 & " " & SQLCriteria _
                                                 & ")"
-                                            Call Main.ExecuteSQL("default", SQL)
+                                            Call main.ExecuteSQL("default", SQL)
                                             StatusMessage = "<P>Allow Group Email was set for all people in this selection.<P>"
                                         End If
                                 End Select
                         End Select
                     Case FormDetails
-                        DetailMemberID = Main.GetStreamInteger(RequestNameMemberID)
+                        DetailMemberID = main.GetStreamInteger(RequestNameMemberID)
                         Select Case Button
                             Case ButtonCancel
                                 FormID = FormList
@@ -492,26 +492,26 @@ Private Function GetFormSearch(StatusMessage As String, IsAdminPath As Boolean) 
     Dim Content As String
     Dim ButtonList As String
     '
-    If Not (Main Is Nothing) Then
+    If Not (main Is Nothing) Then
         '
         ' Determine current Subtab
         '
-        Set AdminUI = CreateObject("ccWeb3.AdminUIClass")
-        SubTab = Main.GetStreamInteger("SubTab")
+        Set AdminUI = getAdminUI(main)
+        SubTab = main.GetStreamInteger("SubTab")
         If SubTab = 0 Then
-            SubTab = kmaEncodeInteger(Main.GetMemberProperty("SelectSubTab", "1"))
+            SubTab = kmaEncodeInteger(main.GetMemberProperty("SelectSubTab", "1"))
             If SubTab = 0 Then
                 SubTab = 1
-                Call Main.SetMemberProperty("SelectSubTab", CStr(SubTab))
+                Call main.SetMemberProperty("SelectSubTab", CStr(SubTab))
             End If
         Else
-            Call Main.SetMemberProperty("SelectSubTab", CStr(SubTab))
+            Call main.SetMemberProperty("SelectSubTab", CStr(SubTab))
         End If
-        Call Main.AddRefreshQueryString("SubTab", SubTab)
+        Call main.AddRefreshQueryString("SubTab", SubTab)
         '
         ' SubTab Menu
         '
-        Call Main.AddRefreshQueryString("tab", "")
+        Call main.AddRefreshQueryString("tab", "")
         If IsAdminPath Then
             ButtonList = ButtonCancelAll & "," & ButtonSearch
         Else
@@ -525,11 +525,11 @@ Private Function GetFormSearch(StatusMessage As String, IsAdminPath As Boolean) 
         Call Nav.AddEntry("Content", GetFormSearch_TabContent(), "ccAdminTab")
         '
         Content = "" _
-            & Main.GetFormInputHidden("SelectionForm", "1") _
+            & main.GetFormInputHidden("SelectionForm", "1") _
             & Nav.GetTabs() _
-            & Main.GetFormInputHidden(RequestNameFormID, FormSearch) _
+            & main.GetFormInputHidden(RequestNameFormID, FormSearch) _
             & ""
-        GetFormSearch = AdminUI.GetBody(Main, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
+        GetFormSearch = AdminUI.GetBody(main, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
     End If
     '
     Exit Function
@@ -564,16 +564,16 @@ Private Function GetFormSearch_TabContent() As String
     Dim s As String
     Dim Style As String
     '
-    If Not (Main Is Nothing) Then
+    If Not (main Is Nothing) Then
         Button = "ContentSelect"
-        RQS = Main.RefreshQueryString
-        FormSave = (Main.GetStreamText(Button) = "Save")
+        RQS = main.RefreshQueryString
+        FormSave = (main.GetStreamText(Button) = "Save")
         '
         ' Prepopulate the form
         '
-        ContactContentID = kmaEncodeInteger(Main.GetMemberProperty("ContactContentID", 0))
+        ContactContentID = kmaEncodeInteger(main.GetMemberProperty("ContactContentID", 0))
         If ContactContentID = 0 Then
-            ContactContentID = Main.GetContentID("people")
+            ContactContentID = main.GetContentID("people")
         End If
         '
         s = s _
@@ -598,30 +598,30 @@ Private Function GetFormSearch_TabContent() As String
         s = s & kmaStartTableCell("99%", 1, RowEven, "left") & "<img src=/cclib/images/spacer.gif width=1 height=1></TD>"
         s = s & kmaEndTableRow
         '
-        ContentControlCriteria = Main.GetContentControlCriteria("people")
+        ContentControlCriteria = main.GetContentControlCriteria("people")
         ContentControlCriteria = Replace(ContentControlCriteria, "ccMembers", "ccContent")
         ContentControlCriteria = Replace(ContentControlCriteria, "ContentControlID", "ID")
-        CS = Main.OpenCSContent("Content", ContentControlCriteria, "name", , , , "name,ID")
+        CS = main.OpenCSContent("Content", ContentControlCriteria, "name", , , , "name,ID")
         GroupPointer = 0
-        Do While Main.IsCSOK(CS)
-            ContentName = Main.GetCStext(CS, "name")
-            ContentID = Main.GetCSInteger(CS, "ID")
+        Do While main.IsCSOK(CS)
+            ContentName = main.GetCStext(CS, "name")
+            ContentID = main.GetCSInteger(CS, "ID")
             If ((GroupPointer Mod 2) = 0) Then
                 Style = "ccAdminListRowEven"
             Else
                 Style = "ccAdminListRowOdd"
             End If
             s = s & "<TR>"
-            s = s & "<TD width=30 align=center class=""" & Style & """>" & Main.GetFormInputRadioBox("ContentID", ContentID, ContactContentID) & "</TD>"
+            s = s & "<TD width=30 align=center class=""" & Style & """>" & main.GetFormInputRadioBox("ContentID", ContentID, ContactContentID) & "</TD>"
             s = s & "<TD width=99% align=left class=""" & Style & """>" & ContentName & "</TD>"
             s = s & "</TR>"
             GroupPointer = GroupPointer + 1
-            Call Main.NextCSRecord(CS)
+            Call main.NextCSRecord(CS)
         Loop
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         s = s & "</Table>"
         '
-        GetFormSearch_TabContent = s & Main.GetFormInputHidden("SelectionContentSubTab", "1")
+        GetFormSearch_TabContent = s & main.GetFormInputHidden("SelectionContentSubTab", "1")
         '
     End If
     '
@@ -656,10 +656,10 @@ Private Function GetFormSearch_TabGroup() As String
     Dim s As String
     Dim Style As String
     '
-    If Not (Main Is Nothing) Then
+    If Not (main Is Nothing) Then
         Button = "GroupSelect"
-        RQS = Main.RefreshQueryString
-        ContactGroupCriteria = Main.GetMemberProperty("ContactGroupCriteria", "")
+        RQS = main.RefreshQueryString
+        ContactGroupCriteria = main.GetMemberProperty("ContactGroupCriteria", "")
         '
         s = s _
             & "<div>Select groups to narrow your results. If any groups are selected, your search will be limited to people in any of the selected groups.</div>" _
@@ -693,13 +693,13 @@ Private Function GetFormSearch_TabGroup() As String
         '    & " GROUP BY ccGroups.ID, ccGroups.Name, ccGroups.Caption" _
         '    & " HAVING (((Count(ccMembers.ID)) Is Not Null))" _
         '    & " ORDER BY ccGroups.Caption;"
-        CS = Main.OpenCSSQL("Default", SQL)
+        CS = main.OpenCSSQL("Default", SQL)
         GroupPointer = 0
-        Do While Main.IsCSOK(CS)
-            GroupID = Main.GetCSInteger(CS, "GroupID")
-            GroupName = Main.GetCStext(CS, "GroupCaption")
+        Do While main.IsCSOK(CS)
+            GroupID = main.GetCSInteger(CS, "GroupID")
+            GroupName = main.GetCStext(CS, "GroupCaption")
             If GroupName = "" Then
-                GroupName = Main.GetCStext(CS, "GroupName")
+                GroupName = main.GetCStext(CS, "GroupName")
                 If GroupName = "" Then
                     GroupName = "Group " & GroupID
                 End If
@@ -713,8 +713,8 @@ Private Function GetFormSearch_TabGroup() As String
                 Style = "ccAdminListRowOdd"
             End If
             s = s & "<TR>"
-            s = s & "<TD width=30 align=center class=""" & Style & """>" & Main.GetFormInputCheckBox(GroupLabel, GroupChecked) & Main.GetFormInputHidden(GroupLabel & ".id", GroupID) & "</TD>"
-            s = s & "<TD width=30 align=right class=""" & Style & """>" & Main.GetCSInteger(CS, "CountOfID") & "</TD>"
+            s = s & "<TD width=30 align=center class=""" & Style & """>" & main.GetFormInputCheckBox(GroupLabel, GroupChecked) & main.GetFormInputHidden(GroupLabel & ".id", GroupID) & "</TD>"
+            s = s & "<TD width=30 align=right class=""" & Style & """>" & main.GetCSInteger(CS, "CountOfID") & "</TD>"
             s = s & "<TD width=99% align=left class=""" & Style & """>" & GroupName & "</TD>"
             s = s & "</TR>"
             'S = S & kmaStartTableRow
@@ -723,13 +723,13 @@ Private Function GetFormSearch_TabGroup() As String
             'S = S & kmaStartTableCell("100%", 1, RowEven, "left") & "&nbsp;" & GroupName & "</TD>"
             'S = S & kmaEndTableRow
             GroupPointer = GroupPointer + 1
-            Call Main.NextCSRecord(CS)
+            Call main.NextCSRecord(CS)
             Loop
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         s = s & "</Table>"
         '
-        s = s & Main.GetFormInputHidden("GroupCount", GroupPointer)
-        GetFormSearch_TabGroup = s & Main.GetFormInputHidden("SelectionGroupSubTab", "1")
+        s = s & main.GetFormInputHidden("GroupCount", GroupPointer)
+        GetFormSearch_TabGroup = s & main.GetFormInputHidden("SelectionGroupSubTab", "1")
         '
         End If
     '
@@ -785,13 +785,13 @@ Private Function GetFormSearch_TabPeople() As String
     Dim tabCaption As String
     Dim groupTab As String
     '
-    If Not (Main Is Nothing) Then
+    If Not (main Is Nothing) Then
         Button = "CriteriaSelect"
-        RQS = Main.RefreshQueryString
+        RQS = main.RefreshQueryString
         '
         ' prepare visit property to prepopulate form
         '
-        ContactSearchCriteria = Main.GetMemberProperty("ContactSearchCriteria", "")
+        ContactSearchCriteria = main.GetMemberProperty("ContactSearchCriteria", "")
         If ContactSearchCriteria <> "" Then
             CriteriaValues = Split(ContactSearchCriteria, vbCrLf)
             CriteriaCount = UBound(CriteriaValues) + 1
@@ -799,10 +799,10 @@ Private Function GetFormSearch_TabPeople() As String
         '
         ' Setup fields and capture request changes
         '
-        Criteria = "(active<>0)and(ContentID=" & Main.GetContentID("people") & ")and(authorable<>0)"
-        CS = Main.OpenCSContent("Content Fields", Criteria, "EditTab,EditSortPriority")
+        Criteria = "(active<>0)and(ContentID=" & main.GetContentID("people") & ")and(authorable<>0)"
+        CS = main.OpenCSContent("Content Fields", Criteria, "EditTab,EditSortPriority")
         FieldPtr = 0
-        Do While Main.IsCSOK(CS)
+        Do While main.IsCSOK(CS)
             If FieldPtr >= FieldSize Then
                 FieldSize = FieldSize + 100
                 ReDim Preserve FieldName(FieldSize)
@@ -815,18 +815,18 @@ Private Function GetFormSearch_TabPeople() As String
                 ReDim Preserve FieldLookupList(FieldSize)
                 ReDim Preserve fieldEditTab(FieldSize)
             End If
-            FieldName(FieldPtr) = Main.GetCStext(CS, "name")
-            FieldCaption(FieldPtr) = Main.GetCStext(CS, "Caption")
-            fieldId(FieldPtr) = Main.GetCSInteger(CS, "ID")
-            fieldType(FieldPtr) = Main.GetCSInteger(CS, "Type")
+            FieldName(FieldPtr) = main.GetCStext(CS, "name")
+            FieldCaption(FieldPtr) = main.GetCStext(CS, "Caption")
+            fieldId(FieldPtr) = main.GetCSInteger(CS, "ID")
+            fieldType(FieldPtr) = main.GetCSInteger(CS, "Type")
             If fieldType(FieldPtr) = 7 Then
-                ContentID = Main.GetCSInteger(CS, "LookupContentID")
+                ContentID = main.GetCSInteger(CS, "LookupContentID")
                 If ContentID > 0 Then
-                    FieldLookupContentName(FieldPtr) = Main.GetContentNameByID(ContentID)
+                    FieldLookupContentName(FieldPtr) = main.GetContentNameByID(ContentID)
                 End If
-                FieldLookupList(FieldPtr) = Main.GetCStext(CS, "LookupList")
+                FieldLookupList(FieldPtr) = main.GetCStext(CS, "LookupList")
             End If
-            fieldEditTab(FieldPtr) = Main.GetCStext(CS, "editTab")
+            fieldEditTab(FieldPtr) = main.GetCStext(CS, "editTab")
             '
             ' set prepoplate value from visit property
             '
@@ -849,9 +849,9 @@ Private Function GetFormSearch_TabPeople() As String
                 Next
             End If
             FieldPtr = FieldPtr + 1
-            Call Main.NextCSRecord(CS)
+            Call main.NextCSRecord(CS)
         Loop
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         FieldCount = FieldPtr
         '
         ' header
@@ -976,11 +976,11 @@ Private Function GetFormSearch_TabPeople() As String
                     If FieldLookupContentName(FieldPtr) <> "" Then
                         s = s _
                             & "<TD class=""cmRowField"">" _
-                            & Main.GetFormInputSelect(FieldName(FieldPtr), FieldValue(FieldPtr), FieldLookupContentName(FieldPtr), , "Any") & "</TD>"
+                            & main.GetFormInputSelect(FieldName(FieldPtr), FieldValue(FieldPtr), FieldLookupContentName(FieldPtr), , "Any") & "</TD>"
                     Else
                         s = s _
                             & "<TD class=""cmRowField"">" _
-                            & Main.GetFormInputSelectList(FieldName(FieldPtr), FieldValue(FieldPtr), FieldLookupList(FieldPtr), , "Any") & "</TD>"
+                            & main.GetFormInputSelectList(FieldName(FieldPtr), FieldValue(FieldPtr), FieldLookupList(FieldPtr), , "Any") & "</TD>"
                     End If
                     s = s & "</TR>"
                     groupTab = ""
@@ -989,7 +989,7 @@ Private Function GetFormSearch_TabPeople() As String
             Next
         s = s & "</Table>"
         '
-        GetFormSearch_TabPeople = s & Main.GetFormInputHidden("SelectionSearchSubTab", "1")
+        GetFormSearch_TabPeople = s & main.GetFormInputHidden("SelectionSearchSubTab", "1")
         '
         End If
     '
@@ -1084,28 +1084,28 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
     Dim SortColType As Long
     Dim TextTest As String
     '
-    If Not (Main Is Nothing) Then
-        Set AdminUI = CreateObject("ccWeb3.AdminUIClass")
-        IsAdmin = Main.IsAdmin()
-        RQS = Main.RefreshQueryString
-        TextTest = Main.GetStreamText(RequestNamePageSize)
+    If Not (main Is Nothing) Then
+        Set AdminUI = getAdminUI(main)
+        IsAdmin = main.IsAdmin()
+        RQS = main.RefreshQueryString
+        TextTest = main.GetStreamText(RequestNamePageSize)
         If TextTest = "" Then
-            PageSize = kmaEncodeInteger(Main.getvisitproperty("cmPageSize", "50"))
+            PageSize = kmaEncodeInteger(main.getvisitproperty("cmPageSize", "50"))
         Else
             PageSize = kmaEncodeInteger(TextTest)
-            Call Main.setvisitproperty("cmPageSize", CStr(PageSize))
+            Call main.setvisitproperty("cmPageSize", CStr(PageSize))
         End If
         'PageSize = Main.GetStreamInteger(RequestNamePageSize)
         If PageSize = 0 Then
             PageSize = 50
         End If
-        PageNumber = Main.GetStreamInteger(RequestNamePageNumber)
+        PageNumber = main.GetStreamInteger(RequestNamePageNumber)
         If PageNumber = 0 Then
             PageNumber = 1
         End If
-        GroupID = Main.GetStreamInteger("GroupID")
-        GroupToolAction = Main.GetStreamInteger("GroupToolAction")
-        AdminURL = Main.SiteProperty_AdminURL
+        GroupID = main.GetStreamInteger("GroupID")
+        GroupToolAction = main.GetStreamInteger("GroupToolAction")
+        AdminURL = main.SiteProperty_AdminURL
         ColumnCount = 11
         If IsAdmin Then
             '
@@ -1123,15 +1123,15 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
         ReDim Cells(PageSize, ColumnCount)
         '
         SortColPtr = 3
-        TextTest = Main.getvisitproperty("cmSortColumn", "")
+        TextTest = main.getvisitproperty("cmSortColumn", "")
         If TextTest <> "" Then
             SortColPtr = kmaEncodeInteger(TextTest)
         End If
-        SortColPtr = AdminUI.GetReportSortColumnPtr(Main, SortColPtr)
+        SortColPtr = AdminUI.GetReportSortColumnPtr(main, SortColPtr)
         If CStr(SortColPtr) <> TextTest Then
-            Call Main.setvisitproperty("cmSortColumn", CStr(SortColPtr))
+            Call main.setvisitproperty("cmSortColumn", CStr(SortColPtr))
         End If
-        If AdminUI.GetReportSortType(Main) = 2 Then
+        If AdminUI.GetReportSortType(main) = 2 Then
             SQLOrderDir = " Desc"
         End If
         '
@@ -1247,7 +1247,7 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
         '
         ' SubTab Menu
         '
-        RQS = Main.RefreshQueryString
+        RQS = main.RefreshQueryString
         RQS = ModifyQueryString(RQS, "tab", "", False)
         Call BuildSearch(Criteria, SearchCaption)
         '
@@ -1258,8 +1258,8 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
             & " FROM ccMemberRules A, ccMemberRules B" _
             & " WHERE (((A.MemberID)=[B].[MemberID]) AND ((A.GroupID)=[B].[GroupID]) AND ((A.ID)<[B].[ID]))" _
             & ")"
-        Main.TestPoint ("Purge all ccMemberRule duplicates SQL = " & SQL)
-        Call Main.ExecuteSQL("default", SQL)
+        main.TestPoint ("Purge all ccMemberRule duplicates SQL = " & SQL)
+        Call main.ExecuteSQL("default", SQL)
         '
         '   Get DataRowCount
         '       This had been commented out - but it is needed for the "matches found" caption
@@ -1268,45 +1268,45 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
             & " from ccMembers" _
             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID" _
             & Criteria
-        Call Main.TestPoint("Selection SQL=" & SQL)
-        CS = Main.OpenCSSQL("default", SQL)
-        If Main.IsCSOK(CS) Then
-            DataRowCount = Main.GetCSRowCount(CS)
+        Call main.TestPoint("Selection SQL=" & SQL)
+        CS = main.OpenCSSQL("default", SQL)
+        If main.IsCSOK(CS) Then
+            DataRowCount = main.GetCSRowCount(CS)
         End If
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         '
         '   Get Data
         '
-        DefaultName = Main.GetContentFieldProperty("people", "name", "default")
+        DefaultName = main.GetContentFieldProperty("people", "name", "default")
         SQL = "Select distinct Top " & TopCount & " ccMembers.name,ccMembers.FirstName,ccMembers.LastName,ccMembers.ID, ccMembers.ContentControlID, ccMembers.Visits, ccMembers.LastVisit, ccMembers.Phone, ccMembers.Email,Organizations.Name as OrgName" _
             & " from ((ccMembers" _
             & " left join organizations on Organizations.ID=ccMembers.OrganizationID)" _
             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID)" _
             & Criteria _
             & SQLOrderBy & SQLOrderDir
-        Call Main.TestPoint("Selection SQL=" & SQL)
-        CS = Main.OpenCSSQL("default", SQL, PageSize, PageNumber)
+        Call main.TestPoint("Selection SQL=" & SQL)
+        CS = main.OpenCSSQL("default", SQL, PageSize, PageNumber)
         RowPointer = 0
-        If Not Main.IsCSOK(CS) Then
+        If Not main.IsCSOK(CS) Then
             Cells(0, 3) = "This search returned no results"
             RowPointer = 1
         Else
             'DataRowCount = Main.GetCSRowCount(CS)
-            Do While Main.IsCSOK(CS) And (RowPointer < PageSize)
+            Do While main.IsCSOK(CS) And (RowPointer < PageSize)
                 CPtr = 0
-                RecordID = Main.GetCSInteger(CS, "ID")
-                CCID = Main.GetCSInteger(CS, "ContentControlID")
-                VisitCount = Main.GetCSInteger(CS, "Visits")
+                RecordID = main.GetCSInteger(CS, "ID")
+                CCID = main.GetCSInteger(CS, "ContentControlID")
+                VisitCount = main.GetCSInteger(CS, "Visits")
                 If IsAdminPath And (VisitCount > 0) Then
                     QS = GetReportQueryString(PageNumber, PageSize, RecordID, ReportFormVisitList)
-                    VisitsCell = "<A href=""" & Main.ServerPage & "?" & QS & """ Target=""_blank"">" & VisitCount & "</A>"
+                    VisitsCell = "<A href=""" & main.ServerPage & "?" & QS & """ Target=""_blank"">" & VisitCount & "</A>"
                 Else
                     VisitsCell = CStr(VisitCount)
                 End If
-                CheckBox = Main.GetFormInputCheckBox("M." & RowPointer, , "DelCheck")
-                Cells(RowPointer, CPtr) = CheckBox & Main.GetFormInputHidden("MID." & RowPointer, RecordID)
+                CheckBox = main.GetFormInputCheckBox("M." & RowPointer, , "DelCheck")
+                Cells(RowPointer, CPtr) = CheckBox & main.GetFormInputHidden("MID." & RowPointer, RecordID)
                 CPtr = CPtr + 1
-                RecordName = Main.GetCStext(CS, "name")
+                RecordName = main.GetCStext(CS, "name")
                 If RecordName = "" Then
                     RecordName = DefaultName
                 End If
@@ -1324,19 +1324,19 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
                 CPtr = CPtr + 1
                 Cells(RowPointer, CPtr) = RecordName
                 CPtr = CPtr + 1
-                Cells(RowPointer, CPtr) = Main.GetCStext(CS, "FirstName")
+                Cells(RowPointer, CPtr) = main.GetCStext(CS, "FirstName")
                 CPtr = CPtr + 1
-                Cells(RowPointer, CPtr) = Main.GetCStext(CS, "LastName")
+                Cells(RowPointer, CPtr) = main.GetCStext(CS, "LastName")
                 CPtr = CPtr + 1
-                Cells(RowPointer, CPtr) = Main.GetCStext(CS, "OrgName")
+                Cells(RowPointer, CPtr) = main.GetCStext(CS, "OrgName")
                 CPtr = CPtr + 1
-                Cells(RowPointer, CPtr) = Main.GetCStext(CS, "phone")
+                Cells(RowPointer, CPtr) = main.GetCStext(CS, "phone")
                 CPtr = CPtr + 1
-                Cells(RowPointer, CPtr) = Main.GetCStext(CS, "email")
+                Cells(RowPointer, CPtr) = main.GetCStext(CS, "email")
                 CPtr = CPtr + 1
                 Cells(RowPointer, CPtr) = VisitsCell
                 CPtr = CPtr + 1
-                LastVisit = Int(Main.GetCSDate(CS, "LastVisit"))
+                LastVisit = Int(main.GetCSDate(CS, "LastVisit"))
                 If LastVisit = CDate(0) Then
                     Cells(RowPointer, CPtr) = "&nbsp;"
                 Else
@@ -1346,18 +1346,18 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
                 Cells(RowPointer, CPtr) = "&nbsp;"
                 CPtr = CPtr + 1
                 RowPointer = RowPointer + 1
-                Call Main.NextCSRecord(CS)
+                Call main.NextCSRecord(CS)
             Loop
         End If
-        Call Main.CloseCS(CS)
-        GetFormList = GetFormList & Main.GetFormInputHidden("M.Count", RowPointer)
+        Call main.CloseCS(CS)
+        GetFormList = GetFormList & main.GetFormInputHidden("M.Count", RowPointer)
         '
         BlankPanel = "<div class=""cmBody ccPanel3DReverse"">x</div>"
         'Main.GetPanel("x", "ccPanelInput", "ccPanelShadow", "ccPanelHilite")
         RowPageSize = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500>" _
             & "<TR>" _
             & "<TD class=APLeft>Rows Per Page</TD>" _
-            & "<TD class=apright>" & Main.GetFormInputText(RequestNamePageSize, PageSize, 1, 10) & "</TD>" _
+            & "<TD class=apright>" & main.GetFormInputText(RequestNamePageSize, PageSize, 1, 10) & "</TD>" _
             & "</TR>" _
             & "</Table>"
         RowGroups = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500><TR>" _
@@ -1365,18 +1365,18 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
             & "<TD class=APRight>" _
                 & "" _
                 & "<div class=APRight>Source Contacts</div>" _
-                & "<div class=APRightIndent>" & Main.GetFormInputRadioBox("GroupToolSelect", 0, 0) & "&nbsp;Only those selected on this page</div>" _
+                & "<div class=APRightIndent>" & main.GetFormInputRadioBox("GroupToolSelect", 0, 0) & "&nbsp;Only those selected on this page</div>" _
                 & "<div class=APRightIndent><input type=radio name=GroupToolSelect value=1>&nbsp;Everyone in search results</div>" _
                 & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
                 & "<div class=APRight>Perform Action</div>" _
-                & "<div class=APRightIndent>" & Main.GetFormInputRadioBox("GroupToolAction", 0, 0) & " No Action</div>" _
-                & "<div class=APRightIndent>" & Main.GetFormInputRadioBox("GroupToolAction", 1, 0) & " Add to Target Group</div>" _
-                & "<div class=APRightIndent>" & Main.GetFormInputRadioBox("GroupToolAction", 2, 0) & " Remove from Target Group</div>" _
-                & "<div class=APRightIndent>" & Main.GetFormInputRadioBox("GroupToolAction", 3, 0) & " Export comma delimited file</div>" _
-                & "<div class=APRightIndent>" & Main.GetFormInputRadioBox("GroupToolAction", 4, 0) & " Set Allow Group Email</div>" _
+                & "<div class=APRightIndent>" & main.GetFormInputRadioBox("GroupToolAction", 0, 0) & " No Action</div>" _
+                & "<div class=APRightIndent>" & main.GetFormInputRadioBox("GroupToolAction", 1, 0) & " Add to Target Group</div>" _
+                & "<div class=APRightIndent>" & main.GetFormInputRadioBox("GroupToolAction", 2, 0) & " Remove from Target Group</div>" _
+                & "<div class=APRightIndent>" & main.GetFormInputRadioBox("GroupToolAction", 3, 0) & " Export comma delimited file</div>" _
+                & "<div class=APRightIndent>" & main.GetFormInputRadioBox("GroupToolAction", 4, 0) & " Set Allow Group Email</div>" _
                 & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
                 & "<div class=APRight style=""padding-bottom:6px;"">Target Group</div>" _
-                & "<div class=APRightIndent>" & Main.GetFormInputSelect("GroupID", GroupID, "Groups") & "</div>" _
+                & "<div class=APRightIndent>" & main.GetFormInputSelect("GroupID", GroupID, "Groups") & "</div>" _
                 & "</TD>" _
             & "</TR></Table>"
         
@@ -1395,8 +1395,8 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
             & ""
         PostTableCopy = "" _
             & "<div class=""cmBody ccPanel3D"">" & ActionPanel & "</div>" _
-            & Main.GetFormInputHidden("M.Count", RowPointer) _
-            & Main.GetFormInputHidden(RequestNameFormID, FormList) _
+            & main.GetFormInputHidden("M.Count", RowPointer) _
+            & main.GetFormInputHidden(RequestNameFormID, FormList) _
             & ""
         '
         ' Header
@@ -1405,16 +1405,16 @@ Private Function GetFormList(StatusMessage As String, IsAdminPath As Boolean) As
             & SearchCaption & "<BR>" & DataRowCount & " Matches found" _
             & StatusMessage _
             & vbCrLf
-        Header = Main.GetPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 20)
+        Header = main.GetPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 20)
         Header = "<div class=ccPanelBackground style=""padding:10px;"">" & Header & "</div>"
         ButtonList = ButtonApply & "," & ButtonNewSearch
-        Body = AdminUI.GetReport2(Main, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
+        Body = AdminUI.GetReport2(main, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
         'Body = AdminUI.GetReport2(Main, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, DefaultSortColumnPtr)
         'Body = "<div style=""Background-color:white;"">" & Body & "</div>"
         '
         ' Assemble page
         '
-        GetFormList = AdminUI.GetBody(Main, "Contact Manager &gt;&gt; List People", ButtonList, "", True, True, Description, "", 0, Body)
+        GetFormList = AdminUI.GetBody(main, "Contact Manager &gt;&gt; List People", ButtonList, "", True, True, Description, "", 0, Body)
         '
         End If
     '
@@ -1435,7 +1435,7 @@ Private Function GetEventsTab() As String
     Dim SelectedGroupIDList As String
     Dim GroupCount As Long
     '
-    If Not (Main Is Nothing) Then
+    If Not (main Is Nothing) Then
         '
         GetEventsTab = "events"
     End If
@@ -1491,45 +1491,45 @@ Private Function ProcessSearchForm() As Long
     '
     Dim ContactContentID As Long
     '
-    If Not (Main Is Nothing) Then
-        If Main.GetStreamText("SelectionGroupSubTab") <> "" Then
+    If Not (main Is Nothing) Then
+        If main.GetStreamText("SelectionGroupSubTab") <> "" Then
             '
             ' Save the Form
             '
-            GroupCount = Main.GetStreamInteger("GroupCount")
+            GroupCount = main.GetStreamInteger("GroupCount")
             If GroupCount > 0 Then
                 For GroupPointer = 0 To GroupCount - 1
                     GroupLabel = "Group" & GroupPointer
-                    If Main.GetStreamBoolean(GroupLabel) Then
-                        ContactGroupCriteria = ContactGroupCriteria & "," & Main.GetStreamInteger(GroupLabel & ".id")
+                    If main.GetStreamBoolean(GroupLabel) Then
+                        ContactGroupCriteria = ContactGroupCriteria & "," & main.GetStreamInteger(GroupLabel & ".id")
                     End If
                 Next
             End If
             ContactGroupCriteria = ContactGroupCriteria & ","
-            Call Main.SetMemberProperty("ContactGroupCriteria", ContactGroupCriteria)
+            Call main.SetMemberProperty("ContactGroupCriteria", ContactGroupCriteria)
         End If
-        If Main.GetStreamText("SelectionContentSubTab") <> "" Then
+        If main.GetStreamText("SelectionContentSubTab") <> "" Then
             '
             ' SelectionContentSubTab
             '
-            Call Main.TestPoint("ProcessSearchForm - SelectionContentSubTab")
-            ContactContentID = Main.GetStreamInteger("ContentID")
-            Call Main.SetMemberProperty("ContactContentID", ContactContentID)
+            Call main.TestPoint("ProcessSearchForm - SelectionContentSubTab")
+            ContactContentID = main.GetStreamInteger("ContentID")
+            Call main.SetMemberProperty("ContactContentID", ContactContentID)
         End If
-        If Main.GetStreamText("SelectionSearchSubTab") <> "" Then
+        If main.GetStreamText("SelectionSearchSubTab") <> "" Then
             '
             ' SelectionContentSubTab (crlf FieldName tab FieldType tab FieldVAlue tab Operator)
             '
-            Call Main.TestPoint("ProcessSearchForm - SelectionSearchSubTab")
-            Criteria = "(active<>0)and(ContentID=" & Main.GetContentID("people") & ")and(authorable<>0)"
-            CS = Main.OpenCSContent("Content Fields", Criteria, "EditSortPriority")
-            Do While Main.IsCSOK(CS)
-                FieldName = Main.GetCStext(CS, "name")
-                FieldValue = Main.GetStreamText(FieldName)
-                fieldType = Main.GetCSInteger(CS, "Type")
+            Call main.TestPoint("ProcessSearchForm - SelectionSearchSubTab")
+            Criteria = "(active<>0)and(ContentID=" & main.GetContentID("people") & ")and(authorable<>0)"
+            CS = main.OpenCSContent("Content Fields", Criteria, "EditSortPriority")
+            Do While main.IsCSOK(CS)
+                FieldName = main.GetCStext(CS, "name")
+                FieldValue = main.GetStreamText(FieldName)
+                fieldType = main.GetCSInteger(CS, "Type")
                 Select Case fieldType
                     Case FieldTypeDate
-                        NumericOption = Main.GetStreamText(FieldName & "_D")
+                        NumericOption = main.GetStreamText(FieldName & "_D")
                         If NumericOption <> "" Then
                             ContactSearchCriteria = ContactSearchCriteria _
                                 & vbCrLf _
@@ -1539,7 +1539,7 @@ Private Function ProcessSearchForm() As Long
                                 & NumericOption
                         End If
                     Case FieldTypeCurrency, FieldTypeFloat, FieldTypeInteger
-                        NumericOption = Main.GetStreamText(FieldName & "_N")
+                        NumericOption = main.GetStreamText(FieldName & "_N")
                         If NumericOption <> "" Then
                             ContactSearchCriteria = ContactSearchCriteria _
                                 & vbCrLf _
@@ -1558,7 +1558,7 @@ Private Function ProcessSearchForm() As Long
                                 & ""
                         End If
                     Case FieldTypeText
-                        TextOption = Main.GetStreamText(FieldName & "_T")
+                        TextOption = main.GetStreamText(FieldName & "_T")
                         If TextOption <> "" Then
                             ContactSearchCriteria = ContactSearchCriteria _
                                 & vbCrLf _
@@ -1577,10 +1577,10 @@ Private Function ProcessSearchForm() As Long
                                 & ""
                         End If
                 End Select
-                Call Main.NextCSRecord(CS)
+                Call main.NextCSRecord(CS)
             Loop
-            Call Main.CloseCS(CS)
-            Call Main.SetMemberProperty("ContactSearchCriteria", ContactSearchCriteria)
+            Call main.CloseCS(CS)
+            Call main.SetMemberProperty("ContactSearchCriteria", ContactSearchCriteria)
         End If
         ProcessSearchForm = FormList
     End If
@@ -1596,7 +1596,7 @@ Private Function GetReportQueryString(ReportPageNumber As Long, ReportPageSize A
     On Error GoTo ErrorTrap
     '
     '
-    GetReportQueryString = Main.RefreshQueryString
+    GetReportQueryString = main.RefreshQueryString
     GetReportQueryString = ModifyQueryString(GetReportQueryString, "aa", 0, False)
     GetReportQueryString = ModifyQueryString(GetReportQueryString, RequestNameAdminForm, AdminFormReports, True)
     GetReportQueryString = ModifyQueryString(GetReportQueryString, RequestNameAdminSourceForm, AdminFormReports, True)
@@ -1623,17 +1623,17 @@ Private Function GetGroupCaption(GroupID As String) As String
     '
     Dim CS As Long
     '
-    CS = Main.OpenCSContentRecord("groups", kmaEncodeInteger(GroupID), , , "Caption,name")
-    If Main.IsCSOK(CS) Then
-        GetGroupCaption = Main.GetCStext(CS, "caption")
+    CS = main.OpenCSContentRecord("groups", kmaEncodeInteger(GroupID), , , "Caption,name")
+    If main.IsCSOK(CS) Then
+        GetGroupCaption = main.GetCStext(CS, "caption")
         If GetGroupCaption = "" Then
-            GetGroupCaption = Main.GetCStext(CS, "name")
+            GetGroupCaption = main.GetCStext(CS, "name")
             If GetGroupCaption = "" Then
                 GetGroupCaption = "Group " & GroupID
             End If
         End If
     End If
-    Call Main.CloseCS(CS)
+    Call main.CloseCS(CS)
 '    GetGroupCaption = "Group " & GroupID
     '
     Exit Function
@@ -1669,9 +1669,9 @@ Private Sub BuildSearch(Criteria As String, SearchCaption As String)
     Dim hint As String
     '
     hint = "100"
-    ContactContentID = kmaEncodeInteger(Main.GetMemberProperty("ContactContentID", Main.GetContentID("people")))
-    ContactGroupCriteria = Main.GetMemberProperty("ContactGroupCriteria", "")
-    ContactSearchCriteria = Main.GetMemberProperty("ContactSearchCriteria", "")
+    ContactContentID = kmaEncodeInteger(main.GetMemberProperty("ContactContentID", main.GetContentID("people")))
+    ContactGroupCriteria = main.GetMemberProperty("ContactGroupCriteria", "")
+    ContactSearchCriteria = main.GetMemberProperty("ContactSearchCriteria", "")
     SearchCaption = ""
     '
     ' Search Criteria Fields  (crlf FieldName tab FieldType tab FieldVAlue tab Operator)
@@ -1691,12 +1691,12 @@ Private Sub BuildSearch(Criteria As String, SearchCaption As String)
                     '
                     FieldCaption = ""
                     SQL = "select caption,LookupContentID from ccfields where name=" & KmaEncodeSQLText(FieldParms(0)) & " and contentid=" & ContactContentID
-                    CS = Main.OpenCSSQL("default", SQL)
-                    If Main.IsCSOK(CS) Then
-                        FieldCaption = Main.GetCStext(CS, "caption")
-                        FieldContentLookupID = Main.GetCSInteger(CS, "LookupContentID")
+                    CS = main.OpenCSSQL("default", SQL)
+                    If main.IsCSOK(CS) Then
+                        FieldCaption = main.GetCStext(CS, "caption")
+                        FieldContentLookupID = main.GetCSInteger(CS, "LookupContentID")
                     End If
-                    Call Main.CloseCS(CS)
+                    Call main.CloseCS(CS)
                     If FieldCaption = "" Then
                         FieldCaption = FieldParms(0)
                         FieldContentLookupID = 0
@@ -1741,9 +1741,9 @@ Private Sub BuildSearch(Criteria As String, SearchCaption As String)
                             hint = hint & ",180"
                             LookupName = ""
                             If FieldContentLookupID <> 0 Then
-                                FieldContentLookupName = Main.GetRecordName("Content", FieldContentLookupID)
+                                FieldContentLookupName = main.GetRecordName("Content", FieldContentLookupID)
                                 If (FieldContentLookupName <> "") And IsNumeric(FieldParms(2)) Then
-                                    LookupName = Main.GetRecordName(FieldContentLookupName, FieldParms(2))
+                                    LookupName = main.GetRecordName(FieldContentLookupName, FieldParms(2))
                                 End If
                             End If
                             If LookupName = "" Then
@@ -1862,12 +1862,12 @@ Private Sub BuildSearch(Criteria As String, SearchCaption As String)
     ' Add Content Criteria
     '
     hint = hint & ",290"
-    ContentName = Main.GetContentNameByID(ContactContentID)
+    ContentName = main.GetContentNameByID(ContactContentID)
     If ContentName = "" Then
         SearchCaption = "Everyone" & SearchCaption
     ElseIf LCase(ContentName) <> "people" Then
         SearchCaption = "Every " & ContentName & SearchCaption
-        Criteria = Criteria & "AND" & Main.GetContentControlCriteria(ContentName)
+        Criteria = Criteria & "AND" & main.GetContentControlCriteria(ContentName)
     Else
         SearchCaption = "Everyone " & SearchCaption
     End If
@@ -1903,34 +1903,34 @@ Private Function GetFormDetail(DetailMemberID As Long, StatusMessage As String, 
     Dim MemberName As String
     Dim hint As String
     '
-    If Not (Main Is Nothing) Then
-        Set AdminUI = CreateObject("ccWeb3.AdminUIClass")
-        CS = Main.OpenCSContent("people", "ID=" & DetailMemberID, , False)
-        MemberName = Main.GetCStext(CS, "name")
+    If Not (main Is Nothing) Then
+        Set AdminUI = getAdminUI(main)
+        CS = main.OpenCSContent("people", "ID=" & DetailMemberID, , False)
+        MemberName = main.GetCStext(CS, "name")
         If MemberName = "" Then
-            MemberName = Trim(Main.GetCStext(CS, "FirstName") & " " & Main.GetCStext(CS, "LastName"))
+            MemberName = Trim(main.GetCStext(CS, "FirstName") & " " & main.GetCStext(CS, "LastName"))
             If MemberName = "" Then
-                MemberName = "Record " & Main.GetCStext(CS, "ID")
+                MemberName = "Record " & main.GetCStext(CS, "ID")
             End If
         End If
         '
         ' Determine current Subtab
         '
-        SubTab = Main.GetStreamInteger(RequestNameDetailSubtab)
+        SubTab = main.GetStreamInteger(RequestNameDetailSubtab)
         If SubTab = 0 Then
-            SubTab = kmaEncodeInteger(Main.GetMemberProperty(RequestNameDetailSubtab, "1"))
+            SubTab = kmaEncodeInteger(main.GetMemberProperty(RequestNameDetailSubtab, "1"))
             If SubTab = 0 Then
                 SubTab = 1
-                Call Main.SetMemberProperty(RequestNameDetailSubtab, CStr(SubTab))
+                Call main.SetMemberProperty(RequestNameDetailSubtab, CStr(SubTab))
             End If
         Else
-            Call Main.SetMemberProperty(RequestNameDetailSubtab, CStr(SubTab))
+            Call main.SetMemberProperty(RequestNameDetailSubtab, CStr(SubTab))
         End If
-        Call Main.AddRefreshQueryString(RequestNameDetailSubtab, SubTab)
+        Call main.AddRefreshQueryString(RequestNameDetailSubtab, SubTab)
         '
         ' SubTab Menu
         '
-        Call Main.AddRefreshQueryString("tab", "")
+        Call main.AddRefreshQueryString("tab", "")
         ButtonList = ButtonCancel & "," & ButtonSave & "," & ButtonOK & "," & ButtonNewSearch
         Header = "<div>" & MemberName & "</div>"
         '
@@ -1942,13 +1942,13 @@ Private Function GetFormDetail(DetailMemberID As Long, StatusMessage As String, 
         If IsGoMethodEnabled Then
             Call Nav.AddEntry("Homes&nbsp;Viewed", GetFormDetail_TabHomes(CS), "ccAdminTab")
         End If
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         '
         Content = Nav.GetTabs()
-        Content = Content & Main.GetFormInputHidden(RequestNameFormID, FormDetails)
-        Content = Content & Main.GetFormInputHidden(RequestNameMemberID, DetailMemberID)
+        Content = Content & main.GetFormInputHidden(RequestNameFormID, FormDetails)
+        Content = Content & main.GetFormInputHidden(RequestNameMemberID, DetailMemberID)
         '
-        GetFormDetail = AdminUI.GetBody(Main, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", 0, Content)
+        GetFormDetail = AdminUI.GetBody(main, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", 0, Content)
     End If
     Exit Function
 ErrorTrap:
@@ -1967,7 +1967,7 @@ Private Function GetFormDetail_TabContact(CS As Long) As String
     Dim Right As String
     Dim Copy As String
     '
-    If Not Main.IsCSOK(CS) Then
+    If Not main.IsCSOK(CS) Then
         '
         s = s & "<div>There was a problem retrieving this person's information.</div>"
     Else
@@ -1979,30 +1979,30 @@ Private Function GetFormDetail_TabContact(CS As Long) As String
                 & "<TD width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
                 & "<TD width=350><img src=/cclib/images/spacer.gif width=350 height=1></TD>" _
                 & "</TR>"
-        Left = Left & GetFormDetail_InputTextRow("Full Name", "Name", Main.GetCStext(CS, "name"), False)
-        Left = Left & GetFormDetail_InputTextRow("First Name", "FirstName", Main.GetCStext(CS, "FirstName"), False)
-        Left = Left & GetFormDetail_InputTextRow("Last Name", "LastName", Main.GetCStext(CS, "LastName"), False)
+        Left = Left & GetFormDetail_InputTextRow("Full Name", "Name", main.GetCStext(CS, "name"), False)
+        Left = Left & GetFormDetail_InputTextRow("First Name", "FirstName", main.GetCStext(CS, "FirstName"), False)
+        Left = Left & GetFormDetail_InputTextRow("Last Name", "LastName", main.GetCStext(CS, "LastName"), False)
         Left = Left & GetFormDetail_DividerRow("Contact")
-        Left = Left & GetFormDetail_InputTextRow("Email", "EMAIL", Main.GetCStext(CS, "email"), False)
-        Left = Left & GetFormDetail_InputTextRow("Phone", "PHONE", Main.GetCStext(CS, "PHONE"), False)
-        Left = Left & GetFormDetail_InputTextRow("Fax", "Fax", Main.GetCStext(CS, "Fax"), False)
-        Left = Left & GetFormDetail_InputTextRow("Address", "ADDRESS", Main.GetCStext(CS, "ADDRESS"), False)
-        Left = Left & GetFormDetail_InputTextRow("Line 2", "ADDRESS2", Main.GetCStext(CS, "ADDRESS2"), False)
-        Left = Left & GetFormDetail_InputTextRow("City", "City", Main.GetCStext(CS, "City"), False)
-        Left = Left & GetFormDetail_InputTextRow("State", "State", Main.GetCStext(CS, "State"), False)
-        Left = Left & GetFormDetail_InputTextRow("Zip", "Zip", Main.GetCStext(CS, "Zip"), False)
+        Left = Left & GetFormDetail_InputTextRow("Email", "EMAIL", main.GetCStext(CS, "email"), False)
+        Left = Left & GetFormDetail_InputTextRow("Phone", "PHONE", main.GetCStext(CS, "PHONE"), False)
+        Left = Left & GetFormDetail_InputTextRow("Fax", "Fax", main.GetCStext(CS, "Fax"), False)
+        Left = Left & GetFormDetail_InputTextRow("Address", "ADDRESS", main.GetCStext(CS, "ADDRESS"), False)
+        Left = Left & GetFormDetail_InputTextRow("Line 2", "ADDRESS2", main.GetCStext(CS, "ADDRESS2"), False)
+        Left = Left & GetFormDetail_InputTextRow("City", "City", main.GetCStext(CS, "City"), False)
+        Left = Left & GetFormDetail_InputTextRow("State", "State", main.GetCStext(CS, "State"), False)
+        Left = Left & GetFormDetail_InputTextRow("Zip", "Zip", main.GetCStext(CS, "Zip"), False)
         Left = Left & GetFormDetail_DividerRow("Company")
-        Left = Left & GetFormDetail_InputTextRow("Name", "Company", Main.GetCStext(CS, "Company"), False)
-        Left = Left & GetFormDetail_InputTextRow("Title", "Title", Main.GetCStext(CS, "Title"), False)
+        Left = Left & GetFormDetail_InputTextRow("Name", "Company", main.GetCStext(CS, "Company"), False)
+        Left = Left & GetFormDetail_InputTextRow("Title", "Title", main.GetCStext(CS, "Title"), False)
         Left = Left & GetFormDetail_DividerRow("Birthday")
-        Left = Left & GetFormDetail_InputTextRow("Day", "BirthdayDay", Main.GetCStext(CS, "BirthdayDay"), False)
-        Left = Left & GetFormDetail_InputTextRow("Month", "BirthdayMonth", Main.GetCStext(CS, "BirthdayMonth"), False)
-        Left = Left & GetFormDetail_InputTextRow("Year", "BirthdayYear", Main.GetCStext(CS, "BirthdayYear"), False)
+        Left = Left & GetFormDetail_InputTextRow("Day", "BirthdayDay", main.GetCStext(CS, "BirthdayDay"), False)
+        Left = Left & GetFormDetail_InputTextRow("Month", "BirthdayMonth", main.GetCStext(CS, "BirthdayMonth"), False)
+        Left = Left & GetFormDetail_InputTextRow("Year", "BirthdayYear", main.GetCStext(CS, "BirthdayYear"), False)
         Left = Left & "</table>"
         '
         ' Right Side
         '
-        Copy = Main.GetFormInputText("AppendNotes", "", 20, 100)
+        Copy = main.GetFormInputText("AppendNotes", "", 20, 100)
         Copy = Replace(Copy, " cols=""100""", " style=""width:100%;""", , , vbTextCompare)
         '
         Right = Right & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
@@ -2038,7 +2038,7 @@ Private Function GetFormDetail_TabPermissions(CS As Long) As String
     '
     Dim s As String
     '
-    If Not Main.IsCSOK(CS) Then
+    If Not main.IsCSOK(CS) Then
         '
         s = s & "<div>There was a problem retrieving this person's information.</div>"
     Else
@@ -2049,9 +2049,9 @@ Private Function GetFormDetail_TabPermissions(CS As Long) As String
                 & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                 & "</TR>"
         s = s & GetFormDetail_DividerRow("Login")
-        s = s & GetFormDetail_InputTextRow("Username", "Username", Main.GetCStext(CS, "Username"), False)
-        s = s & GetFormDetail_InputTextRow("Password", "Password", Main.GetCStext(CS, "Password"), True)
-        s = s & GetFormDetail_InputBooleanRow("Allow Auto Login", "AutoLogin", Main.GetCSBoolean(CS, "AutoLogin"))
+        s = s & GetFormDetail_InputTextRow("Username", "Username", main.GetCStext(CS, "Username"), False)
+        s = s & GetFormDetail_InputTextRow("Password", "Password", main.GetCStext(CS, "Password"), True)
+        s = s & GetFormDetail_InputBooleanRow("Allow Auto Login", "AutoLogin", main.GetCSBoolean(CS, "AutoLogin"))
         s = s & "</table>"
     End If
     '
@@ -2072,7 +2072,7 @@ Private Function GetFormDetail_TabNotes(CS As Long) As String
     '
     Dim s As String
     '
-    If Not Main.IsCSOK(CS) Then
+    If Not main.IsCSOK(CS) Then
         '
         s = s & "<div>There was a problem retrieving this person's information.</div>"
     Else
@@ -2082,7 +2082,7 @@ Private Function GetFormDetail_TabNotes(CS As Long) As String
                 & "<TD width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
                 & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                 & "</TR>"
-        s = s & GetFormDetail_InputHTMLRow("Notes", "NotesFilename", Main.GetCS(CS, "NotesFilename"))
+        s = s & GetFormDetail_InputHTMLRow("Notes", "NotesFilename", main.GetCS(CS, "NotesFilename"))
         s = s & "</table>"
     End If
     '
@@ -2103,7 +2103,7 @@ Private Function GetFormDetail_TabPhoto(CS As Long) As String
     '
     Dim s As String
     '
-    If Not Main.IsCSOK(CS) Then
+    If Not main.IsCSOK(CS) Then
         '
         s = s & "<div>There was a problem retrieving this person's information.</div>"
     Else
@@ -2113,8 +2113,8 @@ Private Function GetFormDetail_TabPhoto(CS As Long) As String
                 & "<TD width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
                 & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                 & "</TR>"
-        s = s & GetFormDetail_InputImageRow("Thumbnail", "ThumbnailFilename", Main.GetCStext(CS, "ThumbnailFilename"))
-        s = s & GetFormDetail_InputImageRow("Image", "ImageFilename", Main.GetCStext(CS, "ImageFilename"))
+        s = s & GetFormDetail_InputImageRow("Thumbnail", "ThumbnailFilename", main.GetCStext(CS, "ThumbnailFilename"))
+        s = s & GetFormDetail_InputImageRow("Image", "ImageFilename", main.GetCStext(CS, "ImageFilename"))
         s = s & "</table>"
     End If
     '
@@ -2187,7 +2187,7 @@ Private Function GetFormDetail_InputHTMLRow(Caption As String, FieldName As Stri
         & "<TR><TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
         & Caption & ":" _
         & "</TD><TD style=""TEXT-ALIGN:left;"">"
-    s = s & Main.GetFormInputHTML(FieldName, DefaultValue)
+    s = s & main.GetFormInputHTML(FieldName, DefaultValue)
     s = s & "</TD></TR>"
     GetFormDetail_InputHTMLRow = s
     '
@@ -2213,11 +2213,11 @@ Private Function GetFormDetail_InputImageRow(Caption As String, FieldName As Str
         & Caption & ":" _
         & "</TD><TD style=""TEXT-ALIGN:left;"">"
     If DefaultValue = "" Then
-        s = s & Main.GetFormInputFile(FieldName)
+        s = s & main.GetFormInputFile(FieldName)
         s = s & "</TD></TR>"
     Else
         Filename = kmaEncodeHTML(kmaGetFilename(DefaultValue))
-        EncodedLink = kmaEncodeURL("http://" & Main.ServerHost & Main.serverFilePath & DefaultValue)
+        EncodedLink = kmaEncodeURL("http://" & main.ServerHost & main.serverFilePath & DefaultValue)
         s = s _
             & "<table border=0 width=100% cellspacing=0 cellpadding=4><TR>" _
             & "<TD width=200><a href=""" & EncodedLink & """ target=""_blank""><img src=""" & EncodedLink & """ width=200 border=0></a></TD>" _
@@ -2225,8 +2225,8 @@ Private Function GetFormDetail_InputImageRow(Caption As String, FieldName As Str
             & "<div style=""height:20px;"">Filename:&nbsp;" & Filename & "</div>" _
             & "<div style=""height:20px;"">URL:&nbsp;" & EncodedLink & "</div>" _
             & "<div style=""height:20px;""><a href=""" & EncodedLink & """ target=""_blank"">Click for Full Size</A></div>" _
-            & "<div style=""height:20px;""><span style=""width:100px;"">Delete:</span>" & Main.GetFormInputCheckBox(FieldName & ".DeleteFlag", False) & "</div>" _
-            & "<div style=""height:20px;""><span style=""width:100px;"">Change:</span>" & Main.GetFormInputFile(FieldName) & "</div>" _
+            & "<div style=""height:20px;""><span style=""width:100px;"">Delete:</span>" & main.GetFormInputCheckBox(FieldName & ".DeleteFlag", False) & "</div>" _
+            & "<div style=""height:20px;""><span style=""width:100px;"">Change:</span>" & main.GetFormInputFile(FieldName) & "</div>" _
             & "</TD></TR>" _
             & "</table>" _
             & "" _
@@ -2275,87 +2275,87 @@ Private Function SaveContactFromStream(DetailMemberID As Long) As String
     Dim FieldName As String
     Dim Copy As String
     '
-    CS = Main.OpenCSContent("people", "id=" & DetailMemberID)
-    If Main.IsCSOK(CS) Then
-        Call Main.SetCS(CS, "name", Main.GetStreamText("name"))
-        Call Main.SetCS(CS, "FirstName", Main.GetStreamText("FirstName"))
-        Call Main.SetCS(CS, "LastName", Main.GetStreamText("LastName"))
+    CS = main.OpenCSContent("people", "id=" & DetailMemberID)
+    If main.IsCSOK(CS) Then
+        Call main.SetCS(CS, "name", main.GetStreamText("name"))
+        Call main.SetCS(CS, "FirstName", main.GetStreamText("FirstName"))
+        Call main.SetCS(CS, "LastName", main.GetStreamText("LastName"))
         '
         ' Contact
         '
-        Call Main.SetCS(CS, "email", Main.GetStreamText("email"))
-        Call Main.SetCS(CS, "Phone", Main.GetStreamText("Phone"))
-        Call Main.SetCS(CS, "Fax", Main.GetStreamText("Fax"))
-        Call Main.SetCS(CS, "Address", Main.GetStreamText("Address"))
-        Call Main.SetCS(CS, "Address2", Main.GetStreamText("Address2"))
-        Call Main.SetCS(CS, "City", Main.GetStreamText("City"))
-        Call Main.SetCS(CS, "State", Main.GetStreamText("State"))
-        Call Main.SetCS(CS, "Zip", Main.GetStreamText("Zip"))
+        Call main.SetCS(CS, "email", main.GetStreamText("email"))
+        Call main.SetCS(CS, "Phone", main.GetStreamText("Phone"))
+        Call main.SetCS(CS, "Fax", main.GetStreamText("Fax"))
+        Call main.SetCS(CS, "Address", main.GetStreamText("Address"))
+        Call main.SetCS(CS, "Address2", main.GetStreamText("Address2"))
+        Call main.SetCS(CS, "City", main.GetStreamText("City"))
+        Call main.SetCS(CS, "State", main.GetStreamText("State"))
+        Call main.SetCS(CS, "Zip", main.GetStreamText("Zip"))
         '
         ' Company
         '
-        Call Main.SetCS(CS, "Company", Main.GetStreamText("Company"))
-        Call Main.SetCS(CS, "Title", Main.GetStreamText("Title"))
+        Call main.SetCS(CS, "Company", main.GetStreamText("Company"))
+        Call main.SetCS(CS, "Title", main.GetStreamText("Title"))
         '
         ' Birthday
         '
-        Call Main.SetCS(CS, "BirthdayDay", Main.GetStreamInteger("BirthdayDay"))
-        Call Main.SetCS(CS, "BirthdayMonth", Main.GetStreamInteger("BirthdayMonth"))
-        Call Main.SetCS(CS, "BirthdayYear", Main.GetStreamInteger("BirthdayYear"))
+        Call main.SetCS(CS, "BirthdayDay", main.GetStreamInteger("BirthdayDay"))
+        Call main.SetCS(CS, "BirthdayMonth", main.GetStreamInteger("BirthdayMonth"))
+        Call main.SetCS(CS, "BirthdayYear", main.GetStreamInteger("BirthdayYear"))
         '
         ' Notes
         '
-        If Main.SiteProperty_BuildVersion > "3.3.554" Then
-            Copy = Main.GetStreamText("AppendNotes")
+        If main.SiteProperty_BuildVersion > "3.3.554" Then
+            Copy = main.GetStreamText("AppendNotes")
             If Copy <> "" Then
                 Copy = "" _
-                    & "<div style=""margin-top:10px;border-top:1px dashed black;"">Added " & Now & " by " & Main.GetRecordName("people", Main.memberID) & "</div>" _
+                    & "<div style=""margin-top:10px;border-top:1px dashed black;"">Added " & Now & " by " & main.GetRecordName("people", main.memberID) & "</div>" _
                     & "<div style=""margin-left:20px;margin-top:5px;"">" & Copy & "</div>"
             End If
-            Call Main.SetCS(CS, "NotesFilename", Main.GetStreamText("NotesFilename") & Copy)
+            Call main.SetCS(CS, "NotesFilename", main.GetStreamText("NotesFilename") & Copy)
         End If
         '
         ' Photos
         '
         FieldName = "ThumbnailFilename"
-        If Main.GetStreamBoolean(FieldName & ".DeleteFlag") Then
-            Call Main.SetCSField(CS, FieldName, Null)
+        If main.GetStreamBoolean(FieldName & ".DeleteFlag") Then
+            Call main.SetCSField(CS, FieldName, Null)
         End If
-        OriginalFilename = Main.GetStreamText(FieldName)
+        OriginalFilename = main.GetStreamText(FieldName)
         If OriginalFilename <> "" Then
-            Filename = Main.GetCSFilename(CS, FieldName, OriginalFilename)
+            Filename = main.GetCSFilename(CS, FieldName, OriginalFilename)
             Path = Filename
             Path = Replace(Path, "/", "\")
             Path = Replace(Path, "\" & OriginalFilename, "")
-            Call Main.SetCSField(CS, FieldName, Filename)
-            Call Main.SaveStreamFile(FieldName, Path)
+            Call main.SetCSField(CS, FieldName, Filename)
+            Call main.SaveStreamFile(FieldName, Path)
         End If
         '
         FieldName = "ImageFilename"
-        If Main.GetStreamBoolean(FieldName & ".DeleteFlag") Then
-            Call Main.SetCSField(CS, FieldName, Null)
+        If main.GetStreamBoolean(FieldName & ".DeleteFlag") Then
+            Call main.SetCSField(CS, FieldName, Null)
         End If
-        OriginalFilename = Main.GetStreamText(FieldName)
+        OriginalFilename = main.GetStreamText(FieldName)
         If OriginalFilename <> "" Then
-            Filename = Main.GetCSFilename(CS, FieldName, OriginalFilename)
+            Filename = main.GetCSFilename(CS, FieldName, OriginalFilename)
             Path = Filename
             Path = Replace(Path, "/", "\")
             Path = Replace(Path, "\" & OriginalFilename, "")
-            Call Main.SetCSField(CS, FieldName, Filename)
-            Call Main.SaveStreamFile(FieldName, Path)
+            Call main.SetCSField(CS, FieldName, Filename)
+            Call main.SaveStreamFile(FieldName, Path)
         End If
         '
         ' Permissions
         '
-        Call Main.SetCS(CS, "Username", Main.GetStreamText("Username"))
-        Call Main.SetCS(CS, "Password", Main.GetStreamText("Password"))
-        Call Main.SetCS(CS, "AutoLogin", Main.GetStreamBoolean("AutoLogin"))
+        Call main.SetCS(CS, "Username", main.GetStreamText("Username"))
+        Call main.SetCS(CS, "Password", main.GetStreamText("Password"))
+        Call main.SetCS(CS, "AutoLogin", main.GetStreamBoolean("AutoLogin"))
         '
         ' Groups
         '
         Call SaveMemberRules(CS)
     End If
-    Call Main.CloseCS(CS)
+    Call main.CloseCS(CS)
     '
     Exit Function
 ErrorTrap:
@@ -2399,13 +2399,13 @@ Private Function GetFormDetail_TabGroup(CSMember As Long) As String
     '
     MethodName = "GetFormDetail_TabGroup"
     '
-    Set AdminUI = CreateObject("ccWeb3.AdminUIClass")
-    DetailMemberID = Main.GetCSInteger(CSMember, "ID")
+    Set AdminUI = getAdminUI(main)
+    DetailMemberID = main.GetCSInteger(CSMember, "ID")
     '
     ' ----- Gather all the SecondaryContent that associates to the PrimaryContent
     '
-    PrimaryContentID = Main.GetContentID("People")
-    SecondaryContentID = Main.GetContentID("Groups")
+    PrimaryContentID = main.GetContentID("People")
+    SecondaryContentID = main.GetContentID("Groups")
     '
     MembershipCount = 0
     MembershipSize = 0
@@ -2419,45 +2419,45 @@ Private Function GetFormDetail_TabGroup(CSMember As Long) As String
         ' ----- read in the groups that this member has subscribed (exclude new member records)
         '
         SQL = "SELECT Active,GroupID,DateExpires" _
-            & " FROM " & Main.SQLTableMemberRules & "" _
+            & " FROM " & main.SQLTableMemberRules & "" _
             & " WHERE MemberID=" & DetailMemberID
-        CS = Main.OpenCSSQL("Default", SQL)
-        Do While Main.IsCSOK(CS)
+        CS = main.OpenCSSQL("Default", SQL)
+        Do While main.IsCSOK(CS)
             If MembershipCount >= MembershipSize Then
                 MembershipSize = MembershipSize + 10
                 ReDim Preserve Membership(MembershipSize)
                 ReDim Preserve active(MembershipSize)
                 ReDim Preserve DateExpires(MembershipSize)
             End If
-            Membership(MembershipCount) = Main.GetCSInteger(CS, "GroupID")
-            DateExpires(MembershipCount) = Main.GetCSDate(CS, "DateExpires")
-            active(MembershipCount) = Main.GetCSBoolean(CS, "Active")
+            Membership(MembershipCount) = main.GetCSInteger(CS, "GroupID")
+            DateExpires(MembershipCount) = main.GetCSDate(CS, "DateExpires")
+            active(MembershipCount) = main.GetCSBoolean(CS, "Active")
             MembershipCount = MembershipCount + 1
-            Main.NextCSRecord (CS)
+            main.NextCSRecord (CS)
         Loop
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         '
         ' ----- read in all the groups, sorted by ContentName
         '
-        SQL = "SELECT " & Main.SQLTableGroups & ".ID AS ID, ccContent.Name AS SectionName, " & Main.SQLTableGroups & ".Caption AS GroupCaption, " & Main.SQLTableGroups & ".name AS GroupName, " & Main.SQLTableGroups & ".SortOrder" _
-            & " FROM " & Main.SQLTableGroups & " LEFT JOIN ccContent ON " & Main.SQLTableGroups & ".ContentControlID = ccContent.ID" _
-            & " Where (((" & Main.SQLTableGroups & ".Active) <> " & SQLFalse & ") And ((ccContent.Active) <> " & SQLFalse & "))"
+        SQL = "SELECT " & main.SQLTableGroups & ".ID AS ID, ccContent.Name AS SectionName, " & main.SQLTableGroups & ".Caption AS GroupCaption, " & main.SQLTableGroups & ".name AS GroupName, " & main.SQLTableGroups & ".SortOrder" _
+            & " FROM " & main.SQLTableGroups & " LEFT JOIN ccContent ON " & main.SQLTableGroups & ".ContentControlID = ccContent.ID" _
+            & " Where (((" & main.SQLTableGroups & ".Active) <> " & SQLFalse & ") And ((ccContent.Active) <> " & SQLFalse & "))"
         SQL = SQL _
-            & " GROUP BY " & Main.SQLTableGroups & ".ID, ccContent.Name, " & Main.SQLTableGroups & ".Caption, " & Main.SQLTableGroups & ".name, " & Main.SQLTableGroups & ".SortOrder" _
-            & " ORDER BY ccContent.Name, " & Main.SQLTableGroups & ".Caption"
-        CS = Main.OpenCSSQL("Default", SQL)
+            & " GROUP BY " & main.SQLTableGroups & ".ID, ccContent.Name, " & main.SQLTableGroups & ".Caption, " & main.SQLTableGroups & ".name, " & main.SQLTableGroups & ".SortOrder" _
+            & " ORDER BY ccContent.Name, " & main.SQLTableGroups & ".Caption"
+        CS = main.OpenCSSQL("Default", SQL)
         '
         ' Output all the groups, with the active and dateexpires from those joined
         '
         'F.Add AdminUI.EditTableOpen
         SectionName = ""
         GroupCount = 0
-        CanSeeHiddenGroups = Main.IsDeveloper
-        Do While Main.IsCSOK(CS)
-            GroupName = Main.GetCS(CS, "GroupName")
+        CanSeeHiddenGroups = main.IsDeveloper
+        Do While main.IsCSOK(CS)
+            GroupName = main.GetCS(CS, "GroupName")
             If (Mid(GroupName, 1, 1) <> "_") Or CanSeeHiddenGroups Then
-                GroupCaption = Main.GetCS(CS, "GroupCaption")
-                GroupID = Main.GetCSInteger(CS, "ID")
+                GroupCaption = main.GetCS(CS, "GroupCaption")
+                GroupID = main.GetCSInteger(CS, "ID")
                 If GroupCaption = "" Then
                     GroupCaption = GroupName
                     If GroupCaption = "" Then
@@ -2488,18 +2488,18 @@ Private Function GetFormDetail_TabGroup(CSMember As Long) As String
                 Else
                     Caption = "&nbsp;"
                 End If
-                f.Add Main.GetFormInputHidden("Memberrules." & GroupCount & ".ID", GroupID)
+                f.Add main.GetFormInputHidden("Memberrules." & GroupCount & ".ID", GroupID)
                 GroupCaption = Replace(GroupCaption, " ", "&nbsp;")
                 f.Add vbCrLf & "<!-- GroupRule Row -->" _
                     & "<TR>" _
-                    & "<TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;border-top:1px solid white;"">" & Main.GetFormInputCheckBox("MemberRules." & GroupCount, GroupActive) & GroupCaption & "</TD>" _
-                    & "<TD style=""TEXT-ALIGN:left;PADDING-LEFT:10px;border-top:1px solid white;"">Expires " & Main.GetFormInputText("MemberRules." & GroupCount & ".DateExpires", DateExpireValue, 1, 20) & "</TD>" _
+                    & "<TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;border-top:1px solid white;"">" & main.GetFormInputCheckBox("MemberRules." & GroupCount, GroupActive) & GroupCaption & "</TD>" _
+                    & "<TD style=""TEXT-ALIGN:left;PADDING-LEFT:10px;border-top:1px solid white;"">Expires " & main.GetFormInputText("MemberRules." & GroupCount & ".DateExpires", DateExpireValue, 1, 20) & "</TD>" _
                     & "</TR>"
                 GroupCount = GroupCount + 1
             End If
-            Main.NextCSRecord (CS)
+            main.NextCSRecord (CS)
         Loop
-        Main.CloseCS (CS)
+        main.CloseCS (CS)
     End If
     If DetailMemberID = 0 Then
         f.Add "<TR>" _
@@ -2548,16 +2548,16 @@ Private Sub SaveMemberRules(CSMember)
     '
     ' --- create MemberRule records for all selected
     '
-    PeopleID = Main.GetCSInteger(CSMember, "ID")
-    GroupCount = Main.GetStreamNumber("MemberRules" & ".RowCount")
+    PeopleID = main.GetCSInteger(CSMember, "ID")
+    GroupCount = main.GetStreamNumber("MemberRules" & ".RowCount")
     If GroupCount > 0 Then
         For GroupPointer = 0 To GroupCount - 1
             '
             ' ----- Read Response
             '
-            GroupID = Main.GetStreamInteger("MemberRules" & "." & GroupPointer & "." & "ID")
-            RuleNeeded = Main.GetStreamBoolean("MemberRules" & "." & GroupPointer)
-            DateExpires = Main.GetStreamDate("MemberRules" & "." & GroupPointer & "." & "DateExpires")
+            GroupID = main.GetStreamInteger("MemberRules" & "." & GroupPointer & "." & "ID")
+            RuleNeeded = main.GetStreamBoolean("MemberRules" & "." & GroupPointer)
+            DateExpires = main.GetStreamDate("MemberRules" & "." & GroupPointer & "." & "DateExpires")
             If DateExpires = CDate(0) Then
                 DateExpiresVariant = Null
             Else
@@ -2566,8 +2566,8 @@ Private Sub SaveMemberRules(CSMember)
             '
             ' ----- Update Record
             '
-            CSRule = Main.OpenCSContent_Internal("Member Rules", "(MemberID=" & PeopleID & ")and(GroupID=" & GroupID & ")", , False, , , "Active,MemberID,GroupID,DateExpires")
-            If Not Main.IsCSOK(CSRule) Then
+            CSRule = main.OpenCSContent_Internal("Member Rules", "(MemberID=" & PeopleID & ")and(GroupID=" & GroupID & ")", , False, , , "Active,MemberID,GroupID,DateExpires")
+            If Not main.IsCSOK(CSRule) Then
                 '
                 ' No record exists
                 '
@@ -2575,20 +2575,20 @@ Private Sub SaveMemberRules(CSMember)
                     '
                     ' No record, Rule needed, add it
                     '
-                    Call Main.CloseCS(CSRule)
-                    CSRule = Main.InsertCSRecord("Member Rules")
-                    If Main.IsCSOK(CSRule) Then
-                        Call Main.SetCS(CSRule, "Active", True)
-                        Call Main.SetCS(CSRule, "MemberID", PeopleID)
-                        Call Main.SetCS(CSRule, "GroupID", GroupID)
-                        Call Main.SetCS(CSRule, "DateExpires", DateExpires)
+                    Call main.CloseCS(CSRule)
+                    CSRule = main.InsertCSRecord("Member Rules")
+                    If main.IsCSOK(CSRule) Then
+                        Call main.SetCS(CSRule, "Active", True)
+                        Call main.SetCS(CSRule, "MemberID", PeopleID)
+                        Call main.SetCS(CSRule, "GroupID", GroupID)
+                        Call main.SetCS(CSRule, "DateExpires", DateExpires)
                         End If
-                    Call Main.CloseCS(CSRule)
+                    Call main.CloseCS(CSRule)
                 Else
                     '
                     ' No record, no Rule needed, ignore it
                     '
-                    Call Main.CloseCS(CSRule)
+                    Call main.CloseCS(CSRule)
                     End If
             Else
                 '
@@ -2598,20 +2598,20 @@ Private Sub SaveMemberRules(CSMember)
                     '
                     ' record exists, and it is needed, update the DateExpires if changed
                     '
-                    RuleActive = Main.GetCSBoolean(CSRule, "active")
-                    RuleDateExpires = Main.GetCSDate(CSRule, "DateExpires")
+                    RuleActive = main.GetCSBoolean(CSRule, "active")
+                    RuleDateExpires = main.GetCSDate(CSRule, "DateExpires")
                     If (Not RuleActive) Or (RuleDateExpires <> DateExpires) Then
-                        Call Main.SetCS(CSRule, "Active", True)
-                        Call Main.SetCS(CSRule, "DateExpires", DateExpires)
+                        Call main.SetCS(CSRule, "Active", True)
+                        Call main.SetCS(CSRule, "DateExpires", DateExpires)
                         End If
-                    Call Main.CloseCS(CSRule)
+                    Call main.CloseCS(CSRule)
                 Else
                     '
                     ' record exists and it is not needed, delete it
                     '
-                    MemberRuleID = Main.GetCSInteger(CSRule, "ID")
-                    Call Main.CloseCS(CSRule)
-                    Call Main.DeleteTableRecord("Default", Main.SQLTableMemberRules, MemberRuleID)
+                    MemberRuleID = main.GetCSInteger(CSRule, "ID")
+                    Call main.CloseCS(CSRule)
+                    Call main.DeleteTableRecord("Default", main.SQLTableMemberRules, MemberRuleID)
                     End If
                 End If
             Next
@@ -2683,26 +2683,26 @@ Private Function GetFormDetail_TabHomes(CSMember As Long) As String
     '
     IsGrgOK = True
     '
-    Set AdminUI = CreateObject("ccWeb3.AdminUIClass")
+    Set AdminUI = getAdminUI(main)
     If Not IsGrgOK Then
         '
         ' The RealEstate datasource is not available
         '
         Stream = "<P>This site is not configured to display the Homes Viewed tab. This tab requires the grgRealEstate Datasource.</P>"
     Else
-        SortField = Main.GetStreamText("SortField")
-        SortDirection = Main.GetStreamInteger("SortDirection")
+        SortField = main.GetStreamText("SortField")
+        SortDirection = main.GetStreamInteger("SortDirection")
         If SortField = "" Then
             SortField = "DateAdded"
             SortDirection = -1
         End If
         '
-        RQS = Main.RefreshQueryString
-        PageSize = Main.GetStreamInteger(RequestNamePageSize)
+        RQS = main.RefreshQueryString
+        PageSize = main.GetStreamInteger(RequestNamePageSize)
         If PageSize = 0 Then
             PageSize = 50
         End If
-        PageNumber = Main.GetStreamInteger(RequestNamePageNumber)
+        PageNumber = main.GetStreamInteger(RequestNamePageNumber)
         If PageNumber = 0 Then
             PageNumber = 1
         End If
@@ -2743,20 +2743,20 @@ Private Function GetFormDetail_TabHomes(CSMember As Long) As String
             '& " left join Properties P on P.ID=L.PropertyID"
         SQLWhere = " Where" _
             & "(S.ID is not null)" _
-            & "and(L.MemberID=" & Main.GetCSInteger(CSMember, "ID") & ")" _
+            & "and(L.MemberID=" & main.GetCSInteger(CSMember, "ID") & ")" _
             & ""
         If Not AllowNonEmail Then
             SQLWhere = SQLWhere & "and(L.IsEmailSearch is not null)and(L.IsEmailSearch<>0)"
         End If
         Select Case DateRangeID
             Case DateRangeToday
-                SQLWhere = SQLWhere & "and(L.DateAdded>=" & Main.EncodeSQLDate(Int(Now())) & ")"
+                SQLWhere = SQLWhere & "and(L.DateAdded>=" & main.EncodeSQLDate(Int(Now())) & ")"
             Case DateRangeYesterday
-                SQLWhere = SQLWhere & "and(L.DateAdded<" & Main.EncodeSQLDate(Int(Now())) & ")and(L.DateAdded>=" & Main.EncodeSQLDate(Int(Now()) - 1) & ")"
+                SQLWhere = SQLWhere & "and(L.DateAdded<" & main.EncodeSQLDate(Int(Now())) & ")and(L.DateAdded>=" & main.EncodeSQLDate(Int(Now()) - 1) & ")"
             Case DateRangePastWeek
-                SQLWhere = SQLWhere & "and(L.DateAdded>" & Main.EncodeSQLDate(Int(Now() - 7)) & ")"
+                SQLWhere = SQLWhere & "and(L.DateAdded>" & main.EncodeSQLDate(Int(Now() - 7)) & ")"
             Case DateRangePastMonth
-                SQLWhere = SQLWhere & "and(L.DateAdded>" & Main.EncodeSQLDate(Int(Now() - 30)) & ")"
+                SQLWhere = SQLWhere & "and(L.DateAdded>" & main.EncodeSQLDate(Int(Now() - 30)) & ")"
         End Select
         SQLOrderBy = " ORDER BY L." & SortField
         If SortDirection <> 0 Then
@@ -2769,11 +2769,11 @@ Private Function GetFormDetail_TabHomes(CSMember As Long) As String
         ' Get DataRowCount
         '
         SQL = "select count(*) as Cnt " & SQLFrom & SQLWhere
-        CS = Main.OpenCSSQL("Default", SQL)
-        If Main.IsCSOK(CS) Then
-            DataRowCount = Main.GetCSInteger(CS, "cnt")
+        CS = main.OpenCSSQL("Default", SQL)
+        If main.IsCSOK(CS) Then
+            DataRowCount = main.GetCSInteger(CS, "cnt")
         End If
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         '
         ' Get Data
         '
@@ -2784,9 +2784,9 @@ Private Function GetFormDetail_TabHomes(CSMember As Long) As String
             & ",L.IsEmailSearch as ViewingIsEmailSearch" _
             & ",L.VisitID as ViewingVisitID" _
             & " " & SQLFrom & SQLWhere & SQLOrderBy
-        Main.TestPoint ("Get Data, SQL=" & SQL)
-        CS = Main.OpenCSSQL("Default", SQL, PageSize, PageNumber)
-        If Not Main.IsCSOK(CS) Then
+        main.TestPoint ("Get Data, SQL=" & SQL)
+        CS = main.OpenCSSQL("Default", SQL, PageSize, PageNumber)
+        If Not main.IsCSOK(CS) Then
             '
             ' No Searchs saved
             '
@@ -2797,20 +2797,20 @@ Private Function GetFormDetail_TabHomes(CSMember As Long) As String
             '
             RowCnt = 0
             RowClass = RowClassEven
-            PeopleCID = Main.GetContentID("People")
-            If Not Main.IsCSOK(CS) Then
+            PeopleCID = main.GetContentID("People")
+            If Not main.IsCSOK(CS) Then
                 '
                 ' EMPTY
                 '
             Else
-                Do While Main.IsCSOK(CS) And (RowCnt < PageSize)
-                    RecordID = Main.GetCSInteger(CS, "ID")
-                    DateCompleted = Main.GetCSDate(CS, "DateCompleted")
-                    Cells(RowCnt, 0) = Main.GetCSDate(CS, "DateAdded") & Main.GetFormInputHidden("RowID" & RowCnt, RecordID)
-                    Cells(RowCnt, 1) = Main.GetCStext(CS, "name")
-                    Cells(RowCnt, 2) = Main.GetYesNo(Main.GetCSBoolean(CS, "ViewingIsEmailSearch"))
-                    Propertyid = Main.GetCSInteger(CS, "PropertyID")
-                    Copy = Main.GetCStext(CS, "PropertyName")
+                Do While main.IsCSOK(CS) And (RowCnt < PageSize)
+                    RecordID = main.GetCSInteger(CS, "ID")
+                    DateCompleted = main.GetCSDate(CS, "DateCompleted")
+                    Cells(RowCnt, 0) = main.GetCSDate(CS, "DateAdded") & main.GetFormInputHidden("RowID" & RowCnt, RecordID)
+                    Cells(RowCnt, 1) = main.GetCStext(CS, "name")
+                    Cells(RowCnt, 2) = main.GetYesNo(main.GetCSBoolean(CS, "ViewingIsEmailSearch"))
+                    Propertyid = main.GetCSInteger(CS, "PropertyID")
+                    Copy = main.GetCStext(CS, "PropertyName")
                     If Copy = "" Then
                         Copy = "&nbsp;"
                     Else
@@ -2818,15 +2818,15 @@ Private Function GetFormDetail_TabHomes(CSMember As Long) As String
                     End If
                     Cells(RowCnt, 4) = Copy
                     RowCnt = RowCnt + 1
-                    Call Main.NextCSRecord(CS)
+                    Call main.NextCSRecord(CS)
                 Loop
             End If
-            Stream = Stream & Main.GetFormInputHidden("RowCount", RowCnt)
+            Stream = Stream & main.GetFormInputHidden("RowCount", RowCnt)
         End If
-        Call Main.CloseCS(CS)
+        Call main.CloseCS(CS)
         '
-        DetailMemberID = Main.GetCSInteger(CSMember, "ID")
-        Stream = Main.GetReport(RowCnt, ColCaption(), ColAlign(), ColWidth(), Cells(), PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "")
+        DetailMemberID = main.GetCSInteger(CSMember, "ID")
+        Stream = main.GetReport(RowCnt, ColCaption(), ColAlign(), ColWidth(), Cells(), PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "")
     End If
     
     GetFormDetail_TabHomes = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & Stream & "</div>"
@@ -2839,13 +2839,13 @@ ErrorTrap:
 '
 '
 Function GetFormInputRadioBox(ElementName, ElementValue, CurrentValue, ElementID)
-    GetFormInputRadioBox = Main.GetFormInputRadioBox(ElementName, ElementValue, CurrentValue, ElementID)
+    GetFormInputRadioBox = main.GetFormInputRadioBox(ElementName, ElementValue, CurrentValue, ElementID)
 End Function
 '
 '
 '
 Function GetFormInputText(ElementName, CurrentValue, Height, Width, ElementID, OnFocus)
-    GetFormInputText = Main.GetFormInputText(ElementName, CurrentValue, Height, Width, ElementID)
+    GetFormInputText = main.GetFormInputText(ElementName, CurrentValue, Height, Width, ElementID)
     If OnFocus <> "" Then
         GetFormInputText = Replace(GetFormInputText, ">", "onFocus=""" & OnFocus & """>", 1, 1, vbBinaryCompare)
     End If
@@ -2854,9 +2854,20 @@ End Function
 '
 '
 Function GetFormInputDate(ElementName, CurrentValue, Width, ElementID, OnFocus)
-    GetFormInputDate = Main.GetFormInputDate(ElementName, CurrentValue, Width, ElementID)
+    GetFormInputDate = main.GetFormInputDate(ElementName, CurrentValue, Width, ElementID)
     If OnFocus <> "" Then
         GetFormInputDate = Replace(GetFormInputDate, ">", "onFocus=""" & OnFocus & """>", 1, 1, vbBinaryCompare)
     End If
 End Function
+'
+'
+'
+Private Function getAdminUI(main As Object) As Object
+        If main.SiteProperty_BuildVersion < "4.2.000" Then
+            Set getAdminUI = CreateObject("ccWeb3.AdminUIClass")
+        Else
+            Set getAdminUI = CreateObject("ccWeb42.AdminUIClass")
+        End If
+End Function
+
 
