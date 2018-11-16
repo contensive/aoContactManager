@@ -59,6 +59,9 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="adminFramework, Version=1.0.15.0, Culture=neutral, PublicKeyToken=df99052d01433f97, processorArchitecture=MSIL">
+      <HintPath>..\packages\Contensive.PortalApi.1.0.16\lib\net35\adminFramework.dll</HintPath>
+    </Reference>
     <Reference Include="Amazon.ElastiCacheCluster, Version=1.0.0.4, Culture=neutral, PublicKeyToken=445456c82d5a0fce, processorArchitecture=MSIL">
       <HintPath>..\packages\Amazon.ElastiCacheCluster.1.0.0.4\lib\net35\Amazon.ElastiCacheCluster.dll</HintPath>
     </Reference>
@@ -84,7 +87,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="constants.vb" />
-    <Compile Include="Controllers\NavController.vb" />
     <Compile Include="Controllers\applicationController.vb" />
     <Compile Include="Controllers\cacheController.vb" />
     <Compile Include="Controllers\AdminUIController.vb" />
@@ -226,6 +228,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="vb6\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ContactManagerTools\ContactManagerTools.csproj">
+      <Project>{0a429381-9dd0-4dab-930a-c607d90793cb}</Project>
+      <Name>ContactManagerTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

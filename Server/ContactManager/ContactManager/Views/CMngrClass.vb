@@ -44,167 +44,112 @@ Namespace Views
         Public Function GetContent(cp As CPBaseClass) As String
             Dim result As String = ""
             Try
-                'Dim PeopleCID As Integer
-                'Dim AdminUI As Object
-                Dim RecordCnt As Integer
-                'Dim Argument1 As String
-                'Dim Argument2 As String
-                Dim TabNumber As Integer
-                'Dim SourceFilename As String
-                'Dim CutPosition As Integer
-                'Dim InBuffer As String
-                Dim RQS As String
-                Dim ContactSearchCriteria As String
-                Dim Button As String
-                Dim RowCount As Integer
-                Dim GroupID As Integer
-                Dim GroupToolAction As Integer
-                Dim GroupName As String
-                Dim RowPointer As Integer
-                Dim memberID As Integer
-                Dim GroupToolSelect As Integer
-                Dim ContactGroupCriteria As String
-                Dim Criteria As String
-                Dim SearchCaption As String
-                Dim CCID As Integer
-                Dim SQL As String
-                Dim StatusMessage As String
-                Dim FieldName As String
-                Dim SelectList As String = ""
-                Dim FieldNameList As String = ""
-                Dim SQLFrom As String
-                Dim SQLCriteria As String
-                Dim LookupContentID As Integer
-                Dim LookupTable As String
-                Dim ContentID As Integer
-                Dim JoinTableCnt As Integer
-                Dim JoinTableAlias As String
-                Dim Filename As String
-                Dim Filename2 As String
-                Dim ExportName As String
-                Dim DetailMemberID As Integer
-                Dim FormID As Integer
-                'Dim IsGoMethodEnabled As Boolean
-                Dim IsAdminPath As Boolean
-                '
+                Dim IsAdminPath As Boolean = cp.Doc.GetText("source").ToUpper() = "ADMIN"
                 If True Then
-                    IsAdminPath = cp.Doc.GetText("source").ToUpper() = "ADMIN"
-                    If Not cp.User.IsAdmin Then
+                    '
+                    'PeopleCID = cp.Content.GetID("people")
+                    Dim RQS As String = cp.Doc.RefreshQueryString
+                    Dim TabNumber As Integer = cp.Doc.GetInteger("tab")
+                    Dim DetailMemberID As Integer = cp.Doc.GetInteger(RequestNameMemberID)
+                    Dim ContactSearchCriteria As String = cp.User.GetText("ContactSearchCriteria", ContactSearchCriteria)
+                    Dim ContactGroupCriteria As String = cp.User.GetText("ContactGroupCriteria", "")
+                    '
+                    Call cp.Doc.AddRefreshQueryString("tab", TabNumber.ToString())
+                    '
+                    Dim FormID As Integer = cp.Doc.GetInteger(RequestNameFormID)
+                    Dim Button As String = cp.Doc.GetText("Button")
+                    Dim StatusMessage As String
+                    If FormID = 0 Then
                         '
-                        ' You must be admin to use this feature
+                        ' ----- Set default form
                         '
-                        If IsAdminPath Then
+                        If (DetailMemberID <> 0) Then
                             '
-                            ' Admin site, but not an admin
+                            ' Detail form
                             '
-                            GetContent = Controllers.AdminUIController.GetFormBodyAdminOnly()
-                            GetContent = Controllers.AdminUIController.GetBody(cp, "Contact Manager", ButtonCancelAll, "", False, False, GetContent, "", 0, "")
+                            FormID = FormDetails
+                        ElseIf (ContactSearchCriteria <> "") Or (ContactGroupCriteria <> "") Then
+                            '
+                            ' List form
+                            '
+                            FormID = FormList
                         Else
                             '
-                            ' Public site, not an admin
+                            ' Search Form
                             '
-                            GetContent = Controllers.AdminUIController.GetFormBodyAdminOnly()
-                            GetContent = Controllers.AdminUIController.GetBody(cp, "Contact Manager", "", "", False, False, GetContent, "", 0, "")
+                            FormID = FormSearch
                         End If
-                    Else
+                    ElseIf Button <> "" Then
                         '
-                        'PeopleCID = cp.Content.GetID("people")
-                        RQS = cp.Doc.RefreshQueryString
-                        TabNumber = cp.Doc.GetInteger("tab")
-                        DetailMemberID = cp.Doc.GetInteger(RequestNameMemberID)
-                        ContactSearchCriteria = cp.User.GetText("ContactSearchCriteria", ContactSearchCriteria)
-                        ContactGroupCriteria = cp.User.GetText("ContactGroupCriteria", "")
+                        ' ----- Process Previous Forms
                         '
-                        Call cp.Doc.AddRefreshQueryString("tab", TabNumber.ToString())
-                        '
-                        FormID = cp.Doc.GetInteger(RequestNameFormID)
-                        Button = cp.Doc.GetText("Button")
-                        If FormID = 0 Then
-                            '
-                            ' ----- Set default form
-                            '
-                            If (DetailMemberID <> 0) Then
-                                '
-                                ' Detail form
-                                '
-                                FormID = FormDetails
-                            ElseIf (ContactSearchCriteria <> "") Or (ContactGroupCriteria <> "") Then
-                                '
-                                ' List form
-                                '
-                                FormID = FormList
-                            Else
+                        Select Case FormID
+                            Case FormSearch
                                 '
                                 ' Search Form
                                 '
-                                FormID = FormSearch
-                            End If
-                        ElseIf Button <> "" Then
-                            '
-                            ' ----- Process Previous Forms
-                            '
-                            Select Case FormID
-                                Case FormSearch
-                                    '
-                                    ' Search Form
-                                    '
-                                    Select Case Button
-                                        Case ButtonSearch
-                                            FormID = ProcessSearchForm(cp)
-                                        Case ButtonCancel
-                                            Exit Function
-                                    End Select
-                                Case FormList
-                                    '
-                                    ' List Form
-                                    '
-                                    Select Case Button
-                                        Case ButtonNewSearch
-                                            ContactSearchCriteria = ""
-                                            ContactGroupCriteria = ""
-                                            Call cp.User.SetProperty("ContactSearchCriteria", ContactSearchCriteria)
-                                            Call cp.User.SetProperty("ContactGroupCriteria", ContactGroupCriteria)
-                                            FormID = FormSearch
-                                        Case ButtonApply
-                                            '
-                                            ' Add to or remove from group
-                                            '
-                                            RowCount = cp.Doc.GetInteger("M.Count")
-                                            GroupID = cp.Doc.GetInteger("GroupID")
-                                            GroupToolAction = cp.Doc.GetInteger("GroupToolAction")
-                                            GroupToolSelect = cp.Doc.GetInteger("GroupToolSelect")
-                                            SQLCriteria = ""
-                                            Call BuildSearch(cp, SQLCriteria, SearchCaption)
-                                            Select Case GroupToolAction
-                                                Case 1
+                                Select Case Button
+                                    Case ButtonSearch
+                                        FormID = ProcessSearchForm(cp)
+                                    Case ButtonCancel
+                                        Exit Function
+                                End Select
+                            Case FormList
+                                '
+                                ' List Form
+                                '
+                                Select Case Button
+                                    Case ButtonNewSearch
+                                        ContactSearchCriteria = ""
+                                        ContactGroupCriteria = ""
+                                        Call cp.User.SetProperty("ContactSearchCriteria", ContactSearchCriteria)
+                                        Call cp.User.SetProperty("ContactGroupCriteria", ContactGroupCriteria)
+                                        FormID = FormSearch
+                                    Case ButtonApply
+                                        '
+                                        ' Add to or remove from group
+                                        '
+                                        Dim RowCount As Integer = cp.Doc.GetInteger("M.Count")
+                                        Dim GroupID As Integer = cp.Doc.GetInteger("GroupID")
+                                        Dim GroupToolAction As Integer = cp.Doc.GetInteger("GroupToolAction")
+                                        Dim GroupToolSelect As Integer = cp.Doc.GetInteger("GroupToolSelect")
+                                        Dim SQLCriteria As String = ""
+                                        Dim SearchCaption As String
+                                        Call BuildSearch(cp, SQLCriteria, SearchCaption)
+                                        Dim GroupName As String
+                                        Dim RowPointer As Integer
+                                        Dim memberID As Integer
+                                        Dim SQL As String
+                                        Select Case GroupToolAction
+                                            Case 1
+                                                '
+                                                ' ----- Add to Group
+                                                '
+                                                If (GroupID = 0) Then
                                                     '
-                                                    ' ----- Add to Group
+                                                    ' Group required and not provided
                                                     '
-                                                    If (GroupID = 0) Then
-                                                        '
-                                                        ' Group required and not provided
-                                                        '
-                                                        Call cp.UserError.Add("Please select a Target Group for this operation")
-                                                    ElseIf GroupToolSelect = 0 Then
-                                                        '
-                                                        ' Add selection to Group
-                                                        '
-                                                        If (RowCount > 0) Then
-                                                            GroupName = cp.Group.GetName(GroupID.ToString())
-                                                            For RowPointer = 0 To RowCount - 1
-                                                                If cp.Doc.GetBoolean("M." & RowPointer) Then
-                                                                    memberID = cp.Doc.GetInteger("MID." & RowPointer)
-                                                                    Call cp.Group.AddUser(GroupName, memberID)
-                                                                End If
-                                                            Next
-                                                        End If
-                                                    Else
-                                                        '
-                                                        ' Add everyone in search criteria to this group
-                                                        '
+                                                    Call cp.UserError.Add("Please select a Target Group for this operation")
+                                                ElseIf GroupToolSelect = 0 Then
+                                                    '
+                                                    ' Add selection to Group
+                                                    '
+                                                    If (RowCount > 0) Then
+                                                        GroupName = cp.Group.GetName(GroupID.ToString())
+                                                        For RowPointer = 0 To RowCount - 1
+                                                            If cp.Doc.GetBoolean("M." & RowPointer) Then
+                                                                memberID = cp.Doc.GetInteger("MID." & RowPointer)
+                                                                Call cp.Group.AddUser(GroupName, memberID)
+                                                            End If
+                                                        Next
+                                                    End If
+                                                Else
+                                                    '
+                                                    ' Add everyone in search criteria to this group
+                                                    '
 
-                                                        CCID = cp.Content.GetID("Member Rules")
-                                                        SQL = "insert into ccMemberRules (Active,ContentControlID,GroupID,MemberID )" _
+                                                    Dim CCID As Integer = cp.Content.GetID("Member Rules")
+                                                    SQL = "insert into ccMemberRules (Active,ContentControlID,GroupID,MemberID )" _
                                                             & " select 1," & CCID & "," & GroupID & ",ccMembers.ID" _
                                                             & " from (ccMembers" _
                                                             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )" _
@@ -212,242 +157,218 @@ Namespace Views
                                                             & " " & SQLCriteria _
                                                             & " and InGroups.MemberID is null" _
                                                             & ""
-                                                        Call cp.Db.ExecuteNonQuery(SQL)
+                                                    Call cp.Db.ExecuteNonQuery(SQL)
+                                                End If
+                                            Case 2
+                                                '
+                                                ' ----- Remove From Group
+                                                '
+                                                If (GroupID = 0) Then
+                                                    '
+                                                    ' Group required and not provided
+                                                    '
+                                                    Call cp.UserError.Add("Please select a Target Group for this operation")
+                                                ElseIf GroupToolSelect = 0 Then
+                                                    '
+                                                    ' Remove selection from Group
+                                                    '
+                                                    If (RowCount > 0) Then
+                                                        GroupName = cp.Group.GetName(GroupID.ToString())
+                                                        For RowPointer = 0 To RowCount - 1
+                                                            If cp.Doc.GetBoolean("M." & RowPointer) Then
+                                                                memberID = cp.Doc.GetInteger("MID." & RowPointer)
+                                                                Call cp.Content.Delete("Member Rules", "(GroupID=" & GroupID & ")and(MemberID=" & memberID & ")")
+                                                            End If
+                                                        Next
                                                     End If
-                                                Case 2
+                                                Else
                                                     '
-                                                    ' ----- Remove From Group
+                                                    ' Remove everyone in search criteria from this group
                                                     '
-                                                    If (GroupID = 0) Then
-                                                        '
-                                                        ' Group required and not provided
-                                                        '
-                                                        Call cp.UserError.Add("Please select a Target Group for this operation")
-                                                    ElseIf GroupToolSelect = 0 Then
-                                                        '
-                                                        ' Remove selection from Group
-                                                        '
-                                                        If (RowCount > 0) Then
-                                                            GroupName = cp.Group.GetName(GroupID.ToString())
-                                                            For RowPointer = 0 To RowCount - 1
-                                                                If cp.Doc.GetBoolean("M." & RowPointer) Then
-                                                                    memberID = cp.Doc.GetInteger("MID." & RowPointer)
-                                                                    Call cp.Content.Delete("Member Rules", "(GroupID=" & GroupID & ")and(MemberID=" & memberID & ")")
-                                                                End If
-                                                            Next
-                                                        End If
-                                                    Else
-                                                        '
-                                                        ' Remove everyone in search criteria from this group
-                                                        '
-                                                        SQL = "delete from ccMemberRules where GroupID=" & GroupID & " and MemberID in (" _
+                                                    SQL = "delete from ccMemberRules where GroupID=" & GroupID & " and MemberID in (" _
                                                             & " select ccMembers.ID" _
                                                             & " from (ccMembers" _
                                                             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )" _
                                                             & " " & SQLCriteria _
                                                             & ")"
-                                                        Call cp.Db.ExecuteNonQuery(SQL)
-                                                    End If
-                                                Case 3
-                                                    '
-                                                    ' ----- Export
-                                                    '
-                                                    Dim Aborttask As Boolean = False
-                                                    If True Then
-                                                        ExportName = SearchCaption
-                                                        If GroupToolSelect = 0 Then
-                                                            Dim RowSQL As String
-                                                            '
-                                                            ' Export selection from Group
-                                                            '
-                                                            ExportName = "Selected rows from " & ExportName
-                                                            RowSQL = ""
-                                                            If (RowCount > 0) Then
-                                                                GroupName = cp.Group.GetName(GroupID.ToString())
-                                                                For RowPointer = 0 To RowCount - 1
-                                                                    If cp.Doc.GetBoolean("M." & RowPointer) Then
-                                                                        memberID = cp.Doc.GetInteger("MID." & RowPointer)
-                                                                        RowSQL = RowSQL & "OR(ccMembers.ID=" & memberID & ")"
-                                                                    End If
-                                                                Next
-                                                                If RowSQL = "" Then
-                                                                    '
-                                                                    ' nothing selected, abort export
-                                                                    '
-                                                                    Aborttask = True
-                                                                    StatusMessage = "<P>You requested to only download the selected entries, and none were selected.<P>"
-                                                                ElseIf SQLCriteria = "" Then
-                                                                    '
-                                                                    ' This is the only criteria
-                                                                    '
-                                                                    SQLCriteria = " WHERE(" & Mid(RowSQL, 3) & ")"
-                                                                Else
-                                                                    '
-                                                                    ' Add this criteria to the previous
-                                                                    '
-                                                                    SQLCriteria = SQLCriteria & " And(" & Mid(RowSQL, 3) & ")"
-                                                                End If
-                                                            End If
-                                                        Else
-                                                            '
-                                                            ' Export the search criteria
-                                                            '
-                                                        End If
-                                                        If Not Aborttask Then
-                                                            SQLFrom = "ccMembers"
-                                                            JoinTableCnt = 0
-                                                            If cp.User.GetText("ContactGroupCriteria", "") <> "" Then
-                                                                SQLFrom = "(" & SQLFrom & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )"
-                                                            End If
-                                                            ContentID = cp.User.GetInteger("ContactContentID", cp.Content.GetID("people").ToString())
-                                                            Dim cs As CPCSBaseClass = cp.CSNew()
-                                                            cs.Open("Content Fields", "ContentID=" & ContentID, "EditSortPriority", True, "Name,Caption,Type,LookupContentID")
-                                                            Do While cs.OK()
-                                                                FieldName = cs.GetText("name")
-                                                                Select Case cs.GetInteger("type")
-                                                                    Case FieldTypeLookup
-                                                                        '
-                                                                        ' just add the ID into the list
-                                                                        '
-                                                                        SelectList = SelectList & ",ccMembers." & FieldName
-                                                                        FieldNameList = FieldNameList & "," & FieldName
-                                                                        ' Skip it
-                                                                        '    '
-                                                                        '    ' add table join for secondary name
-                                                                        '    '
-                                                                        '    JoinTableAlias = "J" & JoinTableCnt
-                                                                        '    LookupContentID = cs.getInteger( "LookupContentID")
-                                                                        '    If LookupContentID <> 0 Then
-                                                                        '        LookupTable = Main.GetContentTablename(cp.content.getRecordName( "content",LookupContentID))
-                                                                        '        SelectList = SelectList & ",ccMembers." & FieldName & "," & JoinTableAlias & ".Name as NameOf" & FieldName
-                                                                        '        SQLFrom = "(" & SQLFrom & " left join " & LookupTable & " " & JoinTableAlias & " on " & JoinTableAlias & ".ID=ccMembers." & FieldName & ")"
-                                                                        '        FieldNameList = FieldNameList & "," & FieldName & ",NameOf" & FieldName
-                                                                        '        JoinTableCnt = JoinTableCnt + 1
-                                                                        '    End If
-                                                                    Case FieldTypeFileText
-                                                                        '
-                                                                        ' read file for text - skip field
-                                                                        '
-                                                                    Case FieldTypeRedirect, FieldTypeManyToMany
-                                                                        '
-                                                                        ' no field involved, skip it
-                                                                        '
-                                                                    Case Else
-                                                                        '
-                                                                        ' just add value
-                                                                        '
-                                                                        SelectList = SelectList & ",ccMembers." & FieldName
-                                                                        FieldNameList = FieldNameList & "," & FieldName
-                                                                End Select
-                                                                Call cs.GoNext()
-                                                            Loop
-                                                            Call cs.Close()
-                                                            If SelectList = "" Then
-                                                                StatusMessage = "<P>There was a problem requesting your download.<P>"
-                                                            Else
-                                                                SelectList = Mid(SelectList, 2)
-                                                                If FieldNameList <> "" Then
-                                                                    FieldNameList = Mid(FieldNameList, 2)
-                                                                End If
-                                                                'ExportName = CStr(Now()) & " snapshot of " & LCase(ExportName)
-                                                                SQL = "select Distinct " & SelectList & " from " & SQLFrom & SQLCriteria
-                                                                '
-                                                                ' -- skip for now
-                                                                Throw New NotImplementedException()
-                                                                ' Call main.RequestTask("BuildCSV", SQL, ExportName, "MemberExport-" & CStr(main.GetRandomLong) & ".csv")
-                                                                ' StatusMessage = "<P>Your download request has been submitted and will be available on the <a href=" & main.SiteProperty_AdminURL & "?af=30>Download Requests</a> page shortly.<P>"
-                                                            End If
-                                                        End If
-                                                    End If
-                                                Case 4
-                                                    '
-                                                    ' ----- Set AllowBulkEmail field
-                                                    '
+                                                    Call cp.Db.ExecuteNonQuery(SQL)
+                                                End If
+                                            Case 3
+                                                '
+                                                ' ----- Export
+                                                '
+                                                Dim Aborttask As Boolean = False
+                                                If True Then
+                                                    Dim ExportName As String = SearchCaption
                                                     If GroupToolSelect = 0 Then
+                                                        Dim RowSQL As String
                                                         '
-                                                        ' Just selection
+                                                        ' Export selection from Group
                                                         '
-                                                        RecordCnt = 0
+                                                        ExportName = "Selected rows from " & ExportName
+                                                        RowSQL = ""
                                                         If (RowCount > 0) Then
                                                             GroupName = cp.Group.GetName(GroupID.ToString())
                                                             For RowPointer = 0 To RowCount - 1
                                                                 If cp.Doc.GetBoolean("M." & RowPointer) Then
                                                                     memberID = cp.Doc.GetInteger("MID." & RowPointer)
-                                                                    Call cp.Db.ExecuteNonQuery("update ccMembers set AllowBulkEmail=1 where ID=" & memberID)
-                                                                    RecordCnt = RecordCnt + 1
+                                                                    RowSQL = RowSQL & "OR(ccMembers.ID=" & memberID & ")"
                                                                 End If
                                                             Next
+                                                            If RowSQL = "" Then
+                                                                '
+                                                                ' nothing selected, abort export
+                                                                '
+                                                                Aborttask = True
+                                                                StatusMessage = "<P>You requested to only download the selected entries, and none were selected.<P>"
+                                                            ElseIf SQLCriteria = "" Then
+                                                                '
+                                                                ' This is the only criteria
+                                                                '
+                                                                SQLCriteria = " WHERE(" & Mid(RowSQL, 3) & ")"
+                                                            Else
+                                                                '
+                                                                ' Add this criteria to the previous
+                                                                '
+                                                                SQLCriteria = SQLCriteria & " And(" & Mid(RowSQL, 3) & ")"
+                                                            End If
                                                         End If
-                                                        StatusMessage = "<P>Allow Group Email was set for " & RecordCnt & " people.<P>"
                                                     Else
                                                         '
-                                                        ' Set for everyone in search criteria
+                                                        ' Export the search criteria
                                                         '
-                                                        SQL = "Update ccMembers set AllowBulkEmail=1 where ID in (" _
+                                                    End If
+                                                    If Not Aborttask Then
+                                                        Dim SQLFrom As String = "ccMembers"
+                                                        Dim JoinTableCnt As Integer = 0
+                                                        If cp.User.GetText("ContactGroupCriteria", "") <> "" Then
+                                                            SQLFrom = "(" & SQLFrom & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )"
+                                                        End If
+                                                        Dim ContentID As Integer = cp.User.GetInteger("ContactContentID", cp.Content.GetID("people").ToString())
+                                                        Dim cs As CPCSBaseClass = cp.CSNew()
+                                                        cs.Open("Content Fields", "ContentID=" & ContentID, "EditSortPriority", True, "Name,Caption,Type,LookupContentID")
+                                                        Dim SelectList As String = ""
+                                                        Dim FieldNameList As String = ""
+                                                        Do While cs.OK()
+                                                            Dim FieldName As String = cs.GetText("name")
+                                                            Select Case cs.GetInteger("type")
+                                                                Case FieldTypeLookup
+                                                                    '
+                                                                    ' just add the ID into the list
+                                                                    '
+                                                                    SelectList = SelectList & ",ccMembers." & FieldName
+                                                                    FieldNameList = FieldNameList & "," & FieldName
+                                                                Case FieldTypeFileText
+                                                                    '
+                                                                    ' read file for text - skip field
+                                                                Case FieldTypeRedirect, FieldTypeManyToMany
+                                                                    '
+                                                                    ' no field involved, skip it
+                                                                Case Else
+                                                                    '
+                                                                    ' just add value
+                                                                    SelectList = SelectList & ",ccMembers." & FieldName
+                                                                    FieldNameList = FieldNameList & "," & FieldName
+                                                            End Select
+                                                            Call cs.GoNext()
+                                                        Loop
+                                                        Call cs.Close()
+                                                        If SelectList = "" Then
+                                                            StatusMessage = "<P>There was a problem requesting your download.<P>"
+                                                        Else
+                                                            SelectList = Mid(SelectList, 2)
+                                                            If FieldNameList <> "" Then
+                                                                FieldNameList = Mid(FieldNameList, 2)
+                                                            End If
+                                                            'ExportName = CStr(Now()) & " snapshot of " & LCase(ExportName)
+                                                            SQL = "select Distinct " & SelectList & " from " & SQLFrom & SQLCriteria
+                                                            '
+                                                            ' -- skip for now
+                                                            Throw New NotImplementedException()
+                                                            ' Call main.RequestTask("BuildCSV", SQL, ExportName, "MemberExport-" & CStr(main.GetRandomLong) & ".csv")
+                                                            ' StatusMessage = "<P>Your download request has been submitted and will be available on the <a href=" & main.SiteProperty_AdminURL & "?af=30>Download Requests</a> page shortly.<P>"
+                                                        End If
+                                                    End If
+                                                End If
+                                            Case 4
+                                                '
+                                                ' ----- Set AllowBulkEmail field
+                                                '
+                                                If GroupToolSelect = 0 Then
+                                                    '
+                                                    ' Just selection
+                                                    '
+                                                    Dim RecordCnt As Integer = 0
+                                                    If (RowCount > 0) Then
+                                                        GroupName = cp.Group.GetName(GroupID.ToString())
+                                                        For RowPointer = 0 To RowCount - 1
+                                                            If cp.Doc.GetBoolean("M." & RowPointer) Then
+                                                                memberID = cp.Doc.GetInteger("MID." & RowPointer)
+                                                                Call cp.Db.ExecuteNonQuery("update ccMembers set AllowBulkEmail=1 where ID=" & memberID)
+                                                                RecordCnt = RecordCnt + 1
+                                                            End If
+                                                        Next
+                                                    End If
+                                                    StatusMessage = "<P>Allow Group Email was set for " & RecordCnt & " people.<P>"
+                                                Else
+                                                    '
+                                                    ' Set for everyone in search criteria
+                                                    '
+                                                    SQL = "Update ccMembers set AllowBulkEmail=1 where ID in (" _
                                                             & " select Distinct ccMembers.ID" _
                                                             & " from (ccMembers" _
                                                             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )" _
                                                             & " " & SQLCriteria _
                                                             & ")"
-                                                        Call cp.Db.ExecuteNonQuery(SQL)
-                                                        StatusMessage = "<P>Allow Group Email was set for all people in this selection.<P>"
-                                                    End If
-                                            End Select
-                                    End Select
-                                Case FormDetails
-                                    DetailMemberID = cp.Doc.GetInteger(RequestNameMemberID)
-                                    Select Case Button
-                                        Case ButtonCancel
-                                            FormID = FormList
-                                        Case ButtonSave
-                                            Call SaveContactFromStream(cp, DetailMemberID)
-                                            FormID = FormDetails
-                                        Case ButtonOK
-                                            Call SaveContactFromStream(cp, DetailMemberID)
-                                            FormID = FormList
-                                        Case ButtonNewSearch
-                                            FormID = FormSearch
-                                    End Select
-                            End Select
-                        End If
-                        '
-                        ' ----- Output the next form
-                        '
-                        '
-                        'GetContent = "" _
-                        '    & "<link href=""/ccLib/Styles/ccTabs.css"" type=""text/css"" rel=""stylesheet"">" _
-                        '    & "<script type=text/javascript src=""/ccLib/ClientSide/ccDynamicTab.js""></script>"
-                        Select Case FormID
+                                                    Call cp.Db.ExecuteNonQuery(SQL)
+                                                    StatusMessage = "<P>Allow Group Email was set for all people in this selection.<P>"
+                                                End If
+                                        End Select
+                                End Select
                             Case FormDetails
-                                '
-                                ' Detail form
-                                '
-                                GetContent = GetContent & GetFormDetail(cp, DetailMemberID, StatusMessage)
-                            Case FormList
-                                '
-                                ' List form
-                                '
-                                GetContent = GetContent & GetFormList(cp, StatusMessage, IsAdminPath)
-                            Case Else
-                                '
-                                ' Search Form
-                                '
-                                GetContent = GetContent & GetFormSearch(cp, StatusMessage, IsAdminPath)
+                                DetailMemberID = cp.Doc.GetInteger(RequestNameMemberID)
+                                Select Case Button
+                                    Case ButtonCancel
+                                        FormID = FormList
+                                    Case ButtonSave
+                                        Call SaveContactFromStream(cp, DetailMemberID)
+                                        FormID = FormDetails
+                                    Case ButtonOK
+                                        Call SaveContactFromStream(cp, DetailMemberID)
+                                        FormID = FormList
+                                    Case ButtonNewSearch
+                                        FormID = FormSearch
+                                End Select
                         End Select
-                        GetContent = "<div class=ccbodyadmin>" & GetContent & "</div>"
-                        'GetContent = GetContent & "<script type=text/javascript>TabInit();</script>"
                     End If
+                    '
+                    ' ----- Output the next form
+                    Select Case FormID
+                        Case FormDetails
+                            '
+                            ' Detail form
+                            '
+                            result = result & GetFormDetail(cp, DetailMemberID, StatusMessage)
+                        Case FormList
+                            '
+                            ' List form
+                            '
+                            result = result & GetFormList(cp, StatusMessage, IsAdminPath)
+                        Case Else
+                            '
+                            ' Search Form
+                            '
+                            result = result & GetFormSearch(cp, StatusMessage, IsAdminPath)
+                    End Select
+                    result = "<div class=ccbodyadmin>" & result & "</div>"
                 End If
                 '
                 ' wrapper for style strength
-                '
-                GetContent = "" _
+                result = "" _
                     & vbCrLf & vbTab & "<div class=""contactManager"">" _
-                    & nop(GetContent) _
+                    & nop(result) _
                     & vbCrLf & vbTab & "</div>" _
                     & ""
-                '
-                result = GetContent
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
@@ -460,8 +381,7 @@ Namespace Views
             Dim result As String = ""
             Try
                 Dim SubTab As Integer
-                Dim RQS As String
-                Dim Nav As New Controllers.NavController
+                Dim Nav As New TabController()
                 Dim Header As String
                 Dim Content As String
                 Dim ButtonList As String
@@ -493,15 +413,15 @@ Namespace Views
                     '
                     Header = "<div>Use the selections in each tab below to create a criteria for your search and hit the Search button.</div>"
                     '
-                    Call Nav.AddEntry("Record&nbsp;Fields", GetFormSearch_TabPeople(cp), "ccAdminTab")
-                    Call Nav.AddEntry("Groups", GetFormSearch_TabGroup(cp), "ccAdminTab")
+                    Call Nav.addEntry("Record&nbsp;Fields", GetFormSearch_TabPeople(cp), "ccAdminTab")
+                    Call Nav.addEntry("Groups", GetFormSearch_TabGroup(cp), "ccAdminTab")
                     '
                     Content = "" _
                         & cp.Html.Hidden("SelectionForm", "1") _
-                        & Nav.GetTabs() _
+                        & Nav.getTabs(cp) _
                         & cp.Html.Hidden(RequestNameFormID, FormSearch.ToString()) _
                         & ""
-                    GetFormSearch = Controllers.AdminUIController.GetBody(cp, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
+                    GetFormSearch = HtmlController.getBody(cp, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
                 End If
                 result = GetFormSearch
             Catch ex As Exception
@@ -1276,7 +1196,7 @@ Namespace Views
                     '
                     ' Assemble page
                     '
-                    GetFormList = Controllers.AdminUIController.GetBody(cp, "Contact Manager &gt;&gt; List People", ButtonList, "", True, True, Description, "", 0, Body)
+                    GetFormList = HtmlController.getBody(cp, "Contact Manager &gt;&gt; List People", ButtonList, "", True, True, Description, "", 0, Body)
                     '
                 End If
             Catch ex As Exception
@@ -1581,7 +1501,7 @@ Namespace Views
                                         LookupName = ""
                                         If FieldContentLookupID <> 0 Then
                                             FieldContentLookupName = cp.Content.GetRecordName("Content", FieldContentLookupID)
-                                            If (FieldContentLookupName <> "") And IsNumeric(FieldParms(2)) Then
+                                            If (FieldContentLookupName <> "") And (FieldParms(2).IsNumeric) Then
                                                 LookupName = cp.Content.GetRecordName(FieldContentLookupName, cp.Utils.EncodeInteger(FieldParms(2)))
                                             End If
                                         End If
@@ -1720,7 +1640,7 @@ Namespace Views
                 '
                 Dim SubTab As Integer
                 Dim RQS As String
-                Dim Nav As New Controllers.NavController
+                Dim Nav As New TabController()
                 Dim Header As String
                 Dim AdminUI As Object
                 Dim Content As String
@@ -1767,7 +1687,7 @@ Namespace Views
                     Call Nav.AddEntry("Groups", GetFormDetail_TabGroup(cp, CS), "ccAdminTab")
                     Call CS.Close()
                     '
-                    Content = Nav.GetTabs()
+                    Content = Nav.getTabs(cp)
                     Content = Content & cp.Html.Hidden(RequestNameFormID, FormDetails.ToString())
                     Content = Content & cp.Html.Hidden(RequestNameMemberID, DetailMemberID.ToString())
                     '
