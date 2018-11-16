@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<Collection name="Contact Manager" guid="{51a67cb6-ea94-497c-896a-979a851be3db}" system="No" updatable="No" blockNavigatorNode="No">
+	<HelpLink></HelpLink>
+	<Help></Help>
+	<Addon name="Contact Manager" guid="{57602963-CA46-41EB-8053-8ACB8C47C2F2}" type="Tool">
+		<Copy></Copy>
+		<CopyText></CopyText>
+		<ActiveXProgramID></ActiveXProgramID>
+		<DotNetClass><![CDATA[Contensive.Addons.ContactManager.Views.CMngrClass]]></DotNetClass>
+		<ArgumentList></ArgumentList>
+		<AsAjax>No</AsAjax>
+		<Filter>No</Filter>
+		<Help></Help>
+		<HelpLink><![CDATA[http://Support.Contensive.com/aoContactManager]]></HelpLink>
+		<Icon Link="" width="0" height="0" sprites="0" />
+		<InIframe>No</InIframe>
+		<BlockEditTools>Yes</BlockEditTools>
+		<FormXML></FormXML>
+		<IsInline>No</IsInline>
+		<JavascriptInHead></JavascriptInHead>
+		<javascriptForceHead>No</javascriptForceHead>
+		<JSHeadScriptSrc></JSHeadScriptSrc>
+		<!-- deprecated --><JSBodyScriptSrc></JSBodyScriptSrc>
+		<!-- deprecated --><JavascriptBodyEnd></JavascriptBodyEnd>
+		<!-- deprecated --><JavascriptOnLoad></JavascriptOnLoad>
+		<Content>Yes</Content>
+		<Template>Yes</Template>
+		<Email>No</Email>
+		<Admin>Yes</Admin>
+		<OnPageEndEvent>No</OnPageEndEvent>
+		<OnPageStartEvent>No</OnPageStartEvent>
+		<OnBodyStart>No</OnBodyStart>
+		<OnBodyEnd>No</OnBodyEnd>
+		<RemoteMethod>No</RemoteMethod>
+		<ProcessRunOnce>No</ProcessRunOnce>
+		<ProcessInterval>0</ProcessInterval>
+		<MetaDescription></MetaDescription>
+		<OtherHeadTags></OtherHeadTags>
+		<PageTitle></PageTitle>
+		<RemoteAssetLink></RemoteAssetLink>
+		<Styles><![CDATA[.contactManager * {
+	font-size:11px;
+	color: #000;
+	text-align: left;
+	font-weight: normal;
+	font-family: verdana,arial,sans-serif;	
+	}
+.contactManager .cmRowTab {
+	font-weight: bold;
+	font-size: 13px;	
+	border-bottom: 1px solid #444;
+	padding: 20px 0 3px 0;
+	}
+.contactManager .cmRowCaption {
+	WHITE-SPACE:nowrap;
+	TEXT-ALIGN:right;
+	FONT-WEIGHT:normal;
+	height: 35px;
+	vertical-align: middle;
+	}
+.contactManager .cmRowField {
+	border-top:1px solid #FFFDF1;
+	border-bottom:1px solid #DAD4B2;
+	Background-color:#fff8d0;
+	vertical-align: middle;
+	}
+.contactManager .cmRowField table td {
+	vertical-align: middle;
+	}
+.contactManager .cmBody {
+	BACKGROUND-COLOR:#E8EEF7;
+	padding:5px;
+	}
+]]></Styles>
+		<Scripting Language="VBScript" EntryPoint="" Timeout="5000"/>
+	</Addon>
+</Collection>
