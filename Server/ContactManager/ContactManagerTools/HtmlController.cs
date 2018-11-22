@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using Contensive.BaseClasses;
+using static Contensive.Addons.ContactManager.Constants;
 
 namespace Contensive.Addons.ContactManager {
     public class HtmlController {
@@ -83,39 +84,6 @@ namespace Contensive.Addons.ContactManager {
         public static string ul(string innerHtml, string htmlClass, string htmlId) => genericBlockTag("ul", innerHtml, htmlClass, htmlId);
         //
         //====================================================================================================
-        public static string getBody(CPBaseClass cp, string Caption, string ButtonListLeft, string ButtonListRight, bool AllowAdd, bool AllowDelete, string Description, string ContentSummary, int ContentPadding, string Content) {
-            string result = "";
-            string ButtonBar = null;
-            string LeftButtons = "";
-            string RightButtons = "";
-            string CellContentSummary = "";
-            //
-            // Build ButtonBar
-            //
-            if (!string.IsNullOrEmpty(ButtonListLeft.Trim(' '))) {
-                LeftButtons = getButtonsFromList(cp, ButtonListLeft, AllowDelete, AllowAdd, "Button");
-            }
-            if (!string.IsNullOrEmpty(ButtonListRight.Trim(' '))) {
-                RightButtons = getButtonsFromList(cp, ButtonListRight, AllowDelete, AllowAdd, "Button");
-            }
-            ButtonBar = getButtonBar(cp, LeftButtons, RightButtons);
-            if (!string.IsNullOrEmpty(ContentSummary)) {
-                CellContentSummary = ""
-                    + "\r<div class=\"ccPanelBackground\" style=\"padding:10px;\">"
-                    + getPanel(ContentSummary, "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 5)
-                    + "\r</div>";
-            }
-            result += ""
-                + ButtonBar
-                + getTitleBar(cp, Caption, Description)
-                + CellContentSummary
-                + "<div style=\"padding:" + ContentPadding + "px;\">" + Content + "\r</div>"
-                + ButtonBar;
-            result = HtmlController.formMultipart(cp, result, cp.Doc.RefreshQueryString, "", "ccForm");
-            return result;
-        }
-        //
-        //====================================================================================================
         public static string getButtonsFromList(CPBaseClass cp, List<ButtonMetadata> ButtonList, bool AllowDelete, bool AllowAdd) {
             string s = "";
             foreach (ButtonMetadata button in ButtonList) {
@@ -181,7 +149,7 @@ namespace Contensive.Addons.ContactManager {
         /// <summary>
         /// returns a multipart form, required for file uploads
         /// </summary>
-        /// <param name="core"></param>
+        /// <param name="cp"></param>
         /// <param name="innerHtml"></param>
         /// <param name="actionQueryString"></param>
         /// <param name="htmlName"></param>
@@ -210,7 +178,7 @@ namespace Contensive.Addons.ContactManager {
         /// <summary>
         /// Title Bar
         /// </summary>
-        /// <param name="core"></param>
+        /// <param name="cp"></param>
         /// <param name="Title"></param>
         /// <param name="Description"></param>
         /// <returns></returns>
@@ -318,183 +286,80 @@ namespace Contensive.Addons.ContactManager {
         //
         public static string getPanel(string content, string stylePanel, string styleHilite, string styleShadow, string width, int padding) => getPanel(content, stylePanel, styleHilite, styleShadow, width, padding, 1);
         //
-        //====================================================================================================
-        public static string getReport(CPBaseClass cp, int RowCount, string[] ColCaption, string[] ColAlign, string[] ColWidth, string[,] Cells, int PageSize, int PageNumber, string PreTableCopy, string PostTableCopy, int DataRowCount, string ClassStyle) {
+        // ====================================================================================================
+        /// <summary>
+        /// create a table start tag
+        /// </summary>
+        /// <param name="cellpadding"></param>
+        /// <param name="cellspacing"></param>
+        /// <param name="border"></param>
+        /// <param name="htmlClass"></param>
+        /// <returns></returns>
+        public static string tableStart(int cellpadding, int cellspacing, int border, string htmlClass = "") => "<table border=\"" + border + "\" cellpadding=\"" + cellpadding + "\" cellspacing=\"" + cellspacing + "\" class=\"" + htmlClass + "\" width=\"100%\">";
+        //
+        // ====================================================================================================
+        /// <summary>
+        /// return a row start (tr tag)
+        /// </summary>
+        /// <returns></returns>
+        public static string tableRowStart() => "<tr>";
+        //
+        // ====================================================================================================
+        /// <summary>
+        /// create a td tag (without /td)
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="ColSpan"></param>
+        /// <param name="EvenRow"></param>
+        /// <param name="Align"></param>
+        /// <param name="BGColor"></param>
+        /// <returns></returns>
+        public static string tableCellStart(string Width = "", int ColSpan = 0, bool EvenRow = false, string Align = "", string BGColor = "") {
             string result = "";
-            try {
-                int ColCnt = Cells.GetUpperBound(1);
-                bool[] ColSortable = new bool[ColCnt + 1];
-                for (int Ptr = 0; Ptr < ColCnt; Ptr++) {
-                    ColSortable[Ptr] = false;
-                }
-                //
-                result = getReport2(cp, RowCount, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, ClassStyle, ColSortable, 0);
-            } catch (Exception ex) {
-                
+            if (!string.IsNullOrEmpty(Width)) {
+                result += " width=\"" + Width + "\"";
             }
-            return result;
+            if (!string.IsNullOrEmpty(BGColor)) {
+                result += " bgcolor=\"" + BGColor + "\"";
+            } else if (EvenRow) {
+                result += " class=\"ccPanelRowEven\"";
+            } else {
+                result += " class=\"ccPanelRowOdd\"";
+            }
+            if (ColSpan != 0) {
+                result += " colspan=\"" + ColSpan + "\"";
+            }
+            if (!string.IsNullOrEmpty(Align)) {
+                result += " align=\"" + Align + "\"";
+            }
+            return "<td" + result + ">";
         }
         //
-        //====================================================================================================
-        public static string getReport2(CPBaseClass cp, int RowCount, string[] ColCaption, string[] ColAlign, string[] ColWidth, string[,] Cells, int PageSize, int PageNumber, string PreTableCopy, string PostTableCopy, int DataRowCount, string ClassStyle, bool[] ColSortable, int DefaultSortColumnPtr) {
-            string result = "";
-            try {
-                string RQS = null;
-                int RowBAse = 0;
-                var Content = new StringBuilder();
-                var Stream = new StringBuilder();
-                int ColumnCount = 0;
-                int ColumnPtr = 0;
-                string ColumnWidth = null;
-                int RowPointer = 0;
-                string WorkingQS = null;
-                //
-                int PageCount = 0;
-                int PagePointer = 0;
-                int LinkCount = 0;
-                int ReportPageNumber = 0;
-                int ReportPageSize = 0;
-                string iClassStyle = null;
-                int SortColPtr = 0;
-                int SortColType = 0;
-                //
-                ReportPageNumber = PageNumber;
-                if (ReportPageNumber == 0) {
-                    ReportPageNumber = 1;
-                }
-                ReportPageSize = PageSize;
-                if (ReportPageSize < 1) {
-                    ReportPageSize = 50;
-                }
-                //
-                iClassStyle = ClassStyle;
-                if (string.IsNullOrEmpty(iClassStyle)) {
-                    iClassStyle = "ccPanel";
-                }
-                //If IsArray(Cells) Then
-                ColumnCount = Cells.GetUpperBound(1);
-                //End If
-                RQS = core.doc.refreshQueryString;
-                //
-                SortColPtr = getReportSortColumnPtr(core, DefaultSortColumnPtr);
-                SortColType = getReportSortType(core);
-                //
-                // ----- Start the table
-                //
-                Content.Add(HtmlController.tableStart(3, 1, 0));
-                //
-                // ----- Header
-                //
-                Content.Add("\r\n<tr>");
-                Content.Add(getReport_CellHeader(core, 0, "&nbsp", "50px", "Right", "ccAdminListCaption", RQS, SortingStateEnum.NotSortable));
-                for (ColumnPtr = 0; ColumnPtr < ColumnCount; ColumnPtr++) {
-                    ColumnWidth = ColWidth[ColumnPtr];
-                    if (!ColSortable[ColumnPtr]) {
-                        //
-                        // not sortable column
-                        //
-                        Content.Add(getReport_CellHeader(core, ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, SortingStateEnum.NotSortable));
-                    } else if (ColumnPtr == SortColPtr) {
-                        //
-                        // This is the current sort column
-                        //
-                        Content.Add(getReport_CellHeader(core, ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, (SortingStateEnum)SortColType));
-                    } else {
-                        //
-                        // Column is sortable, but not selected
-                        //
-                        Content.Add(getReport_CellHeader(core, ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, SortingStateEnum.SortableNotSet));
-                    }
-
-                    //If ColumnPtr = SortColPtr Then
-                    //    '
-                    //    ' This column is currently the active sort
-                    //    '
-                    //    Call Content.Add(GetReport_CellHeader(ColumnPtr, ColCaption(ColumnPtr), ColumnWidth, ColAlign(ColumnPtr), "ccAdminListCaption", RQS, SortColType))
-                    //Else
-                    //    Call Content.Add(GetReport_CellHeader(ColumnPtr, ColCaption(ColumnPtr), ColumnWidth, ColAlign(ColumnPtr), "ccAdminListCaption", RQS, SortingStateEnum.SortableNotSet))
-                    //End If
-                }
-                Content.Add("\r\n</tr>");
-                //
-                // ----- Data
-                //
-                if (RowCount == 0) {
-                    Content.Add("\r\n<tr>");
-                    Content.Add(getReport_Cell(core, (RowBAse + RowPointer).ToString(), "right", 1, RowPointer));
-                    Content.Add(getReport_Cell(core, "-- End --", "left", ColumnCount, 0));
-                    Content.Add("\r\n</tr>");
-                } else {
-                    RowBAse = (ReportPageSize * (ReportPageNumber - 1)) + 1;
-                    for (RowPointer = 0; RowPointer < RowCount; RowPointer++) {
-                        Content.Add("\r\n<tr>");
-                        Content.Add(getReport_Cell(core, (RowBAse + RowPointer).ToString(), "right", 1, RowPointer));
-                        for (ColumnPtr = 0; ColumnPtr < ColumnCount; ColumnPtr++) {
-                            Content.Add(getReport_Cell(core, Cells[RowPointer, ColumnPtr], ColAlign[ColumnPtr], 1, RowPointer));
-                        }
-                        Content.Add("\r\n</tr>");
-                    }
-                }
-                //
-                // ----- End Table
-                //
-                Content.Add(kmaEndTable);
-                result += Content.Text;
-                //
-                // ----- Post Table copy
-                //
-                if ((DataRowCount / (double)ReportPageSize) != Math.Floor((DataRowCount / (double)ReportPageSize))) {
-                    PageCount = encodeInteger((DataRowCount / (double)ReportPageSize) + 0.5);
-                } else {
-                    PageCount = encodeInteger(DataRowCount / (double)ReportPageSize);
-                }
-                if (PageCount > 1) {
-                    result += "<br>Page " + ReportPageNumber + " (Row " + (RowBAse) + " of " + DataRowCount + ")";
-                    if (PageCount > 20) {
-                        PagePointer = ReportPageNumber - 10;
-                    }
-                    if (PagePointer < 1) {
-                        PagePointer = 1;
-                    }
-                    if (PageCount > 1) {
-                        result += "<br>Go to Page ";
-                        if (PagePointer != 1) {
-                            WorkingQS = core.doc.refreshQueryString;
-                            WorkingQS = GenericController.modifyQueryString(WorkingQS, "GotoPage", "1", true);
-                            result += "<a href=\"" + core.webServer.requestPage + "?" + WorkingQS + "\">1</A>...&nbsp;";
-                        }
-                        WorkingQS = core.doc.refreshQueryString;
-                        WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
-                        while ((PagePointer <= PageCount) && (LinkCount < 20)) {
-                            if (PagePointer == ReportPageNumber) {
-                                result += PagePointer + "&nbsp;";
-                            } else {
-                                WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
-                                result += "<a href=\"" + core.webServer.requestPage + "?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
-                            }
-                            PagePointer = PagePointer + 1;
-                            LinkCount = LinkCount + 1;
-                        }
-                        if (PagePointer < PageCount) {
-                            WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
-                            result += "...<a href=\"" + core.webServer.requestPage + "?" + WorkingQS + "\">" + PageCount + "</A>&nbsp;";
-                        }
-                        if (ReportPageNumber < PageCount) {
-                            WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
-                            result += "...<a href=\"" + core.webServer.requestPage + "?" + WorkingQS + "\">next</A>&nbsp;";
-                        }
-                        result += "<br>&nbsp;";
-                    }
-                }
-                //
-                result = ""
-                + PreTableCopy + "<table border=0 cellpadding=0 cellspacing=0 width=\"100%\"><tr><td style=\"padding:10px;\">"
-                + result + "</td></tr></table>"
-                + PostTableCopy + "";
-            } catch (Exception ex) {
-                LogController.handleError(core, ex);
-            }
-            return result;
+        // ====================================================================================================
+        /// <summary>
+        /// create a table cell <td>content</td>
+        /// </summary>
+        /// <param name="Copy"></param>
+        /// <param name="Width"></param>
+        /// <param name="ColSpan"></param>
+        /// <param name="EvenRow"></param>
+        /// <param name="Align"></param>
+        /// <param name="BGColor"></param>
+        /// <returns></returns>
+        public static string td(string Copy, string Width = "", int ColSpan = 0, bool EvenRow = false, string Align = "", string BGColor = "") {
+            return tableCellStart(Width, ColSpan, EvenRow, Align, BGColor) + Copy + tableCellEnd;
+        }
+        //
+        // ====================================================================================================
+        /// <summary>
+        /// create a <tr><td>content</td></tr>
+        /// </summary>
+        /// <param name="Cell"></param>
+        /// <param name="ColSpan"></param>
+        /// <param name="EvenRow"></param>
+        /// <returns></returns>
+        public static string tableRow(string Cell, int ColSpan = 0, bool EvenRow = false) {
+            return tableRowStart() + td(Cell, "100%", ColSpan, EvenRow) + Constants.kmaEndTableRow;
         }
     }
 }

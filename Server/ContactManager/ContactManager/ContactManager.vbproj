@@ -89,7 +89,6 @@
     <Compile Include="constants.vb" />
     <Compile Include="Controllers\applicationController.vb" />
     <Compile Include="Controllers\cacheController.vb" />
-    <Compile Include="Controllers\AdminUIController.vb" />
     <Compile Include="Models\Domain\baseDomainModel.vb" />
     <Compile Include="Models\Domain\_blankModel.vb" />
     <Compile Include="Models\Db\LibraryFolderModel.vb" />

@@ -43,7 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminUIController.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="DateController.cs" />
     <Compile Include="extensions.cs" />
+    <Compile Include="GenericController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HtmlController.cs" />
     <Compile Include="TabController.cs" />

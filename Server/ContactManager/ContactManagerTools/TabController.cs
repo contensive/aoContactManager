@@ -65,7 +65,7 @@ namespace Contensive.Addons.ContactManager {
         /// retrieve the html for the tabs in the object
         /// change to https://www.w3schools.com/bootstrap4/bootstrap_navs.asp
         /// </summary>
-        /// <param name="core"></param>
+        /// <param name="cp"></param>
         /// <returns></returns>
         public string getTabs(CPBaseClass cp) {
             var result = new StringBuilder();
