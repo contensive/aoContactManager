@@ -286,37 +286,19 @@ namespace Contensive.Addons.ContactManager {
                 + PreTableCopy + "<table border=0 cellpadding=0 cellspacing=0 width=\"100%\"><tr><td style=\"padding:10px;\">"
                 + result + "</td></tr></table>"
                 + PostTableCopy + "";
-            } catch (Exception ex) {
+            } catch (Exception) {
                 throw;
             }
             return result;
         }
         //
         //====================================================================================================
-        public  static string getReport_Cell(CPBaseClass cp, string Copy, string Align, int Columns, int RowPointer) {
-            string tempGetReport_Cell = null;
-            string iAlign = null;
-            string Style = null;
-            string CellCopy = null;
-            //
-            iAlign = encodeEmpty(Align, "left");
-            //
-            if ((RowPointer % 2) > 0) {
-                Style = "ccAdminListRowOdd";
-            } else {
-                Style = "ccAdminListRowEven";
-            }
-            //
-            tempGetReport_Cell = "\r\n<td valign=\"middle\" align=\"" + iAlign + "\" class=\"" + Style + "\"";
-            if (Columns > 1) {
-                tempGetReport_Cell = tempGetReport_Cell + " colspan=\"" + Columns + "\"";
-            }
-            //
-            CellCopy = Copy;
-            if (string.IsNullOrEmpty(CellCopy)) {
-                CellCopy = "&nbsp;";
-            }
-            return tempGetReport_Cell + "><span class=\"ccSmall\">" + CellCopy + "</span></td>";
+        public  static string getReport_Cell(CPBaseClass cp, string copy, string align, int columns, int rowPointer) {
+            string result = "\r\n<td valign=\"middle\" align=\"" + align + "\"";
+            result += ((rowPointer % 2) > 0) ? " class=\"ccAdminListRowOdd\"" : " class=\"ccAdminListRowEven\"";
+            result += (align.Equals("right")) ? " style=\"text-align:right\"" : (align.Equals("center")) ? " style=\"text-align:center\"" : " style=\"text-align:left\"";
+            result += (columns > 1) ? " colspan=\"" + columns + "\"" : "";
+            return result + ">" + ((String.IsNullOrWhiteSpace(copy)) ? "&nbsp;" : copy ) + "</td>";
         }
         //
         ////====================================================================================================

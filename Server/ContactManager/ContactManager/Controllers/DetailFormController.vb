@@ -40,62 +40,49 @@ Namespace Views
         Public Shared Function getResponse(cp As CPBaseClass, DetailMemberID As Integer) As String
             Dim result As String = ""
             Try
-                '
-                Dim SubTab As Integer
-                Dim RQS As String
-                Dim Nav As New TabController()
-                Dim Header As String
-                Dim AdminUI As Object
-                Dim Content As String
-                Dim ButtonList As String
-                Dim Button As String
                 Dim CS As CPCSBaseClass = cp.CSNew()
-                Dim MemberName As String
-                Dim hint As String
-                '
-                If True Then
-                    CS.Open("people", "ID=" & DetailMemberID, "", False)
-                    MemberName = CS.GetText("name")
+                CS.Open("people", "ID=" & DetailMemberID, "", False)
+                Dim MemberName As String = CS.GetText("name")
+                If MemberName = "" Then
+                    MemberName = Trim(CS.GetText("FirstName") & " " & CS.GetText("LastName"))
                     If MemberName = "" Then
-                        MemberName = Trim(CS.GetText("FirstName") & " " & CS.GetText("LastName"))
-                        If MemberName = "" Then
-                            MemberName = "Record " & CS.GetText("ID")
-                        End If
+                        MemberName = "Record " & CS.GetText("ID")
                     End If
-                    '
-                    ' Determine current Subtab
-                    '
-                    SubTab = cp.Doc.GetInteger(RequestNameDetailSubtab)
+                End If
+                '
+                ' Determine current Subtab
+                '
+                Dim SubTab As Integer = cp.Doc.GetInteger(RequestNameDetailSubtab)
+                If SubTab = 0 Then
+                    SubTab = cp.Utils.EncodeInteger(cp.User.GetText(RequestNameDetailSubtab, "1"))
                     If SubTab = 0 Then
-                        SubTab = cp.Utils.EncodeInteger(cp.User.GetText(RequestNameDetailSubtab, "1"))
-                        If SubTab = 0 Then
-                            SubTab = 1
-                            Call cp.User.SetProperty(RequestNameDetailSubtab, CStr(SubTab))
-                        End If
-                    Else
+                        SubTab = 1
                         Call cp.User.SetProperty(RequestNameDetailSubtab, CStr(SubTab))
                     End If
-                    Call cp.Doc.AddRefreshQueryString(RequestNameDetailSubtab, SubTab.ToString())
-                    '
-                    ' SubTab Menu
-                    '
-                    Call cp.Doc.AddRefreshQueryString("tab", "")
-                    ButtonList = ButtonCancel & "," & ButtonSave & "," & ButtonOK & "," & ButtonNewSearch
-                    Header = "<div>" & MemberName & "</div>"
-                    '
-                    Call Nav.addEntry("Contact", GetFormDetail_TabContact(cp, CS), "ccAdminTab")
-                    Call Nav.addEntry("Permissions", GetFormDetail_TabPermissions(cp, CS), "ccAdminTab")
-                    Call Nav.addEntry("Notes", GetFormDetail_TabNotes(cp, CS), "ccAdminTab")
-                    Call Nav.addEntry("Photos", GetFormDetail_TabPhoto(cp, CS), "ccAdminTab")
-                    Call Nav.addEntry("Groups", GetFormDetail_TabGroup(cp, CS), "ccAdminTab")
-                    Call CS.Close()
-                    '
-                    Content = Nav.getTabs(cp)
-                    Content = Content & cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormDetails).ToString())
-                    Content = Content & cp.Html.Hidden(RequestNameMemberID, DetailMemberID.ToString())
-                    '
-                    getResponse = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", 0, Content)
+                Else
+                    Call cp.User.SetProperty(RequestNameDetailSubtab, CStr(SubTab))
                 End If
+                Call cp.Doc.AddRefreshQueryString(RequestNameDetailSubtab, SubTab.ToString())
+                '
+                ' SubTab Menu
+                '
+                Call cp.Doc.AddRefreshQueryString("tab", "")
+                Dim ButtonList As String = ButtonCancel & "," & ButtonSave & "," & ButtonOK & "," & ButtonNewSearch
+                Dim Header As String = "<div>" & MemberName & "</div>"
+                Dim Nav As New TabController()
+                '
+                Call Nav.addEntry("Contact", GetFormDetail_TabContact(cp, CS), "ccAdminTab")
+                Call Nav.addEntry("Permissions", GetFormDetail_TabPermissions(cp, CS), "ccAdminTab")
+                Call Nav.addEntry("Notes", GetFormDetail_TabNotes(cp, CS), "ccAdminTab")
+                Call Nav.addEntry("Photos", GetFormDetail_TabPhoto(cp, CS), "ccAdminTab")
+                Call Nav.addEntry("Groups", GetFormDetail_TabGroup(cp, CS), "ccAdminTab")
+                Call CS.Close()
+                '
+                Dim Content As String = Nav.getTabs(cp)
+                Content = Content & cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormDetails).ToString())
+                Content = Content & cp.Html.Hidden(RequestNameMemberID, DetailMemberID.ToString())
+                '
+                result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", 0, Content)
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try

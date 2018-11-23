@@ -242,8 +242,8 @@ Namespace Views
         Public Shared Function getResponse(cp As CPBaseClass, ae As Controllers.ApplicationController, IsAdminPath As Boolean) As String
             Dim result As String = ""
             Try
-                Dim SQLOrderDir As String
-                Dim SQLOrderBy As String
+                Dim SQLOrderDir As String = ""
+                Dim SQLOrderBy As String = ""
                 Dim LastVisit As Date
                 Dim CheckBox As String
                 Dim CS As CPCSBaseClass = cp.CSNew()
@@ -259,7 +259,6 @@ Namespace Views
                 Dim DataRowCount As Integer
                 Dim PreTableCopy As String
                 Dim PostTableCopy As String
-                Dim ColumnCount As Integer
                 Dim CPtr As Integer
                 Dim ColCaption() As String
                 Dim ColAlign() As String
@@ -308,21 +307,15 @@ Namespace Views
                     GroupID = cp.Doc.GetInteger("GroupID")
                     GroupToolAction = cp.Doc.GetInteger("GroupToolAction")
                     AdminURL = cp.Site.GetText("adminurl")
-                    ColumnCount = 11
-                    If IsAdmin Then
-                        '
-                        ' If admin, give them an edit column
-                        '
-                        ColumnCount = ColumnCount + 1
-                    End If
+                    Dim ColumnMax As Integer = 5
                     '
                     TopCount = PageNumber * PageSize
                     '
-                    ReDim ColCaption(ColumnCount)
-                    ReDim ColAlign(ColumnCount)
-                    ReDim ColWidth(ColumnCount)
-                    ReDim ColSortable(ColumnCount)
-                    ReDim Cells(PageSize, ColumnCount)
+                    ReDim ColCaption(ColumnMax)
+                    ReDim ColAlign(ColumnMax)
+                    ReDim ColWidth(ColumnMax)
+                    ReDim ColSortable(ColumnMax)
+                    ReDim Cells(PageSize, ColumnMax)
                     '
                     SortColPtr = 3
                     TextTest = cp.Visit.GetText("cmSortColumn", "")
@@ -340,56 +333,56 @@ Namespace Views
                     ' Headers
                     '
                     CPtr = 0
-                    ColCaption(CPtr) = "<INPUT TYPE=CheckBox OnClick=""CheckInputs('DelCheck',this.checked);"">"
+                    ColCaption(CPtr) = "<input type=checkbox id=""cmSelectAll"">"
                     'ColCaption(CPtr) = "<INPUT TYPE=CheckBox OnClick=""CheckInputs('DelCheck',this.checked);""><BR><img src=/cclib/images/spacer.gif width=10 height=1>"
                     ColAlign(CPtr) = "center"
-                    ColWidth(CPtr) = "10"
+                    ColWidth(CPtr) = "30px"
                     ColSortable(CPtr) = False
                     CPtr = CPtr + 1
+                    ''
+                    'If IsAdmin Then
+                    '    ColCaption(CPtr) = "Edit"
+                    '    'ColCaption(CPtr) = "Edit<BR><img src=/cclib/images/spacer.gif width=10 height=1>"
+                    '    ColAlign(CPtr) = "center"
+                    '    ColWidth(CPtr) = "10"
+                    '    ColSortable(CPtr) = False
+                    '    CPtr = CPtr + 1
+                    'End If
                     '
-                    If IsAdmin Then
-                        ColCaption(CPtr) = "Edit"
-                        'ColCaption(CPtr) = "Edit<BR><img src=/cclib/images/spacer.gif width=10 height=1>"
-                        ColAlign(CPtr) = "center"
-                        ColWidth(CPtr) = "10"
-                        ColSortable(CPtr) = False
-                        CPtr = CPtr + 1
-                    End If
+                    'ColCaption(CPtr) = "Details"
+                    ''ColCaption(CPtr) = "Details<BR><img src=/cclib/images/spacer.gif width=10 height=1>"
+                    'ColAlign(CPtr) = "left"
+                    'ColWidth(CPtr) = "10"
+                    'ColSortable(CPtr) = False
+                    'CPtr = CPtr + 1
                     '
-                    ColCaption(CPtr) = "Details"
-                    'ColCaption(CPtr) = "Details<BR><img src=/cclib/images/spacer.gif width=10 height=1>"
-                    ColAlign(CPtr) = "center"
-                    ColWidth(CPtr) = "10"
-                    ColSortable(CPtr) = False
-                    CPtr = CPtr + 1
-                    '
-                    ColCaption(CPtr) = "Full Name"
+                    ColCaption(CPtr) = "Name"
                     ColAlign(CPtr) = "left"
-                    ColWidth(CPtr) = "20%"
+                    ColWidth(CPtr) = ""
                     ColSortable(CPtr) = True
                     DefaultSortColumnPtr = CPtr
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By ccMembers.Name"
                     End If
                     CPtr = CPtr + 1
-                    '
-                    ColCaption(CPtr) = "First Name"
-                    ColAlign(CPtr) = "left"
-                    ColWidth(CPtr) = "20%"
-                    ColSortable(CPtr) = True
-                    If CPtr = SortColPtr Then
-                        SQLOrderBy = "Order By ccMembers.FirstName"
-                    End If
-                    CPtr = CPtr + 1
-                    '
-                    ColCaption(CPtr) = "Last Name"
-                    ColAlign(CPtr) = "left"
-                    ColWidth(CPtr) = "20%"
-                    ColSortable(CPtr) = True
-                    If CPtr = SortColPtr Then
-                        SQLOrderBy = "Order By ccMembers.LastName"
-                    End If
-                    CPtr = CPtr + 1
+                    ''
+                    'ColCaption(CPtr) = "First Name"
+                    'ColAlign(CPtr) = "left"
+                    'ColWidth(CPtr) = "20%"
+                    'ColSortable(CPtr) = True
+                    'If CPtr = SortColPtr Then
+                    '    SQLOrderBy = "Order By ccMembers.FirstName"
+                    'End If
+                    'CPtr = CPtr + 1
+                    ''
+                    'ColCaption(CPtr) = "Last Name"
+                    'ColAlign(CPtr) = "left"
+                    'ColWidth(CPtr) = "20%"
+                    'ColSortable(CPtr) = True
+                    'If CPtr = SortColPtr Then
+                    '    SQLOrderBy = "Order By ccMembers.LastName"
+                    'End If
+                    'CPtr = CPtr + 1
                     '
                     ColCaption(CPtr) = "Organization"
                     ColAlign(CPtr) = "left"
@@ -403,7 +396,7 @@ Namespace Views
                     ColCaption(CPtr) = "Phone"
                     'ColCaption(CPtr) = "Phone<BR><img src=/cclib/images/spacer.gif width=100 height=1>"
                     ColAlign(CPtr) = "left"
-                    ColWidth(CPtr) = "100"
+                    ColWidth(CPtr) = "20%"
                     ColSortable(CPtr) = True
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By ccMembers.Phone"
@@ -413,39 +406,39 @@ Namespace Views
                     ColCaption(CPtr) = "email"
                     'ColCaption(CPtr) = "email<BR><img src=/cclib/images/spacer.gif width=150 height=1>"
                     ColAlign(CPtr) = "left"
-                    ColWidth(CPtr) = "150"
+                    ColWidth(CPtr) = "20%"
                     ColSortable(CPtr) = True
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By ccMembers.Email"
                     End If
                     CPtr = CPtr + 1
                     '
-                    ColCaption(CPtr) = "Visits"
-                    'ColCaption(CPtr) = "Visits<BR><img src=/cclib/images/spacer.gif width=40 height=1>"
-                    ColAlign(CPtr) = "right"
-                    ColWidth(CPtr) = "40"
-                    ColSortable(CPtr) = True
-                    If CPtr = SortColPtr Then
-                        SQLOrderBy = "Order By ccMembers.Visits"
-                    End If
-                    CPtr = CPtr + 1
+                    'ColCaption(CPtr) = "Visits"
+                    ''ColCaption(CPtr) = "Visits<BR><img src=/cclib/images/spacer.gif width=40 height=1>"
+                    'ColAlign(CPtr) = "right"
+                    'ColWidth(CPtr) = "40"
+                    'ColSortable(CPtr) = True
+                    'If CPtr = SortColPtr Then
+                    '    SQLOrderBy = "Order By ccMembers.Visits"
+                    'End If
+                    'CPtr = CPtr + 1
+                    ''
+                    'ColCaption(CPtr) = "Last Visit"
+                    ''ColCaption(CPtr) = "Last Visit<BR><img src=/cclib/images/spacer.gif width=80 height=1>"
+                    'ColAlign(CPtr) = "right"
+                    'ColWidth(CPtr) = "80"
+                    'ColSortable(CPtr) = True
+                    'If CPtr = SortColPtr Then
+                    '    SQLOrderBy = "Order By ccMembers.LastVisit"
+                    'End If
+                    'CPtr = CPtr + 1
                     '
-                    ColCaption(CPtr) = "Last Visit"
-                    'ColCaption(CPtr) = "Last Visit<BR><img src=/cclib/images/spacer.gif width=80 height=1>"
-                    ColAlign(CPtr) = "right"
-                    ColWidth(CPtr) = "80"
-                    ColSortable(CPtr) = True
-                    If CPtr = SortColPtr Then
-                        SQLOrderBy = "Order By ccMembers.LastVisit"
-                    End If
-                    CPtr = CPtr + 1
-                    '
-                    ColCaption(CPtr) = "&nbsp;"
-                    'ColCaption(CPtr) = "&nbsp;<BR><img src=/cclib/images/spacer.gif width=1 height=1>"
-                    ColAlign(CPtr) = "right"
-                    ColWidth(CPtr) = "1"
-                    ColSortable(CPtr) = False
-                    CPtr = CPtr + 1
+                    'ColCaption(CPtr) = "&nbsp;"
+                    ''ColCaption(CPtr) = "&nbsp;<BR><img src=/cclib/images/spacer.gif width=1 height=1>"
+                    'ColAlign(CPtr) = "right"
+                    'ColWidth(CPtr) = "1"
+                    'ColSortable(CPtr) = False
+                    'CPtr = CPtr + 1
                     '
                     ' SubTab Menu
                     '
@@ -497,48 +490,41 @@ Namespace Views
                             CCID = CS.GetInteger("ContentControlID")
                             VisitCount = CS.GetInteger("Visits")
                             VisitsCell = CStr(VisitCount)
-                            CheckBox = cp.Html.CheckBox("M." & RowPointer, , "DelCheck")
+                            CheckBox = cp.Html.CheckBox("M." & RowPointer, False, "cmSelect")
                             Cells(RowPointer, CPtr) = CheckBox & cp.Html.Hidden("MID." & RowPointer, RecordID.ToString())
                             CPtr = CPtr + 1
                             RecordName = CS.GetText("name")
                             If RecordName = "" Then
-                                RecordName = DefaultName
-                            End If
-                            If RecordName = DefaultName Then
                                 RecordName = DefaultName & "&nbsp;" & RecordID
                             End If
-                            If IsAdmin Then
-                                '
-                                ' Edit row
-                                '
-                                Cells(RowPointer, CPtr) = "<a href=""" & AdminURL & "?cid=" & CCID & "&af=4&id=" & RecordID & """><img src=/cclib/images/IconContentEdit.gif width=18 height=22 border=0></a>"
-                                CPtr = CPtr + 1
-                            End If
-                            Cells(RowPointer, CPtr) = "<a href=""?" & RQS & "&" & RequestNameMemberID & "=" & RecordID & """><img border=0 src=""/cclib/images/icons/ContactDetails.gif"" width=16 height=16></a>"
+                            '
+                            'Cells(RowPointer, CPtr) = "" _
+                            '    & "<!-- <a href=""" & AdminURL & "?cid=" & CCID & "&af=4&id=" & RecordID & """><img src=/cclib/images/IconContentEdit.gif width=18 height=22 border=0></a> -->" _
+                            '    & "<a href=""?" & RQS & "&" & RequestNameMemberID & "=" & RecordID & """><img border=0 src=""/cclib/images/icons/ContactDetails.gif"" width=16 height=16></a>"
+                            'CPtr = CPtr + 1
+                            Cells(RowPointer, CPtr) = "<a href=""?" & RQS & "&" & RequestNameMemberID & "=" & RecordID & """>" & RecordName & "</a>"
                             CPtr = CPtr + 1
-                            Cells(RowPointer, CPtr) = RecordName
-                            CPtr = CPtr + 1
-                            Cells(RowPointer, CPtr) = CS.GetText("FirstName")
-                            CPtr = CPtr + 1
-                            Cells(RowPointer, CPtr) = CS.GetText("LastName")
-                            CPtr = CPtr + 1
+                            'Cells(RowPointer, CPtr) = CS.GetText("FirstName")
+                            'CPtr = CPtr + 1
+                            'Cells(RowPointer, CPtr) = CS.GetText("LastName")
+                            'CPtr = CPtr + 1
                             Cells(RowPointer, CPtr) = CS.GetText("OrgName")
                             CPtr = CPtr + 1
                             Cells(RowPointer, CPtr) = CS.GetText("phone")
                             CPtr = CPtr + 1
                             Cells(RowPointer, CPtr) = CS.GetText("email")
                             CPtr = CPtr + 1
-                            Cells(RowPointer, CPtr) = VisitsCell
-                            CPtr = CPtr + 1
-                            LastVisit = CS.GetDate("LastVisit").Date
-                            If LastVisit = Date.MinValue Then
-                                Cells(RowPointer, CPtr) = "&nbsp;"
-                            Else
-                                Cells(RowPointer, CPtr) = LastVisit.ToString()
-                            End If
-                            CPtr = CPtr + 1
-                            Cells(RowPointer, CPtr) = "&nbsp;"
-                            CPtr = CPtr + 1
+                            'Cells(RowPointer, CPtr) = VisitsCell
+                            'CPtr = CPtr + 1
+                            'LastVisit = CS.GetDate("LastVisit").Date
+                            'If LastVisit = Date.MinValue Then
+                            '    Cells(RowPointer, CPtr) = "&nbsp;"
+                            'Else
+                            '    Cells(RowPointer, CPtr) = LastVisit.ToString()
+                            'End If
+                            'CPtr = CPtr + 1
+                            'Cells(RowPointer, CPtr) = "&nbsp;"
+                            'CPtr = CPtr + 1
                             RowPointer = RowPointer + 1
                             Call CS.GoNext()
                         Loop
