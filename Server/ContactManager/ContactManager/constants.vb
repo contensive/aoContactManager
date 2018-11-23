@@ -15,10 +15,6 @@ Public Module constants
     Public Const RequestNamePageNumber As String = "pageNumber"
     Public Const RequestNameDetailSubtab As String = "subtab"
     '
-    Public Const FormDetails As Integer = 1
-    Public Const FormList As Integer = 2
-    Public Const FormSearch As Integer = 3
-    '
     Public Const ButtonSearch As String = "Search"
     Public Const ButtonCancel As String = "Cancel"
     Public Const ButtonCancelAll As String = "Cancel All"
@@ -117,39 +113,43 @@ Public Module constants
         tokenRequired = 499
         internalServerError = 500
     End Enum
+    '
+    '========================================================================
+    ''' <summary>
+    ''' possible formid values
+    ''' </summary>
+    Public Enum FormIdEnum
+        FormUnknown = 0
+        FormDetails = 1
+        FormList = 2
+        FormSearch = 3
+    End Enum
+    '
+    '========================================================================
+    ''' <summary>
+    ''' options for the group tool
+    ''' </summary>
+    Public Enum GroupToolActionEnum
+        nop = 0
+        AddToGroup = 1
+        RemoveFromGroup = 2
+        ExportGroup = 3
+        SetGroupEmail = 4
+    End Enum
+    '
+    '========================================================================
+    ''' <summary>
+    ''' meta data for each row of the people filter
+    ''' </summary>
+    Public Class FieldMeta
+        Public FieldName As String
+        Public FieldCaption As String
+        Public fieldId As Integer
+        Public fieldType As Integer
+        Public currentValue As String
+        Public FieldOperator As Integer
+        Public FieldLookupContentName As String
+        Public FieldLookupList As String
+        Public fieldEditTab As String
+    End Class
 End Module
-
-'
-' During VB6 code upgrade, these are typical find-replace strings
-'   - convert all routines to try-catch and not on error goto
-'
-'
-'
-' -- VB6 typical Replace List
-'                   Find                                            Replace                                             Manual
-'                   -----------------------------------------       --------------------------------------------------  ------------------------------
-'                   a-s long                                        as integer
-'                   a-s variant                                     as object
-'                   k-maIndent(                                     nop(                                                -
-'                   k-maEncodeInteger(Main.GetSiteProperty(         cp.site.getInteger(                                 - leaves double ending "))"
-'                   M-ain.GetFormInputText(                         cp.html.inputText(
-'                   M-ain.GetStreamText(                            cp.doc.getText(
-'                   M-ain.GetStreamNumber(                          cp.doc.getNumber(
-'                   M-ain.GetStreamBoolean(                         cp.doc.getBoolean(
-'                   M-ain.GetStreamDate(                            cp.doc.getDate(
-'                   D-OMDocument60                                  xml.xmlDocument
-'                   M-ain.GetFormButton(                            cp.html.button("button",
-'                   cp.utils.encodeBoolean                                cp.utils.encodeBoolean
-'                   cp.utils.encodeInteger                                cp.utils.encodeInteger
-'                   cp.utils.encodeNumber                                 cp.utils.encodeNumber
-'                   cp.utils.encodeDate                                   cp.utils.encodeDate
-'                   cp.user.isAdmin                                    cp.user.isAdmin
-'                   cp.html.adminHint(                        cp.html.adminHint(
-'                                                                   
-'
-'                   Manual issues
-'                   ------------------------------------------------------------------------
-'                   optionString = optionString & "&name=value"     cp.doc.setProperty( name, value )
-'                   Main.GetFormStart() ... Main.GetFormEnd()       cp.html.form( ... )
-'                   Err. -> convert to try+catch
-

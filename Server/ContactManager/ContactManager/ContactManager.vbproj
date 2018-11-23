@@ -89,7 +89,11 @@
     <Compile Include="constants.vb" />
     <Compile Include="Controllers\applicationController.vb" />
     <Compile Include="Controllers\cacheController.vb" />
+    <Compile Include="Controllers\DetailFormController.vb" />
+    <Compile Include="Controllers\ListFormController.vb" />
+    <Compile Include="Controllers\SearchFormClass.vb" />
     <Compile Include="Models\Domain\baseDomainModel.vb" />
+    <Compile Include="Models\Domain\UserPropertiesModel.vb" />
     <Compile Include="Models\Domain\_blankModel.vb" />
     <Compile Include="Models\Db\LibraryFolderModel.vb" />
     <Compile Include="Models\Db\LibraryFolderRuleModel.vb" />
@@ -243,7 +247,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)*.dll" "C:\Program Files (x86)\kma\Contensive\Addons"
+    <PostBuildEvent>copy "$(TargetDir)*.dll" "C:\inetpub\contactmanager50\private\addons\contact manager_51a67cb6ea94497c896a979a851be3db\20181122103518\"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

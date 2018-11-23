@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="windows-1252"?>
-<Collection name="Contact Manager" guid="{51a67cb6-ea94-497c-896a-979a851be3db}" system="No" updatable="No" blockNavigatorNode="No">
+<Collection name="Contact Manager" guid="{51a67cb6-ea94-497c-896a-979a851be3db}" system="No" updatable="Yes" blockNavigatorNode="No">
 	<HelpLink></HelpLink>
 	<Help></Help>
 	<Addon name="Contact Manager" guid="{57602963-CA46-41EB-8053-8ACB8C47C2F2}" type="Tool">
@@ -16,10 +16,13 @@
 		<InIframe>No</InIframe>
 		<BlockEditTools>Yes</BlockEditTools>
 		<FormXML></FormXML>
+		<IncludeAddon name="Bootstrap Javascript" guid="{0D898BA4-E5FC-474A-82A3-E52DEFC307E5}"/>
+		<IncludeAddon name="Bootstrap Popper" guid="{78AB19D3-A148-4189-BE0F-C0029A8A0042}"/>
+		<IncludeAddon name="Bootstrap Styles" guid="{EF1FD66C-D62F-4BD2-BF07-38F47996EBB3}"/>
 		<IsInline>No</IsInline>
 		<JavascriptInHead></JavascriptInHead>
 		<javascriptForceHead>No</javascriptForceHead>
-		<JSHeadScriptSrc></JSHeadScriptSrc>
+		<JSHeadScriptSrc><![CDATA[/ContactManager/ContactManager.js]]></JSHeadScriptSrc>
 		<!-- deprecated --><JSBodyScriptSrc></JSBodyScriptSrc>
 		<!-- deprecated --><JavascriptBodyEnd></JavascriptBodyEnd>
 		<!-- deprecated --><JavascriptOnLoad></JavascriptOnLoad>
@@ -38,40 +41,9 @@
 		<OtherHeadTags></OtherHeadTags>
 		<PageTitle></PageTitle>
 		<RemoteAssetLink></RemoteAssetLink>
-		<Styles><![CDATA[.contactManager * {
-	font-size:11px;
-	color: #000;
-	text-align: left;
-	font-weight: normal;
-	font-family: verdana,arial,sans-serif;	
-	}
-.contactManager .cmRowTab {
-	font-weight: bold;
-	font-size: 13px;	
-	border-bottom: 1px solid #444;
-	padding: 20px 0 3px 0;
-	}
-.contactManager .cmRowCaption {
-	WHITE-SPACE:nowrap;
-	TEXT-ALIGN:right;
-	FONT-WEIGHT:normal;
-	height: 35px;
-	vertical-align: middle;
-	}
-.contactManager .cmRowField {
-	border-top:1px solid #FFFDF1;
-	border-bottom:1px solid #DAD4B2;
-	Background-color:#fff8d0;
-	vertical-align: middle;
-	}
-.contactManager .cmRowField table td {
-	vertical-align: middle;
-	}
-.contactManager .cmBody {
-	BACKGROUND-COLOR:#E8EEF7;
-	padding:5px;
-	}
-]]></Styles>
+		<Styles></Styles>
 		<Scripting Language="VBScript" EntryPoint="" Timeout="5000"/>
 	</Addon>
+	<Resource name="ContactManager.css" type="www" path="/ContactManager" />
+	<Resource name="ContactManager.js" type="www" path="/ContactManager" />
 </Collection>

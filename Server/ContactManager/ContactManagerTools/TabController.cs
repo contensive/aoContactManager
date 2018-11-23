@@ -83,7 +83,7 @@ namespace Contensive.Addons.ContactManager {
                         //
                         // -- tab
                         string item = HtmlController.a(tab.caption, "#" + containerHtmlId, tabHtmlClass).Replace(">", " data-toggle=\"tab\">");
-                        tabList.Add(cp.Html.li(item, "nav-item"));
+                        tabList.Add(cp.Html.li(item, "", "nav-item"));
                         //
                         // -- container
                         string wrappedLiveBody = HtmlController.div(tab.LiveBody, tab.ContainerClass + "Body");

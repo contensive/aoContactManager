@@ -27,7 +27,7 @@ Namespace Views
             Try
                 '
                 ' -- initialize application. If authentication needed and not login page, pass true
-                Using ae As New Controllers.applicationController(CP, False)
+                Using ae As New Controllers.ApplicationController(CP, False)
                     '
                     ' -- your code
                     result = "Hello World"

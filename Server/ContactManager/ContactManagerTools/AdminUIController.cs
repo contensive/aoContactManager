@@ -33,51 +33,29 @@ namespace Contensive.Addons.ContactManager {
         public static string getReport_CellHeader(CPBaseClass cp, int ColumnPtr, string Title, string Width, string Align, string ClassStyle, string RefreshQueryString, SortingStateEnum SortingState) {
             string result = "";
             try {
-                string Style = null;
-                string Copy = null;
-                string QS = null;
-                int WidthTest = 0;
-                //
-                if (string.IsNullOrEmpty(Title)) {
-                    Copy = "&nbsp;";
-                } else {
-                    Copy = Title.Replace( " ", "&nbsp;");
-                }
-                Style = "VERTICAL-ALIGN:bottom;";
-                if (string.IsNullOrEmpty(Align)) {
-                } else {
-                    Style = Style + "TEXT-ALIGN:" + Align + ";";
-                }
-                //
+                if (string.IsNullOrEmpty(Title)) Title = "&nbsp;";
+                string Style = "VERTICAL-ALIGN:bottom;";
+                if (!string.IsNullOrEmpty(Align)) Style += "TEXT-ALIGN:" + Align + ";";
+                if (!string.IsNullOrEmpty(Width)) Style = Style + "width:" + Width + ";";
+                string QS = "";
                 switch (SortingState) {
                     case SortingStateEnum.SortableNotSet:
                         QS = GenericController.modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetAZ).ToString(), true);
                         QS = GenericController.modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
-                        Copy = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Copy + "</a>";
+                        Title = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Title + "</a>";
                         break;
                     case SortingStateEnum.SortableSetza:
                         QS = GenericController.modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetAZ).ToString(), true);
                         QS = GenericController.modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
-                        Copy = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Copy + "<img src=\"/ccLib/images/arrowup.gif\" width=8 height=8 border=0></a>";
+                        Title = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Title + "<img src=\"/ccLib/images/arrowup.gif\" width=8 height=8 border=0></a>";
                         break;
                     case SortingStateEnum.SortableSetAZ:
                         QS = GenericController.modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetza).ToString(), true);
                         QS = GenericController.modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
-                        Copy = "<a href=\"?" + QS + "\" title=\"Sort Z-A\" class=\"ccAdminListCaption\">" + Copy + "<img src=\"/ccLib/images/arrowdown.gif\" width=8 height=8 border=0></a>";
+                        Title = "<a href=\"?" + QS + "\" title=\"Sort Z-A\" class=\"ccAdminListCaption\">" + Title + "<img src=\"/ccLib/images/arrowdown.gif\" width=8 height=8 border=0></a>";
                         break;
                 }
-                //
-                if (!string.IsNullOrEmpty(Width)) {
-                    Style = Style + "width:" + Width + ";";
-                    //WidthTest = GenericController.encodeInteger(Width.ToLower().Replace("px", ""));
-                    //if (WidthTest != 0) {
-                    //    Style = Style + "width:" + WidthTest + "px;";
-                    //    Copy += "<img alt=\"space\" src=\"/ccLib/images/spacer.gif\" width=\"" + WidthTest + "\" height=1 border=0>";
-                    //    //Copy = Copy & "<br><img alt=""space"" src=""/ccLib/images/spacer.gif"" width=""" & WidthTest & """ height=1 border=0>"
-                    //} else {
-                    //}
-                }
-                result = "\r\n<td style=\"" + Style + "\" class=\"" + ClassStyle + "\">" + Copy + "</td>";
+                result = "<td style=\"" + Style + "\" class=\"" + ClassStyle + "\">" + Title + "</td>";
             } catch (Exception ) {
                 throw;
             }

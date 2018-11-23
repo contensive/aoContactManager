@@ -19,10 +19,10 @@ Namespace Views
             Try
                 '
                 ' -- initialize application. If authentication needed and not login page, pass true
-                Using ae As New Controllers.applicationController(cp, True)
+                Using ae As New Controllers.ApplicationController(cp, True)
                     '
                     ' -- optionally add a timer to report how long this section took
-                    ae.packageProfileList.Add(New Controllers.applicationController.packageProfileClass() With {.name = "applicationControllerConstructor", .time = sw.ElapsedMilliseconds})
+                    ae.packageProfileList.Add(New Controllers.ApplicationController.packageProfileClass() With {.name = "applicationControllerConstructor", .time = sw.ElapsedMilliseconds})
                     If ae.packageErrorList.Count = 0 Then
                         '
                         ' -- get a request variable from either a querystring or a post
@@ -39,14 +39,14 @@ Namespace Views
                         Dim personList As List(Of Models.PeopleModel) = Models.PeopleModel.createList(cp, "")
                         '
                         ' -- add sample data to a node
-                        ae.packageNodeList.Add(New Controllers.applicationController.packageNodeClass With {
+                        ae.packageNodeList.Add(New Controllers.ApplicationController.packageNodeClass With {
                             .dataFor = "nameOfThisDataForRemoteToRecognize",
                             .data = personList
                         })
                     End If
                     '
                     ' -- optionally add a timer to report how long this section took
-                    ae.packageProfileList.Add(New Controllers.applicationController.packageProfileClass() With {.name = "getProjectListNoDetailsClass", .time = sw.ElapsedMilliseconds})
+                    ae.packageProfileList.Add(New Controllers.ApplicationController.packageProfileClass() With {.name = "getProjectListNoDetailsClass", .time = sw.ElapsedMilliseconds})
                     result = ae.getSerializedPackage()
                 End Using
             Catch ex As Exception

@@ -11,7 +11,7 @@ Namespace Controllers
     ''' 
     ''' </summary>
     ''' <remarks></remarks>
-    Public Class applicationController
+    Public Class ApplicationController
         Implements IDisposable
         '
         ' privates passed in, do not dispose
@@ -41,6 +41,36 @@ Namespace Controllers
         '
         '====================================================================================================
         ''' <summary>
+        ''' status message displayed on get-form
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property StatusMessage As String
+            Get
+                Return _StatusMessage
+            End Get
+            Set(value As String)
+                _StatusMessage = value
+            End Set
+        End Property
+        Private _StatusMessage As String = ""
+        '
+        '====================================================================================================
+        ''' <summary>
+        ''' application's user properties
+        ''' </summary>
+        ''' <returns></returns>
+        Public ReadOnly Property userProperties As Contensive.Addons.ContactManager.Models.Domain.UserPropertiesModel
+            Get
+                If (_userProperties Is Nothing) Then
+                    _userProperties = New Models.Domain.UserPropertiesModel(cp)
+                End If
+                Return _userProperties
+            End Get
+        End Property
+        Private _userProperties As Models.Domain.UserPropertiesModel = Nothing
+        '
+        '====================================================================================================
+        ''' <summary>
         ''' instance of performanceCloud cache
         ''' </summary>
         ''' <value></value>
@@ -54,7 +84,7 @@ Namespace Controllers
                 Return _pcache
             End Get
         End Property
-        Private _pcache As cacheController
+        Private _pcache As cacheController = Nothing
         '
         '====================================================================================================
         ''' <summary>
