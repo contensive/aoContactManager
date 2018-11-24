@@ -42,6 +42,7 @@
 		<PageTitle></PageTitle>
 		<RemoteAssetLink></RemoteAssetLink>
 		<Styles></Styles>
+		<styleslinkhref><![CDATA[/ContactManager/ContactManager.css]]></styleslinkhref>
 		<Scripting Language="VBScript" EntryPoint="" Timeout="5000"/>
 	</Addon>
 	<Resource name="ContactManager.css" type="www" path="/ContactManager" />
