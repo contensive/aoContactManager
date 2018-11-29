@@ -72,6 +72,9 @@
     <Reference Include="Enyim.Caching, Version=2.16.0.0, Culture=neutral, PublicKeyToken=cec98615db04012e, processorArchitecture=MSIL">
       <HintPath>..\packages\EnyimMemcached.2.16.0\lib\net35\Enyim.Caching.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Web.Extensions" />
@@ -92,6 +95,8 @@
     <Compile Include="Controllers\DetailFormController.vb" />
     <Compile Include="Controllers\ListFormController.vb" />
     <Compile Include="Controllers\SearchFormClass.vb" />
+    <Compile Include="Models\Db\DownloadModel.vb" />
+    <Compile Include="Models\Db\TaskModel.vb" />
     <Compile Include="Models\Domain\baseDomainModel.vb" />
     <Compile Include="Models\Domain\UserPropertiesModel.vb" />
     <Compile Include="Models\Domain\_blankModel.vb" />
@@ -247,7 +252,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)*.dll" "C:\inetpub\contactmanager50\private\addons\contact manager_51a67cb6ea94497c896a979a851be3db\20181122103518\"
+    <PostBuildEvent>copy "$(TargetDir)*.dll" "C:\ProgramData\Contensive\AddonAssemblyBypass\"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

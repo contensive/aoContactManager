@@ -4,8 +4,10 @@ Option Strict On
 
 Public Module constants
     '
-    ' -- sample
+    '
     Public Const Version As Integer = 1
+    '
+    Public Const addonGuidExportCSV As String = "{5C25F35D-A2A8-4791-B510-B1FFE0645004}"
     '
     ' -- sample
     Public Const rnInputValue As String = "inputValue"
