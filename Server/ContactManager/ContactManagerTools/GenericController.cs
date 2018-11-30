@@ -7,9 +7,9 @@ using System.Net;
 using System.Web;
 using System.Text;
 using Contensive.BaseClasses;
-using static Contensive.Addons.ContactManager.Constants;
+using static Contensive.Addons.ContactManagerTools.Constants;
 
-namespace Contensive.Addons.ContactManager {
+namespace Contensive.Addons.ContactManagerTools.Controllers {
     //
     //====================================================================================================
     /// <summary>
@@ -2394,6 +2394,33 @@ namespace Contensive.Addons.ContactManager {
             } else {
                 return (source1.ToLower() == source2.ToLower());
             }
+        }
+        //
+        //========================================================================
+        /// <summary>
+        /// return the standard tablename fieldname path -- always lowercase.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public static string getVirtualTableFieldUnixPath(string tableName, string fieldName) {
+            string result = tableName + "/" + fieldName + "/";
+            return result.ToLower().Replace(" ", "_").Replace(".", "_");
+        }
+        //
+        //========================================================================
+        //
+        public static string getVirtualTableFieldIdUnixPath(string tableName, string fieldName, int recordID) {
+            return getVirtualTableFieldUnixPath(tableName, fieldName) + recordID.ToString().PadLeft(12, '0') + "/";
+        }
+        //
+        //========================================================================
+        /// <summary>
+        /// Create a filename for the Virtual Directory for a fieldtypeFile or Image (an uploaded file)
+        /// </summary>
+        public static string getVirtualRecordUnixPathFilename(string tableName, string fieldName, int recordID, string originalFilename) {
+            string iOriginalFilename = originalFilename.Replace(" ", "_").Replace(".", "_");
+            return getVirtualTableFieldIdUnixPath(tableName, fieldName, recordID) + originalFilename;
         }
 
     }

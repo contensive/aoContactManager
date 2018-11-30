@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Contensive.Addons.ContactManager.GenericController;
-using static Contensive.Addons.ContactManager.Constants;
-using static Contensive.Addons.ContactManager.HtmlController;
+using static Contensive.Addons.ContactManagerTools.Controllers.GenericController;
+using static Contensive.Addons.ContactManagerTools.Constants;
+using static Contensive.Addons.ContactManagerTools.HtmlController;
 
-namespace Contensive.Addons.ContactManager {
+namespace Contensive.Addons.ContactManagerTools {
     public class AdminUIController {
         public  enum SortingStateEnum {
             NotSortable = 0,
@@ -40,18 +40,18 @@ namespace Contensive.Addons.ContactManager {
                 string QS = "";
                 switch (SortingState) {
                     case SortingStateEnum.SortableNotSet:
-                        QS = GenericController.modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetAZ).ToString(), true);
-                        QS = GenericController.modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
+                        QS = modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetAZ).ToString(), true);
+                        QS = modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
                         Title = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Title + "</a>";
                         break;
                     case SortingStateEnum.SortableSetza:
-                        QS = GenericController.modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetAZ).ToString(), true);
-                        QS = GenericController.modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
+                        QS = modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetAZ).ToString(), true);
+                        QS = modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
                         Title = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Title + "<img src=\"/ccLib/images/arrowup.gif\" width=8 height=8 border=0></a>";
                         break;
                     case SortingStateEnum.SortableSetAZ:
-                        QS = GenericController.modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetza).ToString(), true);
-                        QS = GenericController.modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
+                        QS = modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetza).ToString(), true);
+                        QS = modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
                         Title = "<a href=\"?" + QS + "\" title=\"Sort Z-A\" class=\"ccAdminListCaption\">" + Title + "<img src=\"/ccLib/images/arrowdown.gif\" width=8 height=8 border=0></a>";
                         break;
                 }
@@ -74,7 +74,7 @@ namespace Contensive.Addons.ContactManager {
             string VarText;
             //
             VarText = cp.Doc.GetText("ColPtr");
-            tempGetReportSortColumnPtr = GenericController.encodeInteger(VarText);
+            tempGetReportSortColumnPtr = encodeInteger(VarText);
             if ((tempGetReportSortColumnPtr == 0) && (VarText != "0")) {
                 tempGetReportSortColumnPtr = DefaultSortColumnPtr;
             }
@@ -98,7 +98,7 @@ namespace Contensive.Addons.ContactManager {
             string VarText;
             //
             VarText = cp.Doc.GetText("ColPtr");
-            if ((GenericController.encodeInteger(VarText) != 0) || (VarText == "0")) {
+            if ((encodeInteger(VarText) != 0) || (VarText == "0")) {
                 //
                 // A valid ColPtr was found
                 //
@@ -239,9 +239,9 @@ namespace Contensive.Addons.ContactManager {
                 // ----- Post Table copy
                 //
                 if ((DataRowCount / (double)ReportPageSize) != Math.Floor((DataRowCount / (double)ReportPageSize))) {
-                    PageCount = GenericController.encodeInteger((DataRowCount / (double)ReportPageSize) + 0.5);
+                    PageCount = encodeInteger((DataRowCount / (double)ReportPageSize) + 0.5);
                 } else {
-                    PageCount = GenericController.encodeInteger(DataRowCount / (double)ReportPageSize);
+                    PageCount = encodeInteger(DataRowCount / (double)ReportPageSize);
                 }
                 if (PageCount > 1) {
                     result += "<br>Page " + ReportPageNumber + " (Row " + (RowBAse) + " of " + DataRowCount + ")";
@@ -255,27 +255,27 @@ namespace Contensive.Addons.ContactManager {
                         result += "<br>Go to Page ";
                         if (PagePointer != 1) {
                             WorkingQS = cp.Doc.RefreshQueryString;
-                            WorkingQS = GenericController.modifyQueryString(WorkingQS, "GotoPage", "1", true);
+                            WorkingQS = modifyQueryString(WorkingQS, "GotoPage", "1", true);
                             result += "<a href=\"" + "?" + WorkingQS + "\">1</A>...&nbsp;";
                         }
                         WorkingQS = cp.Doc.RefreshQueryString;
-                        WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
+                        WorkingQS = modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
                         while ((PagePointer <= PageCount) && (LinkCount < 20)) {
                             if (PagePointer == ReportPageNumber) {
                                 result += PagePointer + "&nbsp;";
                             } else {
-                                WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
+                                WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
                                 result += "<a href=\"" + "?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
                             }
                             PagePointer = PagePointer + 1;
                             LinkCount = LinkCount + 1;
                         }
                         if (PagePointer < PageCount) {
-                            WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
+                            WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
                             result += "...<a href=\"" + "?" + WorkingQS + "\">" + PageCount + "</A>&nbsp;";
                         }
                         if (ReportPageNumber < PageCount) {
-                            WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
+                            WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
                             result += "...<a href=\"" + "?" + WorkingQS + "\">next</A>&nbsp;";
                         }
                         result += "<br>&nbsp;";
@@ -427,9 +427,9 @@ namespace Contensive.Addons.ContactManager {
         //        // ----- Post Table copy
         //        //
         //        if ((DataRowCount / (double)ReportPageSize) != Math.Floor((DataRowCount / (double)ReportPageSize))) {
-        //            PageCount = GenericController.encodeInteger((DataRowCount / (double)ReportPageSize) + 0.5);
+        //            PageCount = encodeInteger((DataRowCount / (double)ReportPageSize) + 0.5);
         //        } else {
-        //            PageCount = GenericController.encodeInteger(DataRowCount / (double)ReportPageSize);
+        //            PageCount = encodeInteger(DataRowCount / (double)ReportPageSize);
         //        }
         //        if (PageCount > 1) {
         //            result += "<br>Page " + ReportPageNumber + " (Row " + (RowBAse) + " of " + DataRowCount + ")";
@@ -443,27 +443,27 @@ namespace Contensive.Addons.ContactManager {
         //                result += "<br>Go to Page ";
         //                if (PagePointer != 1) {
         //                    WorkingQS = cp.Doc.RefreshQueryString;
-        //                    WorkingQS = GenericController.modifyQueryString(WorkingQS, "GotoPage", "1", true);
+        //                    WorkingQS = modifyQueryString(WorkingQS, "GotoPage", "1", true);
         //                    result += "<a href=\"" + "?" + WorkingQS + "\">1</A>...&nbsp;";
         //                }
         //                WorkingQS = cp.Doc.RefreshQueryString;
-        //                WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
+        //                WorkingQS = modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
         //                while ((PagePointer <= PageCount) && (LinkCount < 20)) {
         //                    if (PagePointer == ReportPageNumber) {
         //                        result += PagePointer + "&nbsp;";
         //                    } else {
-        //                        WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
+        //                        WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
         //                        result += "<a href=\"" + "?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
         //                    }
         //                    PagePointer = PagePointer + 1;
         //                    LinkCount = LinkCount + 1;
         //                }
         //                if (PagePointer < PageCount) {
-        //                    WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
+        //                    WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
         //                    result += "...<a href=\"" + "?" + WorkingQS + "\">" + PageCount + "</A>&nbsp;";
         //                }
         //                if (ReportPageNumber < PageCount) {
-        //                    WorkingQS = GenericController.modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
+        //                    WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
         //                    result += "...<a href=\"" + "?" + WorkingQS + "\">next</A>&nbsp;";
         //                }
         //                result += "<br>&nbsp;";

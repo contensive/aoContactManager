@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using Contensive.BaseClasses;
-using static Contensive.Addons.ContactManager.Constants;
+using static Contensive.Addons.ContactManagerTools.Constants;
 
-namespace Contensive.Addons.ContactManager {
+namespace Contensive.Addons.ContactManagerTools {
     public class HtmlController {
         //
         internal const string ButtonDelete = "  Delete  ";

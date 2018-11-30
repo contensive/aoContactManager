@@ -3,16 +3,17 @@ Option Strict On
 Option Explicit On
 
 Imports Contensive.BaseClasses
-Imports Contensive.Addons.ContactManager.GenericController
+Imports Contensive.Addons.ContactManagerTools.Controllers.GenericController
 Imports System.Text
 Imports System.Linq
+Imports Contensive.Addons.ContactManagerTools
 
 Namespace Views
     Public Class DetailFormController
         '
         '=================================================================================
         '
-        Public Shared Function ProcessRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As Contensive.Addons.ContactManager.Views.CMngrClass.RequestClass) As FormIdEnum
+        Public Shared Function ProcessRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As Views.CMngrClass.RequestClass) As FormIdEnum
             request.DetailMemberID = cp.Doc.GetInteger(RequestNameMemberID)
             Select Case request.Button
                 Case ButtonCancel

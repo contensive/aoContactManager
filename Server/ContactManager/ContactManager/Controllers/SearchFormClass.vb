@@ -3,7 +3,7 @@ Option Strict On
 Option Explicit On
 
 Imports Contensive.BaseClasses
-Imports Contensive.Addons.ContactManager.GenericController
+Imports Contensive.Addons.ContactManagerTools.Controllers.GenericController
 Imports System.Text
 Imports System.Linq
 
@@ -15,7 +15,7 @@ Namespace Views
             Dim result As String = ""
             Try
                 Dim SubTab As Integer
-                Dim Nav As New TabController()
+                Dim Nav As New ContactManagerTools.TabController()
                 Dim Header As String
                 Dim Content As String
                 Dim ButtonList As String
@@ -55,7 +55,7 @@ Namespace Views
                             & Nav.getTabs(cp) _
                             & cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormSearch).ToString()) _
                             & ""
-                    result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
+                    result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
                 End If
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
@@ -261,8 +261,8 @@ Namespace Views
                     '
                     result = result & "<table border=0 width=100% cellspacing=0 cellpadding=4>"
                     result = result & "<tr>"
-                    result = result & AdminUIController.kmaStartTableCell("120", 1, RowEven, "right") & "<img src=/cclib/images/spacer.gif width=120 height=1></TD>"
-                    result = result & AdminUIController.kmaStartTableCell("99%", 1, RowEven, "left") & "<img src=/cclib/images/spacer.gif width=1 height=1></TD>"
+                    result = result & ContactManagerTools.AdminUIController.kmaStartTableCell("120", 1, RowEven, "right") & "<img src=/cclib/images/spacer.gif width=120 height=1></TD>"
+                    result = result & ContactManagerTools.AdminUIController.kmaStartTableCell("99%", 1, RowEven, "left") & "<img src=/cclib/images/spacer.gif width=1 height=1></TD>"
                     result = result & "</tr>"
                     '
                     RowPointer = 0

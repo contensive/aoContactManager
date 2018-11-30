@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Contensive.Addons.ContactManager {
+namespace Contensive.Addons.ContactManagerTools {
     public static class Constants {
         //
         // code version for this build. This is saved in a site property and checked in the housekeeping event - checkDataVersion

@@ -59,7 +59,7 @@ Namespace Controllers
         ''' application's user properties
         ''' </summary>
         ''' <returns></returns>
-        Public ReadOnly Property userProperties As Contensive.Addons.ContactManager.Models.Domain.UserPropertiesModel
+        Public ReadOnly Property userProperties As Models.Domain.UserPropertiesModel
             Get
                 If (_userProperties Is Nothing) Then
                     _userProperties = New Models.Domain.UserPropertiesModel(cp)

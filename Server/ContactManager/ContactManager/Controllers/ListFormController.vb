@@ -3,9 +3,10 @@ Option Strict On
 Option Explicit On
 
 Imports Contensive.BaseClasses
-Imports Contensive.Addons.ContactManager.GenericController
+Imports Contensive.Addons.ContactManagerTools.GenericController
 Imports System.Text
 Imports System.Linq
+Imports Contensive.Addons.ContactManagerTools.Models
 Imports Contensive.Addons.ContactManager.Models
 
 Namespace Views
@@ -13,7 +14,7 @@ Namespace Views
         '
         '=================================================================================
         '
-        Public Shared Function ProcessRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As ContactManager.Views.CMngrClass.RequestClass) As FormIdEnum
+        Public Shared Function ProcessRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As Views.CMngrClass.RequestClass) As FormIdEnum
             Dim resultFormId As FormIdEnum = FormIdEnum.FormList
             Try
                 '
@@ -215,6 +216,7 @@ Namespace Views
                                                 download.name = "Contact Manager Export by " & cp.User.Name & ", " & Now.ToString()
                                                 download.requestedBy = cp.User.Id
                                                 download.dateRequested = Now()
+                                                download.filename = ContactManagerTools.Controllers.GenericController.getVirtualRecordUnixPathFilename(DownloadModel.contentTableName, "filename", download.id, "export.csv")
                                                 download.save(cp)
                                                 '
                                                 Dim args As New Dictionary(Of String, String)
@@ -368,11 +370,11 @@ Namespace Views
                     If TextTest <> "" Then
                         SortColPtr = cp.Utils.EncodeInteger(TextTest)
                     End If
-                    SortColPtr = AdminUIController.getReportSortColumnPtr(cp, SortColPtr)
+                    SortColPtr = ContactManagerTools.AdminUIController.getReportSortColumnPtr(cp, SortColPtr)
                     If CStr(SortColPtr) <> TextTest Then
                         Call cp.Visit.SetProperty("cmSortColumn", CStr(SortColPtr))
                     End If
-                    If AdminUIController.getReportSortType(cp) = 2 Then
+                    If ContactManagerTools.AdminUIController.getReportSortType(cp) = 2 Then
                         SQLOrderDir = " Desc"
                     End If
                     '
@@ -631,16 +633,16 @@ Namespace Views
                 & SearchCaption & "<BR>" & DataRowCount & " Matches found" _
                 & ae.StatusMessage _
                 & vbCrLf
-                    Header = HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 20)
+                    Header = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 20)
                     Header = "<div class=ccPanelBackground style=""padding:10px;"">" & Header & "</div>"
                     ButtonList = ButtonApply & "," & ButtonNewSearch
-                    Body = AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
+                    Body = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
                     'Body = Controllers.AdminUIController.GetReport2(Main, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, DefaultSortColumnPtr)
                     'Body = "<div style=""Background-color:white;"">" & Body & "</div>"
                     '
                     ' Assemble page
                     '
-                    result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; List People", ButtonList, "", True, True, Description, "", 0, Body)
+                    result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; List People", ButtonList, "", True, True, Description, "", 0, Body)
                     '
                 End If
             Catch ex As Exception

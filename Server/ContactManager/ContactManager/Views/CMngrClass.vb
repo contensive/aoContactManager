@@ -3,7 +3,7 @@ Option Strict On
 Option Explicit On
 
 Imports Contensive.BaseClasses
-Imports Contensive.Addons.ContactManager.GenericController
+Imports Contensive.Addons.ContactManagerTools.GenericController
 Imports System.Text
 Imports System.Linq
 
@@ -63,7 +63,7 @@ Namespace Views
                     ' wrapper for style strength
                     result = "" _
                     & vbCrLf & vbTab & "<div class=""contactManager"">" _
-                    & nop(result) _
+                    & result _
                     & vbCrLf & vbTab & "</div>" _
                     & ""
                 End Using

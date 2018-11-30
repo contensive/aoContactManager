@@ -22,6 +22,7 @@ Namespace Models
         ' -- instance properties
         Public Property requestedBy As Integer
         Public Property dateRequested As Date
+        Public Property filename As String
         '
         '====================================================================================================
         Public Overloads Shared Function add(cp As CPBaseClass) As DownloadModel
