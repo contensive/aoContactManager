@@ -252,7 +252,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)*.dll" "C:\ProgramData\Contensive\AddonAssemblyBypass\"
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
