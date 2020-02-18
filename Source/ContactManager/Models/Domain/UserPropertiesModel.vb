@@ -32,13 +32,12 @@ Namespace Models.Domain
         ''' <returns></returns>
         Public Property contactSearchCriteria As String
             Get
-                Return cp.User.GetText(nameContactSearchCriteria)
+                Return cp.TempFiles.Read("contactManager\user-contact-search-criteria.txt")
             End Get
             Set(value As String)
-                cp.User.SetProperty(nameContactSearchCriteria, value)
+                cp.TempFiles.Save("contactManager\user-contact-search-criteria.txt", value)
             End Set
         End Property
-        Private Const nameContactSearchCriteria As String = "ContactSearchCriteria"
         '
         '====================================================================================================
         ''' <summary>
@@ -47,13 +46,59 @@ Namespace Models.Domain
         ''' <returns></returns>
         Public Property contactGroupCriteria As String
             Get
-                Return cp.User.GetText(nameContactGroupCriteria)
+                Return cp.TempFiles.Read("contactManager\user-group-search-criteria.txt")
             End Get
             Set(value As String)
-                cp.User.SetProperty(nameContactGroupCriteria, value)
+                cp.TempFiles.Save("contactManager\user-group-search-criteria.txt", value)
             End Set
         End Property
-        Private Const nameContactGroupCriteria As String = "ContactGroupCriteria"
+        '
+        '====================================================================================================
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property selectSubTab As Integer
+            Get
+                Return cp.User.GetInteger(nameSelectSubTab)
+            End Get
+            Set(value As Integer)
+                cp.User.SetProperty(nameSelectSubTab, value)
+            End Set
+        End Property
+        Private Const nameSelectSubTab As String = "SelectSubTab"
+        '
+        '====================================================================================================
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property subTab As Integer
+            Get
+                Return cp.User.GetInteger(nameSubTab, 1)
+            End Get
+            Set(value As Integer)
+                cp.User.SetProperty(nameSubTab, value)
+            End Set
+        End Property
+        Private Const nameSubTab As String = "SubTab"
+        '
+        '====================================================================================================
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property ContactContentID As Integer
+            Get
+                Return cp.User.GetInteger(nameContactContentID, cp.Content.GetID("people"))
+            End Get
+            Set(value As Integer)
+                cp.User.SetProperty(nameContactContentID, value)
+            End Set
+        End Property
+        Private Const nameContactContentID As String = "ContactContentID"
+        '
+        '
         '
     End Class
 End Namespace

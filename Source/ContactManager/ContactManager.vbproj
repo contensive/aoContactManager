@@ -149,7 +149,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Db\" />
-    <Folder Include="vb6\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ContactManagerTools\ContactManagerTools.csproj">

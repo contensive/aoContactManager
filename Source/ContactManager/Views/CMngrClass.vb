@@ -32,7 +32,7 @@ Namespace Views
                         Select Case request.FormID
                             Case FormIdEnum.FormSearch
                                 '
-                                request.FormID = SearchFormClass.ProcessRequest(cp, ae, request)
+                                request.FormID = SearchFormClass.processRequest(cp, ae, request)
                             Case FormIdEnum.FormList
                                 '
                                 request.FormID = ListFormController.ProcessRequest(cp, ae, request)
@@ -47,13 +47,13 @@ Namespace Views
                     Select Case request.FormID
                         Case FormIdEnum.FormDetails
                             '
-                            result = result & DetailFormController.getResponse(cp, request.DetailMemberID)
+                            result &= DetailFormController.getResponse(cp, ae, request.DetailMemberID)
                         Case FormIdEnum.FormList
                             '
-                            result = result & ListFormController.getResponse(cp, ae, IsAdminPath)
+                            result &= ListFormController.getResponse(cp, ae, IsAdminPath)
                         Case Else
                             '
-                            result = result & SearchFormClass.getResponse(cp, IsAdminPath)
+                            result &= SearchFormClass.getResponse(cp, ae, IsAdminPath)
                     End Select
                     result = "<div class=ccbodyadmin>" & result & "</div>"
                     '

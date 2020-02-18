@@ -3,11 +3,6 @@ Option Strict On
 Option Explicit On
 
 Imports Contensive.BaseClasses
-Imports Contensive.Addons.ContactManagerTools.GenericController
-Imports System.Text
-Imports System.Linq
-Imports Contensive.Addons.ContactManagerTools.Models
-Imports Contensive.Addons.ContactManager.Models
 Imports Contensive.Models.Db
 
 Namespace Views
@@ -162,10 +157,10 @@ Namespace Views
                                     If Not Aborttask Then
                                         Dim SQLFrom As String = "ccMembers"
                                         Dim JoinTableCnt As Integer = 0
-                                        If cp.User.GetText("ContactGroupCriteria", "") <> "" Then
+                                        If ae.userProperties.contactGroupCriteria <> "" Then
                                             SQLFrom = "(" & SQLFrom & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )"
                                         End If
-                                        Dim ContentID As Integer = cp.User.GetInteger("ContactContentID", cp.Content.GetID("people").ToString())
+                                        Dim ContentID As Integer = ae.userProperties.ContactContentID
                                         Dim cs As CPCSBaseClass = cp.CSNew()
                                         cs.Open("Content Fields", "ContentID=" & ContentID, "EditSortPriority", True, "Name,Caption,Type,LookupContentID")
                                         Dim SelectList As String = ""
@@ -291,82 +286,43 @@ Namespace Views
         Public Shared Function getResponse(cp As CPBaseClass, ae As Controllers.ApplicationController, IsAdminPath As Boolean) As String
             Dim result As String = ""
             Try
-                Dim SQLOrderDir As String = ""
-                Dim SQLOrderBy As String = ""
-                Dim LastVisit As Date
-                Dim CheckBox As String
-                Dim CS As CPCSBaseClass = cp.CSNew()
-                Dim RecordName As String
-                Dim RecordID As Integer
-                Dim SQL As String
-                Dim RQS As String
-                Dim Criteria As String
-                Dim PageSize As Integer
-                Dim PageNumber As Integer
-                Dim TopCount As Integer
-                Dim RowPointer As Integer
-                Dim DataRowCount As Integer
-                Dim PreTableCopy As String
-                Dim PostTableCopy As String
-                Dim CPtr As Integer
-                Dim ColCaption() As String
-                Dim ColAlign() As String
-                Dim ColWidth() As String
-                Dim Cells(,) As String
-                Dim ColSortable() As Boolean
-                Dim DefaultSortColumnPtr As Integer
-                Dim GroupID As Integer
-                Dim GroupToolAction As Integer
-                Dim ActionPanel As String
-                Dim VisitsCell As String
-                Dim VisitCount As Integer
-                Dim AdminURL As String
-                Dim CCID As Integer
-                Dim DefaultName As String
-                Dim SearchCaption As String
-                Dim BlankPanel As String
-                Dim RowPageSize As String
-                Dim RowGroups As String
-                Dim ButtonList As String
-                Dim Header As String
-                Dim Body As String
-                Dim Description As String
-                Dim IsAdmin As Boolean
-                Dim SortColPtr As Integer
-                Dim TextTest As String
                 '
                 If True Then
-                    IsAdmin = cp.User.IsAdmin()
-                    RQS = cp.Doc.RefreshQueryString
-                    TextTest = cp.Doc.GetText(RequestNamePageSize)
+                    Dim IsAdmin As Boolean = cp.User.IsAdmin()
+                    Dim TextTest As String = cp.Doc.GetText(RequestNamePageSize)
+                    Dim PageSize As Integer
                     If TextTest = "" Then
                         PageSize = cp.Utils.EncodeInteger(cp.Visit.GetText("cmPageSize", "50"))
                     Else
                         PageSize = cp.Utils.EncodeInteger(TextTest)
                         Call cp.Visit.SetProperty("cmPageSize", CStr(PageSize))
                     End If
-                    'PageSize = cp.doc.getInteger(RequestNamePageSize)
                     If PageSize = 0 Then
                         PageSize = 50
                     End If
-                    PageNumber = cp.Doc.GetInteger(RequestNamePageNumber)
+                    Dim PageNumber As Integer = cp.Doc.GetInteger(RequestNamePageNumber)
                     If PageNumber = 0 Then
                         PageNumber = 1
                     End If
-                    GroupID = cp.Doc.GetInteger("GroupID")
-                    GroupToolAction = cp.Doc.GetInteger("GroupToolAction")
-                    AdminURL = cp.Site.GetText("adminurl")
+                    Dim GroupID As Integer = cp.Doc.GetInteger("GroupID")
+                    Dim GroupToolAction As Integer = cp.Doc.GetInteger("GroupToolAction")
+                    Dim AdminURL As String = cp.Site.GetText("adminurl")
                     Dim ColumnMax As Integer = 5
                     '
-                    TopCount = PageNumber * PageSize
+                    Dim TopCount As Integer = PageNumber * PageSize
+                    Dim ColCaption() As String
                     '
                     ReDim ColCaption(ColumnMax)
+                    Dim ColAlign() As String
                     ReDim ColAlign(ColumnMax)
+                    Dim ColWidth() As String
                     ReDim ColWidth(ColumnMax)
+                    Dim ColSortable() As Boolean
                     ReDim ColSortable(ColumnMax)
+                    Dim Cells(,) As String
                     ReDim Cells(PageSize, ColumnMax)
                     '
-                    SortColPtr = 3
+                    Dim SortColPtr As Integer = 3
                     TextTest = cp.Visit.GetText("cmSortColumn", "")
                     If TextTest <> "" Then
                         SortColPtr = cp.Utils.EncodeInteger(TextTest)
@@ -375,63 +331,31 @@ Namespace Views
                     If CStr(SortColPtr) <> TextTest Then
                         Call cp.Visit.SetProperty("cmSortColumn", CStr(SortColPtr))
                     End If
+                    Dim SQLOrderDir As String = ""
                     If ContactManagerTools.AdminUIController.getReportSortType(cp) = 2 Then
                         SQLOrderDir = " Desc"
                     End If
                     '
                     ' Headers
                     '
-                    CPtr = 0
+                    Dim CPtr As Integer = 0
                     ColCaption(CPtr) = "<input type=checkbox id=""cmSelectAll"">"
                     'ColCaption(CPtr) = "<INPUT TYPE=CheckBox OnClick=""CheckInputs('DelCheck',this.checked);""><BR><img src=/cclib/images/spacer.gif width=10 height=1>"
                     ColAlign(CPtr) = "center"
                     ColWidth(CPtr) = "30px"
                     ColSortable(CPtr) = False
                     CPtr = CPtr + 1
-                    ''
-                    'If IsAdmin Then
-                    '    ColCaption(CPtr) = "Edit"
-                    '    'ColCaption(CPtr) = "Edit<BR><img src=/cclib/images/spacer.gif width=10 height=1>"
-                    '    ColAlign(CPtr) = "center"
-                    '    ColWidth(CPtr) = "10"
-                    '    ColSortable(CPtr) = False
-                    '    CPtr = CPtr + 1
-                    'End If
-                    '
-                    'ColCaption(CPtr) = "Details"
-                    ''ColCaption(CPtr) = "Details<BR><img src=/cclib/images/spacer.gif width=10 height=1>"
-                    'ColAlign(CPtr) = "left"
-                    'ColWidth(CPtr) = "10"
-                    'ColSortable(CPtr) = False
-                    'CPtr = CPtr + 1
                     '
                     ColCaption(CPtr) = "Name"
                     ColAlign(CPtr) = "left"
                     ColWidth(CPtr) = ""
                     ColSortable(CPtr) = True
-                    DefaultSortColumnPtr = CPtr
+                    Dim DefaultSortColumnPtr As Integer = CPtr
+                    Dim SQLOrderBy As String = ""
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By ccMembers.Name"
                     End If
                     CPtr = CPtr + 1
-                    ''
-                    'ColCaption(CPtr) = "First Name"
-                    'ColAlign(CPtr) = "left"
-                    'ColWidth(CPtr) = "20%"
-                    'ColSortable(CPtr) = True
-                    'If CPtr = SortColPtr Then
-                    '    SQLOrderBy = "Order By ccMembers.FirstName"
-                    'End If
-                    'CPtr = CPtr + 1
-                    ''
-                    'ColCaption(CPtr) = "Last Name"
-                    'ColAlign(CPtr) = "left"
-                    'ColWidth(CPtr) = "20%"
-                    'ColSortable(CPtr) = True
-                    'If CPtr = SortColPtr Then
-                    '    SQLOrderBy = "Order By ccMembers.LastName"
-                    'End If
-                    'CPtr = CPtr + 1
                     '
                     ColCaption(CPtr) = "Organization"
                     ColAlign(CPtr) = "left"
@@ -461,43 +385,19 @@ Namespace Views
                         SQLOrderBy = "Order By ccMembers.Email"
                     End If
                     CPtr = CPtr + 1
-                    '
-                    'ColCaption(CPtr) = "Visits"
-                    ''ColCaption(CPtr) = "Visits<BR><img src=/cclib/images/spacer.gif width=40 height=1>"
-                    'ColAlign(CPtr) = "right"
-                    'ColWidth(CPtr) = "40"
-                    'ColSortable(CPtr) = True
-                    'If CPtr = SortColPtr Then
-                    '    SQLOrderBy = "Order By ccMembers.Visits"
-                    'End If
-                    'CPtr = CPtr + 1
-                    ''
-                    'ColCaption(CPtr) = "Last Visit"
-                    ''ColCaption(CPtr) = "Last Visit<BR><img src=/cclib/images/spacer.gif width=80 height=1>"
-                    'ColAlign(CPtr) = "right"
-                    'ColWidth(CPtr) = "80"
-                    'ColSortable(CPtr) = True
-                    'If CPtr = SortColPtr Then
-                    '    SQLOrderBy = "Order By ccMembers.LastVisit"
-                    'End If
-                    'CPtr = CPtr + 1
-                    '
-                    'ColCaption(CPtr) = "&nbsp;"
-                    ''ColCaption(CPtr) = "&nbsp;<BR><img src=/cclib/images/spacer.gif width=1 height=1>"
-                    'ColAlign(CPtr) = "right"
-                    'ColWidth(CPtr) = "1"
-                    'ColSortable(CPtr) = False
-                    'CPtr = CPtr + 1
+                    Dim RQS As String = cp.Doc.RefreshQueryString
                     '
                     ' SubTab Menu
                     '
                     RQS = cp.Doc.RefreshQueryString
                     RQS = cp.Utils.ModifyQueryString(RQS, "tab", "", False)
+                    Dim Criteria As String
+                    Dim SearchCaption As String
                     Call BuildSearch(cp, ae, Criteria, SearchCaption)
                     '
                     ' purge duplicate in ccMemberRules
                     '
-                    SQL = "Delete from ccMemberRules where ID in (" _
+                    Dim SQL As String = "Delete from ccMemberRules where ID in (" _
                         & " SELECT DISTINCT B.ID" _
                         & " FROM ccMemberRules A, ccMemberRules B" _
                         & " WHERE (((A.MemberID)=[B].[MemberID]) AND ((A.GroupID)=[B].[GroupID]) AND ((A.ID)<[B].[ID]))" _
@@ -511,7 +411,9 @@ Namespace Views
                         & " from ccMembers" _
                         & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID" _
                         & Criteria
+                    Dim CS As CPCSBaseClass = cp.CSNew()
                     CS.OpenSQL(SQL)
+                    Dim DataRowCount As Integer
                     If CS.OK() Then
                         DataRowCount = CS.GetRowCount()
                     End If
@@ -519,7 +421,7 @@ Namespace Views
                     '
                     '   Get Data
                     '
-                    DefaultName = "Guest"
+                    Dim DefaultName As String = "Guest"
                     SQL = "Select distinct Top " & TopCount & " ccMembers.name,ccMembers.FirstName,ccMembers.LastName,ccMembers.ID, ccMembers.ContentControlID, ccMembers.Visits, ccMembers.LastVisit, ccMembers.Phone, ccMembers.Email,Organizations.Name as OrgName" _
                         & " from ((ccMembers" _
                         & " left join organizations on Organizations.ID=ccMembers.OrganizationID)" _
@@ -527,7 +429,7 @@ Namespace Views
                         & Criteria _
                         & SQLOrderBy & SQLOrderDir
                     CS.OpenSQL(SQL, "", PageSize, PageNumber)
-                    RowPointer = 0
+                    Dim RowPointer As Integer = 0
                     If Not CS.OK() Then
                         Cells(0, 3) = "This search returned no results"
                         RowPointer = 1
@@ -535,116 +437,85 @@ Namespace Views
                         'DataRowCount = Main.GetCSRowCount(CS)
                         Do While CS.OK() And (RowPointer < PageSize)
                             CPtr = 0
-                            RecordID = CS.GetInteger("ID")
-                            CCID = CS.GetInteger("ContentControlID")
-                            VisitCount = CS.GetInteger("Visits")
-                            VisitsCell = CStr(VisitCount)
-                            CheckBox = cp.Html.CheckBox("M." & RowPointer, False, "cmSelect")
+                            Dim RecordID As Integer = CS.GetInteger("ID")
+                            Dim CheckBox As String = cp.Html.CheckBox("M." & RowPointer, False, "cmSelect")
                             Cells(RowPointer, CPtr) = CheckBox & cp.Html.Hidden("MID." & RowPointer, RecordID.ToString())
                             CPtr = CPtr + 1
-                            RecordName = CS.GetText("name")
+                            Dim RecordName As String = CS.GetText("name")
                             If RecordName = "" Then
                                 RecordName = DefaultName & "&nbsp;" & RecordID
                             End If
-                            '
-                            'Cells(RowPointer, CPtr) = "" _
-                            '    & "<!-- <a href=""" & AdminURL & "?cid=" & CCID & "&af=4&id=" & RecordID & """><img src=/cclib/images/IconContentEdit.gif width=18 height=22 border=0></a> -->" _
-                            '    & "<a href=""?" & RQS & "&" & RequestNameMemberID & "=" & RecordID & """><img border=0 src=""/cclib/images/icons/ContactDetails.gif"" width=16 height=16></a>"
-                            'CPtr = CPtr + 1
                             Cells(RowPointer, CPtr) = "<a href=""?" & RQS & "&" & RequestNameMemberID & "=" & RecordID & """>" & RecordName & "</a>"
                             CPtr = CPtr + 1
-                            'Cells(RowPointer, CPtr) = CS.GetText("FirstName")
-                            'CPtr = CPtr + 1
-                            'Cells(RowPointer, CPtr) = CS.GetText("LastName")
-                            'CPtr = CPtr + 1
                             Cells(RowPointer, CPtr) = CS.GetText("OrgName")
                             CPtr = CPtr + 1
                             Cells(RowPointer, CPtr) = CS.GetText("phone")
                             CPtr = CPtr + 1
                             Cells(RowPointer, CPtr) = CS.GetText("email")
                             CPtr = CPtr + 1
-                            'Cells(RowPointer, CPtr) = VisitsCell
-                            'CPtr = CPtr + 1
-                            'LastVisit = CS.GetDate("LastVisit").Date
-                            'If LastVisit = Date.MinValue Then
-                            '    Cells(RowPointer, CPtr) = "&nbsp;"
-                            'Else
-                            '    Cells(RowPointer, CPtr) = LastVisit.ToString()
-                            'End If
-                            'CPtr = CPtr + 1
-                            'Cells(RowPointer, CPtr) = "&nbsp;"
-                            'CPtr = CPtr + 1
                             RowPointer = RowPointer + 1
                             Call CS.GoNext()
                         Loop
                     End If
                     Call CS.Close()
-                    result = result & cp.Html.Hidden("M.Count", RowPointer.ToString())
-                    '
-                    BlankPanel = "<div class=""cmBody ccPanel3DReverse"">x</div>"
-                    'Main.GetPanel("x", "ccPanelInput", "ccPanelShadow", "ccPanelHilite")
-                    RowPageSize = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500>" _
-                & "<TR>" _
-                & "<TD class=APLeft>Rows Per Page</TD>" _
-                & "<TD class=apright>" & cp.Html.InputText(RequestNamePageSize, PageSize.ToString(), "1", "10") & "</TD>" _
-                & "</TR>" _
-                & "</Table>"
-                    RowGroups = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500><TR>" _
-                & "<TD valign=top class=APLeft>Actions</TD>" _
-                & "<TD class=APRight>" _
-                    & "" _
-                    & "<div class=APRight>Source Contacts</div>" _
-                    & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolSelect", 0, 0) & "&nbsp;Only those selected on this page</div>" _
-                    & "<div class=APRightIndent><input type=radio name=GroupToolSelect value=1>&nbsp;Everyone in search results</div>" _
-                    & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
-                    & "<div class=APRight>Perform Action</div>" _
-                    & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 0, 0) & " No Action</div>" _
-                    & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 1, 0) & " Add to Target Group</div>" _
-                    & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 2, 0) & " Remove from Target Group</div>" _
-                    & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 3, 0) & " Export comma delimited file</div>" _
-                    & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 4, 0) & " Set Allow Group Email</div>" _
-                    & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
-                    & "<div class=APRight style=""padding-bottom:6px;"">Target Group</div>" _
-                    & "<div class=APRightIndent>" & cp.Html.SelectContent("GroupID", GroupID.ToString(), "Groups") & "</div>" _
-                    & "</TD>" _
-                & "</TR></Table>"
-
-                    '& "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolSelect", 1, 0) & " Everyone in search results</div>" _
-
-                    ActionPanel = "" _
-                & vbCrLf _
-                & "<style>" _
-                & ".APLeft{width:100px;text-align:left;}" _
-                & ".APRight{text-align:left;}" _
-                & ".APRightIndent{text-align:left;padding-left:10px;}" _
-                & "</style>" _
-                & vbCrLf _
-                & Replace(BlankPanel, "x", RowPageSize) _
-                & Replace(BlankPanel, "x", RowGroups) _
-                & ""
-                    PostTableCopy = "" _
-                & "<div class=""cmBody ccPanel3D"">" & ActionPanel & "</div>" _
-                & cp.Html.Hidden("M.Count", RowPointer.ToString()) _
-                & cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormList).ToString()) _
-                & ""
+                    result &= cp.Html.Hidden("M.Count", RowPointer.ToString())
+                    Dim BlankPanel As String = "<div class=""cmBody ccPanel3DReverse"">x</div>"
+                    Dim RowPageSize As String = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500>" _
+                        & "<TR>" _
+                        & "<td class=""p-1"" class=APLeft>Rows Per Page</TD>" _
+                        & "<td class=""p-1"" class=apright>" & cp.Html.InputText(RequestNamePageSize, PageSize.ToString(), "1", "10") & "</TD>" _
+                        & "</TR>" _
+                        & "</Table>"
+                    Dim RowGroups As String = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500><TR>" _
+                        & "<td class=""p-1"" valign=top class=APLeft>Actions</TD>" _
+                        & "<td class=""p-1"" class=APRight>" _
+                            & "" _
+                            & "<div class=APRight>Source Contacts</div>" _
+                            & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolSelect", 0, 0) & "&nbsp;Only those selected on this page</div>" _
+                            & "<div class=APRightIndent><input type=radio name=GroupToolSelect value=1>&nbsp;Everyone in search results</div>" _
+                            & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
+                            & "<div class=APRight>Perform Action</div>" _
+                            & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 0, 0) & " No Action</div>" _
+                            & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 1, 0) & " Add to Target Group</div>" _
+                            & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 2, 0) & " Remove from Target Group</div>" _
+                            & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 3, 0) & " Export comma delimited file</div>" _
+                            & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 4, 0) & " Set Allow Group Email</div>" _
+                            & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
+                            & "<div class=APRight style=""padding-bottom:6px;"">Target Group</div>" _
+                            & "<div class=APRightIndent>" & cp.Html.SelectContent("GroupID", GroupID.ToString(), "Groups") & "</div>" _
+                            & "</TD>" _
+                        & "</TR></Table>"
+                    Dim ActionPanel As String = "" _
+                        & vbCrLf _
+                        & "<style>" _
+                        & ".APLeft{width:100px;text-align:left;}" _
+                        & ".APRight{text-align:left;}" _
+                        & ".APRightIndent{text-align:left;padding-left:10px;}" _
+                        & "</style>" _
+                        & vbCrLf _
+                        & Replace(BlankPanel, "x", RowPageSize) _
+                        & Replace(BlankPanel, "x", RowGroups) _
+                        & ""
+                    Dim PostTableCopy As String = "" _
+                        & "<div class=""cmBody ccPanel3D"">" & ActionPanel & "</div>" _
+                        & cp.Html.Hidden("M.Count", RowPointer.ToString()) _
+                        & cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormList).ToString()) _
+                        & ""
                     '
                     ' Header
                     '
-                    Description = Description _
-                & SearchCaption & "<BR>" & DataRowCount & " Matches found" _
-                & ae.StatusMessage _
-                & vbCrLf
-                    Header = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 20)
+                    Dim Description As String = "" _
+                        & SearchCaption & "<BR>" & DataRowCount & " Matches found" _
+                        & ae.StatusMessage _
+                        & vbCrLf
+                    Dim Header As String = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 20)
                     Header = "<div class=ccPanelBackground style=""padding:10px;"">" & Header & "</div>"
-                    ButtonList = ButtonApply & "," & ButtonNewSearch
-                    Body = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
-                    'Body = Controllers.AdminUIController.GetReport2(Main, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, DefaultSortColumnPtr)
-                    'Body = "<div style=""Background-color:white;"">" & Body & "</div>"
+                    Dim ButtonList As String = ButtonApply & "," & ButtonNewSearch
+                    Dim PreTableCopy As String
+                    Dim Body As String = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
                     '
                     ' Assemble page
-                    '
                     result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; List People", ButtonList, "", True, True, Description, "", 0, Body)
-                    '
                 End If
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
@@ -678,7 +549,7 @@ Namespace Views
                 Dim FieldContentLookupName As String
                 Dim hint As String
                 '
-                ContactContentID = cp.Content.GetID("people") ' cp.Utils.EncodeInteger(cp.User.GetText("ContactContentID", cp.Content.GetID("people").ToString()))
+                ContactContentID = cp.Content.GetID("people")
                 ContactGroupCriteria = ae.userProperties.contactGroupCriteria
                 ContactSearchCriteria = ae.userProperties.contactSearchCriteria
                 return_SearchCaption = ""
@@ -798,18 +669,23 @@ Namespace Views
                                         ' boolean
                                         '
                                         hint = hint & ",200"
-                                        If cp.Utils.EncodeBoolean(FieldParms(2)) Then
+                                        If (FieldParms(2).Equals("1")) Then
                                             '
-                                            ' search for true
+                                            ' 1 = search for true
                                             '
-                                            return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & "<>0)AND(ccMembers." & FieldParms(0) & " is not null)"
-                                        Else
+                                            return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & ">0)"
+                                            return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " is true"
+                                        ElseIf (FieldParms(2).Equals("2")) Then
                                             '
-                                            ' search for false
+                                            ' 2 = search for false
                                             '
                                             return_Criteria = return_Criteria & "AND((ccMembers." & FieldParms(0) & "=0)or(ccMembers." & FieldParms(0) & " is null))"
+                                            return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " is false"
+                                        Else
+                                            '
+                                            ' 0 = ignore
+                                            '
                                         End If
-                                        return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " is " & cp.Utils.EncodeBoolean(FieldParms(2))
                                     Case Else
                                 End Select
                             End If

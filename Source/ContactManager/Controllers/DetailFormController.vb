@@ -19,10 +19,10 @@ Namespace Views
                 Case ButtonCancel
                     Return FormIdEnum.FormList
                 Case ButtonSave
-                    Call SaveContactFromStream(cp, request.DetailMemberID)
+                    Call savePersonFromStream(cp, request.DetailMemberID)
                     Return FormIdEnum.FormDetails
                 Case ButtonOK
-                    Call SaveContactFromStream(cp, request.DetailMemberID)
+                    Call savePersonFromStream(cp, request.DetailMemberID)
                     Return FormIdEnum.FormList
                 Case ButtonNewSearch
                     Return FormIdEnum.FormSearch
@@ -32,58 +32,59 @@ Namespace Views
         '
         '=================================================================================
         '
-        Public Shared Function GetEventsTab() As String
+        Public Shared Function getEventsTab() As String
             Return "events"
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function getResponse(cp As CPBaseClass, DetailMemberID As Integer) As String
+        Public Shared Function getResponse(cp As CPBaseClass, ae As Controllers.ApplicationController, DetailMemberID As Integer) As String
             Dim result As String = ""
             Try
-                Dim CS As CPCSBaseClass = cp.CSNew()
-                CS.Open("people", "ID=" & DetailMemberID, "", False)
-                Dim MemberName As String = CS.GetText("name")
-                If MemberName = "" Then
-                    MemberName = Trim(CS.GetText("FirstName") & " " & CS.GetText("LastName"))
-                    If MemberName = "" Then
-                        MemberName = "Record " & CS.GetText("ID")
+                Using csPerson As CPCSBaseClass = cp.CSNew()
+                    csPerson.Open("people", "ID=" & DetailMemberID, "", False)
+                    Dim memberName As String = csPerson.GetText("name")
+                    If memberName = "" Then
+                        memberName = Trim(csPerson.GetText("FirstName") & " " & csPerson.GetText("LastName"))
+                        If memberName = "" Then
+                            memberName = "Record " & csPerson.GetText("ID")
+                        End If
                     End If
-                End If
-                '
-                ' Determine current Subtab
-                '
-                Dim SubTab As Integer = cp.Doc.GetInteger(RequestNameDetailSubtab)
-                If SubTab = 0 Then
-                    SubTab = cp.Utils.EncodeInteger(cp.User.GetText(RequestNameDetailSubtab, "1"))
+                    '
+                    ' Determine current Subtab
+                    '
+                    Dim SubTab As Integer = cp.Doc.GetInteger(RequestNameDetailSubtab)
                     If SubTab = 0 Then
-                        SubTab = 1
-                        Call cp.User.SetProperty(RequestNameDetailSubtab, CStr(SubTab))
+                        SubTab = ae.userProperties.subTab
+                        If SubTab = 0 Then
+                            SubTab = 1
+                            ae.userProperties.subTab = SubTab
+                        End If
+                    Else
+                        ae.userProperties.subTab = SubTab
                     End If
-                Else
-                    Call cp.User.SetProperty(RequestNameDetailSubtab, CStr(SubTab))
-                End If
-                Call cp.Doc.AddRefreshQueryString(RequestNameDetailSubtab, SubTab.ToString())
-                '
-                ' SubTab Menu
-                '
-                Call cp.Doc.AddRefreshQueryString("tab", "")
-                Dim ButtonList As String = ButtonCancel & "," & ButtonSave & "," & ButtonOK & "," & ButtonNewSearch
-                Dim Header As String = "<div>" & MemberName & "</div>"
-                Dim Nav As New TabController()
-                '
-                Call Nav.addEntry("Contact", GetFormDetail_TabContact(cp, CS), "ccAdminTab")
-                Call Nav.addEntry("Permissions", GetFormDetail_TabPermissions(cp, CS), "ccAdminTab")
-                Call Nav.addEntry("Notes", GetFormDetail_TabNotes(cp, CS), "ccAdminTab")
-                Call Nav.addEntry("Photos", GetFormDetail_TabPhoto(cp, CS), "ccAdminTab")
-                Call Nav.addEntry("Groups", GetFormDetail_TabGroup(cp, CS), "ccAdminTab")
-                Call CS.Close()
-                '
-                Dim Content As String = Nav.getTabs(cp)
-                Content = Content & cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormDetails).ToString())
-                Content = Content & cp.Html.Hidden(RequestNameMemberID, DetailMemberID.ToString())
-                '
-                result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", 0, Content)
+                    Call cp.Doc.AddRefreshQueryString(RequestNameDetailSubtab, SubTab.ToString())
+                    '
+                    ' SubTab Menu
+                    '
+                    Call cp.Doc.AddRefreshQueryString("tab", "")
+                    Dim ButtonList As String = ButtonCancel & "," & ButtonSave & "," & ButtonOK & "," & ButtonNewSearch
+                    Dim Header As String = "<div>" & memberName & "</div>"
+                    '
+                    Dim Nav As New TabController()
+                    Call Nav.addEntry("Contact", getFormDetail_TabContact(cp, csPerson), "ccAdminTab")
+                    Call Nav.addEntry("Permissions", GetFormDetail_TabPermissions(cp, csPerson), "ccAdminTab")
+                    Call Nav.addEntry("Notes", GetFormDetail_TabNotes(cp, csPerson), "ccAdminTab")
+                    Call Nav.addEntry("Photos", GetFormDetail_TabPhoto(cp, csPerson), "ccAdminTab")
+                    Call Nav.addEntry("Groups", getFormDetail_TabGroup(cp, csPerson), "ccAdminTab")
+                    Call csPerson.Close()
+                    '
+                    Dim Content As String = Nav.getTabs(cp)
+                    Content &= cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormDetails).ToString())
+                    Content &= cp.Html.Hidden(RequestNameMemberID, DetailMemberID.ToString())
+                    '
+                    result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", 0, Content)
+                End Using
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
@@ -92,232 +93,231 @@ Namespace Views
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_TabContact(cp As CPBaseClass, CS As CPCSBaseClass) As String
-            Dim s As String = ""
+        Public Shared Function getFormDetail_TabContact(cp As CPBaseClass, csPerson As CPCSBaseClass) As String
+            Dim result As String = ""
             Try
-                Dim Left As String = ""
-                Dim Right As String
-                Dim Copy As String
+                Dim left As String = ""
+                Dim right As String = ""
                 '
-                If Not CS.OK() Then
+                If Not csPerson.OK() Then
                     '
-                    s = s & "<div>There was a problem retrieving this person's information.</div>"
+                    result &= "<div>There was a problem retrieving this person's information.</div>"
                 Else
                     '
                     ' Left Side
                     '
-                    Left = Left & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
+                    left &= "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
                     & "<TR>" _
-                    & "<TD width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
-                    & "<TD width=350><img src=/cclib/images/spacer.gif width=350 height=1></TD>" _
+                    & "<td width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
+                    & "<td width=350><img src=/cclib/images/spacer.gif width=350 height=1></TD>" _
                     & "</TR>"
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Full Name", "Name", CS.GetText("name"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "First Name", "FirstName", CS.GetText("FirstName"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Last Name", "LastName", CS.GetText("LastName"), False)
-                    Left = Left & GetFormDetail_DividerRow(cp, "Contact")
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Email", "EMAIL", CS.GetText("email"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Phone", "PHONE", CS.GetText("PHONE"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Fax", "Fax", CS.GetText("Fax"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Address", "ADDRESS", CS.GetText("ADDRESS"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Line 2", "ADDRESS2", CS.GetText("ADDRESS2"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "City", "City", CS.GetText("City"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "State", "State", CS.GetText("State"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Zip", "Zip", CS.GetText("Zip"), False)
-                    Left = Left & GetFormDetail_DividerRow(cp, "Company")
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Name", "Company", CS.GetText("Company"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Title", "Title", CS.GetText("Title"), False)
-                    Left = Left & GetFormDetail_DividerRow(cp, "Birthday")
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Day", "BirthdayDay", CS.GetText("BirthdayDay"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Month", "BirthdayMonth", CS.GetText("BirthdayMonth"), False)
-                    Left = Left & GetFormDetail_InputTextRow(cp, "Year", "BirthdayYear", CS.GetText("BirthdayYear"), False)
-                    Left = Left & "</table>"
+                    left &= GetFormDetail_InputTextRow(cp, "Full Name", "Name", csPerson.GetText("name"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "First Name", "FirstName", csPerson.GetText("FirstName"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Last Name", "LastName", csPerson.GetText("LastName"), False)
+                    left &= GetFormDetail_DividerRow(cp, "Contact")
+                    left &= GetFormDetail_InputTextRow(cp, "Email", "EMAIL", csPerson.GetText("email"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Phone", "PHONE", csPerson.GetText("PHONE"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Fax", "Fax", csPerson.GetText("Fax"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Address", "ADDRESS", csPerson.GetText("ADDRESS"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Line 2", "ADDRESS2", csPerson.GetText("ADDRESS2"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "City", "City", csPerson.GetText("City"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "State", "State", csPerson.GetText("State"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Zip", "Zip", csPerson.GetText("Zip"), False)
+                    left &= GetFormDetail_DividerRow(cp, "Company")
+                    left &= GetFormDetail_InputTextRow(cp, "Name", "Company", csPerson.GetText("Company"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Title", "Title", csPerson.GetText("Title"), False)
+                    left &= GetFormDetail_DividerRow(cp, "Birthday")
+                    left &= GetFormDetail_InputTextRow(cp, "Day", "BirthdayDay", csPerson.GetText("BirthdayDay"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Month", "BirthdayMonth", csPerson.GetText("BirthdayMonth"), False)
+                    left &= GetFormDetail_InputTextRow(cp, "Year", "BirthdayYear", csPerson.GetText("BirthdayYear"), False)
+                    left &= "</table>"
                     '
                     ' Right Side
                     '
-                    Copy = cp.Html.InputText("AppendNotes", "", 255)
-                    Copy = Replace(Copy, " cols=""100""", " style=""width:100%;""", , , vbTextCompare)
+                    Dim copy As String = cp.Html.InputText("AppendNotes", "", 255)
+                    copy = Replace(copy, " cols=""100""", " style=""width:100%;""", , , vbTextCompare)
                     '
-                    Right = Right & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
-                    & "<TR>" _
-                    & "<TD width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
-                    & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
-                    & "</TR>"
-                    Right = Right & GetFormDetail_DividerRow(cp, "Add to Notes")
-                    Right = Right & "<TR><TD colspan=2>" & Copy & "</TD></TR>"
-                    Right = Right & "</table>"
+                    right &= "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
+                        & "<TR>" _
+                        & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
+                        & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
+                        & "</TR>"
+                    right &= GetFormDetail_DividerRow(cp, "Add to Notes")
+                    right &= "<TR><td colspan=2>" & copy & "</TD></TR>"
+                    right &= "</table>"
                 End If
                 '
-                s = s & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
-                & "<TR>" _
-                & "<TD width=500 valign=top style=""border-right:1px solid #808080;padding-right:20px;"">" & Left & "</TD>" _
-                & "<TD width=100% valign=top style=""border-left:1px solid #f0f0f0;padding-left:20px;"">" & Right & "</TD>" _
-                & "</TR>" _
-                & "</table>"
-                s = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & s & "</div>"
-                s = s
+                result &= "" _
+                    & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
+                    & "<TR>" _
+                    & "<td width=500 valign=top style=""border-right:1px solid #808080;padding-right:20px;"">" & left & "</TD>" _
+                    & "<td width=100% valign=top style=""border-left:1px solid #f0f0f0;padding-left:20px;"">" & right & "</TD>" _
+                    & "</TR>" _
+                    & "</table>"
+                Return "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Return String.Empty
             End Try
-            Return s
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_TabPermissions(cp As CPBaseClass, CS As CPCSBaseClass) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
                 If Not CS.OK() Then
                     '
-                    s = s & "<div>There was a problem retrieving this person's information.</div>"
+                    result &= "<div>There was a problem retrieving this person's information.</div>"
                 Else
                     '
-                    s = s & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
+                    result &= "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
                         & "<TR>" _
-                        & "<TD width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
-                        & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
+                        & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
+                        & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                         & "</TR>"
-                    s = s & GetFormDetail_DividerRow(cp, "Login")
-                    s = s & GetFormDetail_InputTextRow(cp, "Username", "Username", CS.GetText("Username"), False)
-                    s = s & GetFormDetail_InputTextRow(cp, "Password", "Password", CS.GetText("Password"), True)
-                    s = s & GetFormDetail_InputBooleanRow(cp, "Allow Auto Login", "AutoLogin", CS.GetBoolean("AutoLogin").ToString())
-                    s = s & "</table>"
+                    result &= GetFormDetail_DividerRow(cp, "Login")
+                    result &= GetFormDetail_InputTextRow(cp, "Username", "Username", CS.GetText("Username"), False)
+                    result &= GetFormDetail_InputTextRow(cp, "Password", "Password", CS.GetText("Password"), True)
+                    result &= GetFormDetail_InputBooleanRow(cp, "Allow Auto Login", "AutoLogin", CS.GetBoolean("AutoLogin").ToString())
+                    result &= "</table>"
                 End If
-                s = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & s & "</div>"
+                result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_TabNotes(cp As CPBaseClass, CS As CPCSBaseClass) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
                 If Not CS.OK() Then
-                    s = s & "<div>There was a problem retrieving this person's information.</div>"
+                    result &= "<div>There was a problem retrieving this person's information.</div>"
                 Else
                     '
-                    s = s & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
+                    result &= "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
                         & "<TR>" _
-                        & "<TD width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
-                        & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
+                        & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
+                        & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                         & "</TR>"
-                    s = s & GetFormDetail_InputHTMLRow(cp, "Notes", "NotesFilename", CS.GetText("NotesFilename"))
-                    s = s & "</table>"
+                    result &= GetFormDetail_InputHTMLRow(cp, "Notes", "NotesFilename", CS.GetText("NotesFilename"))
+                    result &= "</table>"
                 End If
                 '
-                s = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & s & "</div>"
-                GetFormDetail_TabNotes = s
+                result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
+                GetFormDetail_TabNotes = result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_TabPhoto(cp As CPBaseClass, CS As CPCSBaseClass) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
                 If Not CS.OK() Then
-                    s = s & "<div>There was a problem retrieving this person's information.</div>"
+                    result &= "<div>There was a problem retrieving this person's information.</div>"
                 Else
                     '
-                    s = s & "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
+                    result &= "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
                         & "<TR>" _
-                        & "<TD width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
-                        & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
+                        & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
+                        & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                         & "</TR>"
-                    s = s & GetFormDetail_InputImageRow(cp, "Thumbnail", "ThumbnailFilename", CS.GetText("ThumbnailFilename"))
-                    s = s & GetFormDetail_InputImageRow(cp, "Image", "ImageFilename", CS.GetText("ImageFilename"))
-                    s = s & "</table>"
+                    result &= GetFormDetail_InputImageRow(cp, "Thumbnail", "ThumbnailFilename", CS.GetText("ThumbnailFilename"))
+                    result &= GetFormDetail_InputImageRow(cp, "Image", "ImageFilename", CS.GetText("ImageFilename"))
+                    result &= "</table>"
                 End If
                 '
-                s = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & s & "</div>"
+                result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_InputTextRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String, IsPassword As Boolean) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
-                s = "" _
-                    & "<TR><TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
+                result = "" _
+                    & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
                     & Caption & ":" _
-                    & "</TD><TD style=""TEXT-ALIGN:left;"">"
+                    & "</TD><td style=""TEXT-ALIGN:left;"">"
                 If IsPassword Then
-                    s = s & "<input type=password name=""" & FieldName & """ value=""" & cp.Utils.EncodeHTML(DefaultValue) & """ style=""width:300px;"">"
+                    result &= "<input type=password name=""" & FieldName & """ value=""" & cp.Utils.EncodeHTML(DefaultValue) & """ style=""width:300px;"">"
                 Else
-                    s = s & "<input type=text name=""" & FieldName & """ value=""" & cp.Utils.EncodeHTML(DefaultValue) & """ style=""width:350px;"">"
+                    result &= "<input type=text name=""" & FieldName & """ value=""" & cp.Utils.EncodeHTML(DefaultValue) & """ style=""width:350px;"">"
                 End If
-                s = s & "</TD></TR>"
+                result &= "</TD></TR>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_InputBooleanRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
-                s = "" _
-                    & "<TR><TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
+                result = "" _
+                    & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
                     & Caption & ":" _
-                    & "</TD><TD style=""TEXT-ALIGN:left;"">"
-                s = s & "<input type=checkbox name=""" & FieldName & """ value=""" & DefaultValue & """>"
-                s = s & "</TD></TR>"
+                    & "</TD><td style=""TEXT-ALIGN:left;"">"
+                result &= "<input type=checkbox name=""" & FieldName & """ value=""" & DefaultValue & """>"
+                result &= "</TD></TR>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_InputHTMLRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
-                s = "" _
-                    & "<TR><TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
+                result = "" _
+                    & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
                     & Caption & ":" _
-                    & "</TD><TD style=""TEXT-ALIGN:left;"">"
-                s = s & cp.Html.InputWysiwyg(FieldName, DefaultValue, CPHtmlBaseClass.EditorUserScope.Administrator)
-                s = s & "</TD></TR>"
+                    & "</TD><td style=""TEXT-ALIGN:left;"">"
+                result &= cp.Html.InputWysiwyg(FieldName, DefaultValue, CPHtmlBaseClass.EditorUserScope.Administrator)
+                result &= "</TD></TR>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_InputImageRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
                 Dim EncodedLink As String
                 Dim Filename As String
                 '
-                s = "" _
-                    & "<TR><TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
+                result = "" _
+                    & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
                     & Caption & ":" _
-                    & "</TD><TD style=""TEXT-ALIGN:left;"">"
+                    & "</TD><td style=""TEXT-ALIGN:left;"">"
                 If DefaultValue = "" Then
-                    s = s & cp.Html.InputFile(FieldName)
-                    s = s & "</TD></TR>"
+                    result &= cp.Html.InputFile(FieldName)
+                    result &= "</TD></TR>"
                 Else
                     Filename = cp.Utils.EncodeHTML(DefaultValue)
                     EncodedLink = cp.Utils.EncodeUrl("http://" & cp.Request.Host & cp.Site.FilePath & DefaultValue)
-                    s = s _
+                    result = result _
                         & "<table border=0 width=100% cellspacing=0 cellpadding=4><TR>" _
-                        & "<TD width=200><a href=""" & EncodedLink & """ target=""_blank""><img src=""" & EncodedLink & """ width=200 border=0></a></TD>" _
-                        & "<TD width=100% valign=top>" _
+                        & "<td width=200><a href=""" & EncodedLink & """ target=""_blank""><img src=""" & EncodedLink & """ width=200 border=0></a></TD>" _
+                        & "<td width=100% valign=top>" _
                         & "<div style=""height:20px;"">Filename:&nbsp;" & Filename & "</div>" _
                         & "<div style=""height:20px;"">URL:&nbsp;" & EncodedLink & "</div>" _
                         & "<div style=""height:20px;""><a href=""" & EncodedLink & """ target=""_blank"">Click for Full Size</A></div>" _
@@ -331,116 +331,114 @@ Namespace Views
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
         Public Shared Function GetFormDetail_DividerRow(cp As CPBaseClass, Caption As String) As String
-            Dim s As String = ""
+            Dim result As String = ""
             Try
-                s = Replace(Caption, " ", "&nbsp;")
-                s = "<TR><TD colspan=2 style=""Padding-top:10px;"">" _
+                result = Replace(Caption, " ", "&nbsp;")
+                result = "<TR><td colspan=2 style=""Padding-top:10px;"">" _
                     & "<TABLE border=0 width=100% cellspacing=0 cellpadding=0>" _
-                    & "<TR><TD width=1 style=""white-space:nowrap;"">" & s & "&nbsp;&nbsp;</TD><TD width=100%><HR></TD>" _
+                    & "<TR><td width=1 style=""white-space:nowrap;"">" & result & "&nbsp;&nbsp;</TD><td width=100%><HR></TD>" _
                     & "</TABLE>" _
                     & "</tr>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
-            Return s
+            Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function SaveContactFromStream(cp As CPBaseClass, DetailMemberID As Integer) As String
+        Public Shared Function savePersonFromStream(cp As CPBaseClass, personId As Integer) As String
             Dim result As String = ""
             Try
-                Dim CS As CPCSBaseClass = cp.CSNew()
-                Dim Filename As String
-                Dim OriginalFilename As String
-                Dim Path As String
-                Dim FieldName As String
-                Dim Copy As String
-                '
-                If CS.Open("people", "id=" & DetailMemberID) Then
-                    Call CS.SetField("name", cp.Doc.GetText("name"))
-                    Call CS.SetField("FirstName", cp.Doc.GetText("FirstName"))
-                    Call CS.SetField("LastName", cp.Doc.GetText("LastName"))
-                    '
-                    ' Contact
-                    '
-                    Call CS.SetField("email", cp.Doc.GetText("email"))
-                    Call CS.SetField("Phone", cp.Doc.GetText("Phone"))
-                    Call CS.SetField("Fax", cp.Doc.GetText("Fax"))
-                    Call CS.SetField("Address", cp.Doc.GetText("Address"))
-                    Call CS.SetField("Address2", cp.Doc.GetText("Address2"))
-                    Call CS.SetField("City", cp.Doc.GetText("City"))
-                    Call CS.SetField("State", cp.Doc.GetText("State"))
-                    Call CS.SetField("Zip", cp.Doc.GetText("Zip"))
-                    '
-                    ' Company
-                    '
-                    Call CS.SetField("Company", cp.Doc.GetText("Company"))
-                    Call CS.SetField("Title", cp.Doc.GetText("Title"))
-                    '
-                    ' Birthday
-                    '
-                    Call CS.SetField("BirthdayDay", cp.Doc.GetInteger("BirthdayDay"))
-                    Call CS.SetField("BirthdayMonth", cp.Doc.GetInteger("BirthdayMonth"))
-                    Call CS.SetField("BirthdayYear", cp.Doc.GetInteger("BirthdayYear"))
-                    '
-                    ' Notes
-                    '
-                    Copy = cp.Doc.GetText("AppendNotes")
-                    If Copy <> "" Then
-                        Copy = "" _
-                            & "<div style=""margin-top:10px;border-top:1px dashed black;"">Added " & Now & " by " & cp.Content.GetRecordName("people", cp.User.Id) & "</div>" _
-                            & "<div style=""margin-left:20px;margin-top:5px;"">" & Copy & "</div>"
+                Using csPerson As CPCSBaseClass = cp.CSNew()
+                    If csPerson.Open("people", "id=" & personId) Then
+                        Call csPerson.SetField("name", cp.Doc.GetText("name"))
+                        Call csPerson.SetField("FirstName", cp.Doc.GetText("FirstName"))
+                        Call csPerson.SetField("LastName", cp.Doc.GetText("LastName"))
+                        '
+                        ' Contact
+                        '
+                        Call csPerson.SetField("email", cp.Doc.GetText("email"))
+                        Call csPerson.SetField("Phone", cp.Doc.GetText("Phone"))
+                        Call csPerson.SetField("Fax", cp.Doc.GetText("Fax"))
+                        Call csPerson.SetField("Address", cp.Doc.GetText("Address"))
+                        Call csPerson.SetField("Address2", cp.Doc.GetText("Address2"))
+                        Call csPerson.SetField("City", cp.Doc.GetText("City"))
+                        Call csPerson.SetField("State", cp.Doc.GetText("State"))
+                        Call csPerson.SetField("Zip", cp.Doc.GetText("Zip"))
+                        '
+                        ' Company
+                        '
+                        Call csPerson.SetField("Company", cp.Doc.GetText("Company"))
+                        Call csPerson.SetField("Title", cp.Doc.GetText("Title"))
+                        '
+                        ' Birthday
+                        '
+                        Call csPerson.SetField("BirthdayDay", cp.Doc.GetInteger("BirthdayDay"))
+                        Call csPerson.SetField("BirthdayMonth", cp.Doc.GetInteger("BirthdayMonth"))
+                        Call csPerson.SetField("BirthdayYear", cp.Doc.GetInteger("BirthdayYear"))
+                        '
+                        ' Notes
+                        '
+                        Dim Copy As String = cp.Doc.GetText("AppendNotes")
+                        If Copy <> "" Then
+                            Copy = "" _
+                                & "<div style=""margin-top:10px;border-top:1px dashed black;"">Added " & Now & " by " & cp.Content.GetRecordName("people", cp.User.Id) & "</div>" _
+                                & "<div style=""margin-left:20px;margin-top:5px;"">" & Copy & "</div>"
+                        End If
+                        Call csPerson.SetField("NotesFilename", cp.Doc.GetText("NotesFilename") & Copy)
+                        '
+                        ' Photos
+                        '
+                        Dim thumbnailFieldName As String = "ThumbnailFilename"
+                        If cp.Doc.GetBoolean(thumbnailFieldName & ".DeleteFlag") Then
+                            Call csPerson.SetField(thumbnailFieldName, "")
+                        End If
+                        Dim originalFilename As String = cp.Doc.GetText(thumbnailFieldName)
+
+                        Dim Path As String
+                        If originalFilename <> "" Then
+                            Dim Filename As String = csPerson.GetFilename(thumbnailFieldName, originalFilename)
+                            Path = Filename
+                            Path = Replace(Path, "/", "\")
+                            Path = Replace(Path, "\" & originalFilename, "")
+                            Call csPerson.SetField(thumbnailFieldName, Filename)
+                            'Call CS.SetFile(FieldName, Path)
+                        End If
+                        '
+                        Dim imageFieldName As String = "ImageFilename"
+                        If cp.Doc.GetBoolean(imageFieldName & ".DeleteFlag") Then
+                            Call csPerson.SetField(imageFieldName, "")
+                        End If
+                        originalFilename = cp.Doc.GetText(imageFieldName)
+                        If originalFilename <> "" Then
+                            Dim Filename As String = csPerson.GetFilename(imageFieldName, originalFilename)
+                            Path = Filename
+                            Path = Replace(Path, "/", "\")
+                            Path = Replace(Path, "\" & originalFilename, "")
+                            Call csPerson.SetField(imageFieldName, Filename)
+                            'Call CS.SetFile(FieldName, Path)
+                        End If
+                        '
+                        ' Permissions
+                        '
+                        Call csPerson.SetField("Username", cp.Doc.GetText("Username"))
+                        Call csPerson.SetField("Password", cp.Doc.GetText("Password"))
+                        Call csPerson.SetField("AutoLogin", cp.Doc.GetBoolean("AutoLogin"))
+                        '
+                        ' Groups
+                        '
+                        Call saveMemberRules(cp, csPerson)
                     End If
-                    Call CS.SetField("NotesFilename", cp.Doc.GetText("NotesFilename") & Copy)
-                    '
-                    ' Photos
-                    '
-                    FieldName = "ThumbnailFilename"
-                    If cp.Doc.GetBoolean(FieldName & ".DeleteFlag") Then
-                        Call CS.SetField(FieldName, "")
-                    End If
-                    OriginalFilename = cp.Doc.GetText(FieldName)
-                    If OriginalFilename <> "" Then
-                        Filename = CS.GetFilename(FieldName, OriginalFilename)
-                        Path = Filename
-                        Path = Replace(Path, "/", "\")
-                        Path = Replace(Path, "\" & OriginalFilename, "")
-                        Call CS.SetField(FieldName, Filename)
-                        'Call CS.SetFile(FieldName, Path)
-                    End If
-                    '
-                    FieldName = "ImageFilename"
-                    If cp.Doc.GetBoolean(FieldName & ".DeleteFlag") Then
-                        Call CS.SetField(FieldName, "")
-                    End If
-                    OriginalFilename = cp.Doc.GetText(FieldName)
-                    If OriginalFilename <> "" Then
-                        Filename = CS.GetFilename(FieldName, OriginalFilename)
-                        Path = Filename
-                        Path = Replace(Path, "/", "\")
-                        Path = Replace(Path, "\" & OriginalFilename, "")
-                        Call CS.SetField(FieldName, Filename)
-                        'Call CS.SetFile(FieldName, Path)
-                    End If
-                    '
-                    ' Permissions
-                    '
-                    Call CS.SetField("Username", cp.Doc.GetText("Username"))
-                    Call CS.SetField("Password", cp.Doc.GetText("Password"))
-                    Call CS.SetField("AutoLogin", cp.Doc.GetBoolean("AutoLogin"))
-                    '
-                    ' Groups
-                    '
-                    Call saveMemberRules(cp, CS)
-                End If
-                Call CS.Close()
+                    Call csPerson.Close()
+
+                End Using
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
             End Try
@@ -449,146 +447,132 @@ Namespace Views
         '
         '========================================================================
         '
-        Public Shared Function GetFormDetail_TabGroup(cp As CPBaseClass, CSMember As CPCSBaseClass) As String
+        Public Shared Function getFormDetail_TabGroup(cp As CPBaseClass, CSMember As CPCSBaseClass) As String
             Dim result As String = ""
             Try
-                Dim sb As New StringBuilder()
-                Dim Copy As String
-                Dim SQL As String
-                Dim CS As CPCSBaseClass = cp.CSNew()
-                Dim MembershipCount As Integer
-                Dim MembershipSize As Integer
-                Dim MembershipPointer As Integer
-                Dim SectionName As String
-                Dim PrimaryContentID As Integer
-                Dim SecondaryContentID As Integer
-                Dim CanSeeHiddenGroups As Boolean
-                Dim DateExpireValue As String
-                Dim GroupCount As Integer
-                Dim GroupID As Integer
-                Dim GroupName As String
-                Dim GroupCaption As String
-                Dim GroupActive As Boolean
-                Dim Membership() As Integer
-                Dim DateExpires() As Date
-                Dim active() As Boolean
-                Dim Caption As String
-                Dim MethodName As String
-                Dim ReportLink As String
-                Dim AdminUI As Object
-                Dim DetailMemberID As Integer
-                '
-                DetailMemberID = CSMember.GetInteger("ID")
+
                 '
                 ' ----- Gather all the SecondaryContent that associates to the PrimaryContent
-                '
-                PrimaryContentID = cp.Content.GetID("People")
-                SecondaryContentID = cp.Content.GetID("Groups")
-                '
-                MembershipCount = 0
-                MembershipSize = 0
+                Dim PrimaryContentID As Integer = cp.Content.GetID("People")
+                Dim SecondaryContentID As Integer = cp.Content.GetID("Groups")
+                Dim sb As New StringBuilder()
                 sb.Append(vbCrLf & "<!-- GroupRule Table --><table border=0 width=100% cellspacing=0 cellpadding=0>" _
-                    & "<TR>" _
-                    & "<TD width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
-                    & "<TD width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
-                    & "</TR>")
+                        & "<TR>" _
+                        & "<td width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
+                        & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
+                        & "</TR>")
+                Dim DetailMemberID As Integer = CSMember.GetInteger("ID")
+                Dim GroupCount As Integer
                 If DetailMemberID <> 0 Then
                     '
                     ' ----- read in the groups that this member has subscribed (exclude new member records)
                     '
-                    SQL = "SELECT Active,GroupID,DateExpires" _
-                        & " FROM ccMemberRules" _
-                        & " WHERE MemberID=" & DetailMemberID
-                    CS.OpenSQL(SQL)
-                    Do While CS.OK()
-                        If MembershipCount >= MembershipSize Then
-                            MembershipSize = MembershipSize + 10
-                            ReDim Preserve Membership(MembershipSize)
-                            ReDim Preserve active(MembershipSize)
-                            ReDim Preserve DateExpires(MembershipSize)
-                        End If
-                        Membership(MembershipCount) = CS.GetInteger("GroupID")
-                        DateExpires(MembershipCount) = CS.GetDate("DateExpires")
-                        active(MembershipCount) = CS.GetBoolean("Active")
-                        MembershipCount = MembershipCount + 1
-                        CS.GoNext()
-                    Loop
-                    Call CS.Close()
+                    Dim MembershipCount As Integer = 0
+                    Dim Membership() As Integer = Array.Empty(Of Integer)
+                    Dim DateExpires() As Date = Array.Empty(Of Date)
+                    Dim active() As Boolean = Array.Empty(Of Boolean)
+                    Using csRules As CPCSBaseClass = cp.CSNew()
+                        Dim SQL As String = "" _
+                                & " SELECT Active,GroupID,DateExpires" _
+                                & " FROM ccMemberRules" _
+                                & " WHERE MemberID=" & DetailMemberID
+                        csRules.OpenSQL(SQL)
+                        Do While csRules.OK()
+                            Dim MembershipSize As Integer = 0
+                            If MembershipCount >= MembershipSize Then
+                                MembershipSize += 10
+                                ReDim Preserve Membership(MembershipSize)
+                                ReDim Preserve active(MembershipSize)
+                                ReDim Preserve DateExpires(MembershipSize)
+                            End If
+                            Membership(MembershipCount) = csRules.GetInteger("GroupID")
+                            DateExpires(MembershipCount) = csRules.GetDate("DateExpires")
+                            active(MembershipCount) = csRules.GetBoolean("Active")
+                            MembershipCount += 1
+                            csRules.GoNext()
+                        Loop
+                        Call csRules.Close()
+                    End Using
                     '
                     ' ----- read in all the groups, sorted by ContentName
                     '
-                    SQL = "SELECT ccGroups.ID AS ID, ccContent.Name AS SectionName, ccGroups.Caption AS GroupCaption, ccGroups.name AS GroupName, ccGroups.SortOrder" _
-                        & " FROM ccGroups LEFT JOIN ccContent ON ccGroups.ContentControlID = ccContent.ID" _
-                        & " Where (((ccGroups.Active) >0) And ((ccContent.Active) >0))"
-                    SQL = SQL _
-                        & " GROUP BY ccGroups.ID, ccContent.Name, ccGroups.Caption, ccGroups.name, ccGroups.SortOrder" _
-                        & " ORDER BY ccContent.Name, ccGroups.Caption"
-                    CS.OpenSQL(SQL)
-                    '
-                    ' Output all the groups, with the active and dateexpires from those joined
-                    '
-                    'F.Add Controllers.AdminUIController.EditTableOpen
-                    SectionName = ""
-                    GroupCount = 0
-                    CanSeeHiddenGroups = cp.User.IsDeveloper
-                    Do While CS.OK()
-                        GroupName = CS.GetText("GroupName")
-                        If (Mid(GroupName, 1, 1) <> "_") Or CanSeeHiddenGroups Then
-                            GroupCaption = CS.GetText("GroupCaption")
-                            GroupID = CS.GetInteger("ID")
-                            If GroupCaption = "" Then
-                                GroupCaption = GroupName
+                    Using CS As CPCSBaseClass = cp.CSNew()
+                        Dim Sql As String = "" _
+                                & " SELECT ccGroups.ID AS ID, ccContent.Name AS SectionName, ccGroups.Caption AS GroupCaption, ccGroups.name AS GroupName, ccGroups.SortOrder" _
+                                & " FROM ccGroups LEFT JOIN ccContent ON ccGroups.ContentControlID = ccContent.ID" _
+                                & " Where (((ccGroups.Active) >0) And ((ccContent.Active) >0))"
+                        Sql = Sql _
+                                & " GROUP BY ccGroups.ID, ccContent.Name, ccGroups.Caption, ccGroups.name, ccGroups.SortOrder" _
+                                & " ORDER BY ccContent.Name, ccGroups.Caption"
+                        CS.OpenSQL(Sql)
+                        '
+                        ' Output all the groups, with the active and dateexpires from those joined
+                        '
+                        Dim SectionName As String = ""
+                        GroupCount = 0
+                        Dim CanSeeHiddenGroups As Boolean = cp.User.IsDeveloper
+                        Do While CS.OK()
+                            Dim GroupName As String = CS.GetText("GroupName")
+                            If (Mid(GroupName, 1, 1) <> "_") Or CanSeeHiddenGroups Then
+                                Dim GroupCaption As String = CS.GetText("GroupCaption")
+                                Dim GroupID As Integer = CS.GetInteger("ID")
                                 If GroupCaption = "" Then
-                                    GroupCaption = "Group&nbsp;" & GroupID
-                                End If
-                            End If
-                            GroupActive = False
-                            DateExpireValue = ""
-                            If MembershipCount <> 0 Then
-                                For MembershipPointer = 0 To MembershipCount - 1
-                                    If Membership(MembershipPointer) = GroupID Then
-                                        GroupActive = active(MembershipPointer)
-                                        If (Not DateExpires(MembershipPointer).Equals(Date.MinValue)) Then
-                                            DateExpireValue = DateExpires(MembershipPointer).ToString()
-                                        End If
-                                        Exit For
+                                    GroupCaption = GroupName
+                                    If GroupCaption = "" Then
+                                        GroupCaption = "Group&nbsp;" & GroupID
                                     End If
-                                Next
+                                End If
+                                Dim GroupActive As Boolean = False
+                                Dim DateExpireValue As String = ""
+                                If MembershipCount <> 0 Then
+                                    Dim MembershipPointer As Integer
+                                    For MembershipPointer = 0 To MembershipCount - 1
+                                        If Membership(MembershipPointer) = GroupID Then
+                                            GroupActive = active(MembershipPointer)
+                                            If (Not DateExpires(MembershipPointer).Equals(Date.MinValue)) Then
+                                                DateExpireValue = DateExpires(MembershipPointer).ToString()
+                                            End If
+                                            Exit For
+                                        End If
+                                    Next
+                                End If
+                                Dim ReportLink As String
+                                If GroupID > 0 Then
+                                    ReportLink = "<a href=""?af=12&rid=35&recordid=" & GroupID & """ target=_blank>Group&nbsp;Report</a>"
+                                Else
+                                    ReportLink = "&nbsp;"
+                                End If
+                                Dim Caption As String
+                                '
+                                If GroupCount = 0 Then
+                                    Caption = "Groups"
+                                Else
+                                    Caption = "&nbsp;"
+                                End If
+                                sb.Append(cp.Html.Hidden("Memberrules." & GroupCount & ".ID", GroupID.ToString()))
+                                GroupCaption = Replace(GroupCaption, " ", "&nbsp;")
+                                sb.Append(vbCrLf & "<!-- GroupRule Row -->" _
+                                        & "<TR>" _
+                                        & "<td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;border-top:1px solid white;"">" & cp.Html.CheckBox("MemberRules." & GroupCount, GroupActive) & GroupCaption & "</TD>" _
+                                        & "<td style=""TEXT-ALIGN:left;PADDING-LEFT:10px;border-top:1px solid white;"">Expires " & cp.Html.InputText("MemberRules." & GroupCount & ".DateExpires", DateExpireValue, 255) & "</TD>" _
+                                        & "</TR>")
+                                GroupCount = GroupCount + 1
                             End If
-                            If GroupID > 0 Then
-                                ReportLink = "<a href=""?af=12&rid=35&recordid=" & GroupID & """ target=_blank>Group&nbsp;Report</a>"
-                            Else
-                                ReportLink = "&nbsp;"
-                            End If
-                            '
-                            If GroupCount = 0 Then
-                                Caption = "Groups"
-                            Else
-                                Caption = "&nbsp;"
-                            End If
-                            sb.Append(cp.Html.Hidden("Memberrules." & GroupCount & ".ID", GroupID.ToString()))
-                            GroupCaption = Replace(GroupCaption, " ", "&nbsp;")
-                            sb.Append(vbCrLf & "<!-- GroupRule Row -->" _
-                                & "<TR>" _
-                                & "<TD style=""TEXT-ALIGN:left;PADDING-LEFT:20px;border-top:1px solid white;"">" & cp.Html.CheckBox("MemberRules." & GroupCount, GroupActive) & GroupCaption & "</TD>" _
-                                & "<TD style=""TEXT-ALIGN:left;PADDING-LEFT:10px;border-top:1px solid white;"">Expires " & cp.Html.InputText("MemberRules." & GroupCount & ".DateExpires", DateExpireValue, 255) & "</TD>" _
-                                & "</TR>")
-                            GroupCount = GroupCount + 1
-                        End If
-                        CS.GoNext()
-                    Loop
-                    CS.Close()
+                            CS.GoNext()
+                        Loop
+                        CS.Close()
+                    End Using
                 End If
                 If DetailMemberID = 0 Then
                     sb.Append("<TR>" _
-                        & "<TD valign=middle align=right><span>Groups</span></TD>" _
-                        & "<TD><span>Groups will be available after this record is saved</SPAN></TD>" _
-                        & "<TR>")
+                            & "<td valign=middle align=right><span>Groups</span></TD>" _
+                            & "<td><span>Groups will be available after this record is saved</SPAN></TD>" _
+                            & "<TR>")
                 ElseIf GroupCount = 0 Then
                     sb.Append("<TR>" _
-                        & "<TD valign=middle align=right><span>Groups</span></TD>" _
-                        & "<TD><span>There are currently no groups defined</SPAN></TD>" _
-                        & "<TR>")
+                            & "<td valign=middle align=right><span>Groups</span></TD>" _
+                            & "<td><span>There are currently no groups defined</SPAN></TD>" _
+                            & "<TR>")
                 Else
                     sb.Append("<input type=""hidden"" name=""MemberRules.RowCount"" value=""" & GroupCount & """>")
                 End If
@@ -835,7 +819,7 @@ Namespace Views
                             ' EMPTY
                             '
                         Else
-                            Do While CS.OK() And (RowCnt <PageSize)
+                            Do While CS.OK() And (RowCnt < PageSize)
                                 RecordID = CS.GetInteger("ID")
                                 DateCompleted = CS.GetDate("DateCompleted")
                                 Cells(RowCnt, 0) = CS.GetDate("DateAdded") & cp.Html.Hidden("RowID" & RowCnt, RecordID.ToString())

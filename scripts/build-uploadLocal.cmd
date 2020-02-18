@@ -11,4 +11,3 @@ cd %collectionPath%
 cc -a %appName% --installFile "%collectionName%.zip"
 cd ..\..\scripts
 
-pause
