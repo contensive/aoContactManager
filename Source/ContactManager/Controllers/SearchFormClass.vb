@@ -1,6 +1,6 @@
 ﻿
-Option Strict On
-Option Explicit On
+
+
 
 Imports Contensive.BaseClasses
 Imports Contensive.Addons.ContactManagerTools.Controllers.GenericController
@@ -8,13 +8,14 @@ Imports System.Text
 Imports System.Linq
 
 Namespace Views
-    Public Class SearchFormClass
+    Public NotInheritable Class SearchFormClass
         '
         '=================================================================================
         '
         Public Shared Function getResponse(cp As CPBaseClass, ae As Controllers.ApplicationController, IsAdminPath As Boolean) As String
-            Dim result As String = ""
+
             Try
+                Dim result As String = ""
                 Dim SubTab As Integer
                 Dim Nav As New ContactManagerTools.TabController()
                 Dim Header As String
@@ -58,10 +59,11 @@ Namespace Views
                             & ""
                     result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
                 End If
+                Return result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
-            Return result
         End Function
         '
         '=================================================================================
@@ -106,9 +108,9 @@ Namespace Views
                         Do While CS.OK()
                             Dim GroupID As Integer = CS.GetInteger("GroupID")
                             Dim GroupName As String = CS.GetText("GroupCaption")
-                            If GroupName = "" Then
+                            If String.IsNullOrEmpty(GroupName) Then
                                 GroupName = CS.GetText("GroupName")
-                                If GroupName = "" Then
+                                If String.IsNullOrEmpty(GroupName) Then
                                     GroupName = "Group " & GroupID
                                 End If
                             End If
@@ -139,6 +141,7 @@ Namespace Views
                 End If
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
@@ -153,7 +156,7 @@ Namespace Views
                 Dim ContactSearchCriteria As String = ae.userProperties.contactSearchCriteria
                 Dim CriteriaValues() As String = Array.Empty(Of String)
                 Dim CriteriaCount As Integer = 0
-                If ContactSearchCriteria <> "" Then
+                If Not String.IsNullOrEmpty(ContactSearchCriteria) Then
                     CriteriaValues = Split(ContactSearchCriteria, vbCrLf)
                     CriteriaCount = UBound(CriteriaValues) + 1
                 End If
@@ -170,13 +173,13 @@ Namespace Views
                         Dim fieldType As Integer = CS.GetInteger("Type")
                         Dim field = New FieldMeta() With {
                              .currentValue = "",
-                             .FieldCaption = CS.GetText("Caption"),
+                             .fieldCaption = CS.GetText("Caption"),
                              .fieldEditTab = CS.GetText("editTab"),
                              .fieldId = CS.GetInteger("ID"),
-                             .FieldLookupContentName = If((fieldType <> 7), "", cp.Content.GetRecordName("content", CS.GetInteger("LookupContentID"))),
+                             .fieldLookupContentName = If((fieldType <> 7), "", cp.Content.GetRecordName("content", CS.GetInteger("LookupContentID"))),
                              .FieldLookupList = If((fieldType <> 7), "", CS.GetText("LookupList")),
-                             .FieldName = CS.GetText("name"),
-                             .FieldOperator = 0,
+                             .fieldName = CS.GetText("name"),
+                             .fieldOperator = 0,
                              .fieldType = fieldType
                             }
                         fieldList.Add(field)
@@ -187,18 +190,18 @@ Namespace Views
                             Dim CriteriaPointer As Integer
                             For CriteriaPointer = 0 To CriteriaCount - 1
                                 Dim NameValues() As String
-                                If InStr(1, CriteriaValues(CriteriaPointer), field.FieldName & "=", vbTextCompare) = 1 Then
+                                If InStr(1, CriteriaValues(CriteriaPointer), field.fieldName & "=", vbTextCompare) = 1 Then
                                     NameValues = Split(CriteriaValues(CriteriaPointer), "=")
                                     field.currentValue = NameValues(1)
-                                    field.FieldOperator = 1
-                                ElseIf InStr(1, CriteriaValues(CriteriaPointer), field.FieldName & ">", vbTextCompare) = 1 Then
+                                    field.fieldOperator = 1
+                                ElseIf InStr(1, CriteriaValues(CriteriaPointer), field.fieldName & ">", vbTextCompare) = 1 Then
                                     NameValues = Split(CriteriaValues(CriteriaPointer), ">")
                                     field.currentValue = NameValues(1)
-                                    field.FieldOperator = 2
-                                ElseIf InStr(1, CriteriaValues(CriteriaPointer), field.FieldName & "<", vbTextCompare) = 1 Then
+                                    field.fieldOperator = 2
+                                ElseIf InStr(1, CriteriaValues(CriteriaPointer), field.fieldName & "<", vbTextCompare) = 1 Then
                                     NameValues = Split(CriteriaValues(CriteriaPointer), "<")
                                     field.currentValue = NameValues(1)
-                                    field.FieldOperator = 3
+                                    field.fieldOperator = 3
                                 End If
                             Next
                         End If
@@ -219,8 +222,8 @@ Namespace Views
                     result &= "<table border=0 width=100% cellspacing=0 cellpadding=4>"
                     result &= "<tr>"
                     Dim RowEven As Boolean
-                    result &= ContactManagerTools.AdminUIController.kmaStartTableCell("120", 1, RowEven, "right") & "<img src=/cclib/images/spacer.gif width=120 height=1></TD>"
-                    result &= ContactManagerTools.AdminUIController.kmaStartTableCell("99%", 1, RowEven, "left") & "<img src=/cclib/images/spacer.gif width=1 height=1></TD>"
+                    result &= ContactManagerTools.AdminUIController.kmaStartTableCell("120") & "<img src=/cclib/images/spacer.gif width=120 height=1></TD>"
+                    result &= ContactManagerTools.AdminUIController.kmaStartTableCell("99%") & "<img src=/cclib/images/spacer.gif width=1 height=1></TD>"
                     result &= "</tr>"
                     '
                     Dim RowPointer As Integer = 0
@@ -231,7 +234,7 @@ Namespace Views
                         currentEditTab = field.fieldEditTab
                         If currentEditTab <> lastEditTab Then
                             Dim tabCaption As String
-                            If currentEditTab = "" Then
+                            If String.IsNullOrEmpty(currentEditTab) Then
                                 tabCaption = "Details"
                             Else
                                 tabCaption = currentEditTab
@@ -251,38 +254,38 @@ Namespace Views
                                 '
                                 result &= groupTab _
                                     & "<TR>" _
-                                    & "<td class=""p-1 cmRowCaption"">" & field.FieldCaption & "</TD>" _
+                                    & "<td class=""p-1 cmRowCaption"">" & field.fieldCaption & "</TD>" _
                                     & "<td class=""cmRowField"">" _
                                     & "<table border=0 width=100% cellspacing=0 cellpadding=0><TR>" _
-                                        & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_D", "0", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>ignore</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_D", "1", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>=</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_D", "2", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&gt;</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_D", "3", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&lt;</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" align=left width=99%>" & getFormInputDate(cp, field.FieldName, field.currentValue, "10", "", "") & "</TD>" _
+                                        & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_D", "0", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>ignore</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_D", "1", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>=</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_D", "2", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&gt;</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_D", "3", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&lt;</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" align=left width=99%>" & getFormInputDate(cp, field.fieldName, encodeDate(field.currentValue), "") & "</TD>" _
                                     & "</TR></Table>" _
                                     & "</TD>" _
                                     & "</TR>"
                                 groupTab = ""
-                                RowPointer = RowPointer + 1
+                                RowPointer += 1
                             Case FieldTypeCurrency, FieldTypeFloat, FieldTypeInteger
                                 '
                                 ' Numeric
                                 '
                                 result &= groupTab _
                                     & "<TR>" _
-                                    & "<td class=""p-1 cmRowCaption"">" & field.FieldCaption & "</TD>" _
+                                    & "<td class=""p-1 cmRowCaption"">" & field.fieldCaption & "</TD>" _
                                     & "<td class=""p-1 cmRowField"">" _
                                     & "<table border=0 width=100% cellspacing=0 cellpadding=0><TR>" _
-                                        & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_N", "0", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>ignore</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_N", "1", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>=</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_N", "2", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&gt;</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_N", "3", field.FieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&lt;</TD>" _
-                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" align=left width=99%>" & getFormInputText(cp, field.FieldName, field.currentValue, "1", "5", "", "") & "</TD>" _
+                                        & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_N", "0", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>ignore</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_N", "1", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>=</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_N", "2", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&gt;</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_N", "3", field.fieldOperator.ToString(), "") & "</TD><td class=""p-1"" align=left width=100>&lt;</TD>" _
+                                        & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" align=left width=99%>" & getFormInputText(cp, field.fieldName, field.currentValue, "", "") & "</TD>" _
                                     & "</TR></Table>" _
                                     & "</TD>" _
                                     & "</TR>"
                                 groupTab = ""
-                                RowPointer = RowPointer + 1
+                                RowPointer += 1
                             Case FieldTypeBoolean
                                 '
                                 ' Boolean
@@ -290,12 +293,12 @@ Namespace Views
                                 Dim currentValue As String = If(String.IsNullOrWhiteSpace(field.currentValue), "0", field.currentValue)
                                 result &= groupTab _
                                     & "<TR>" _
-                                    & "<td class=""p-1 cmRowCaption"">" & field.FieldCaption & "</TD>" _
+                                    & "<td class=""p-1 cmRowCaption"">" & field.fieldCaption & "</TD>" _
                                     & "<td class=""p-1 cmRowField"">" _
                                     & "<table border=0 width=100% cellspacing=0 cellpadding=0><TR>" _
-                                    & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName, "0", currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "  ignore</TD>" _
-                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName, "1", currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "true</TD>" _
-                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName, "2", currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "false</TD>" _
+                                    & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName, "0", currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "  ignore</TD>" _
+                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName, "1", currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "true</TD>" _
+                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName, "2", currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "false</TD>" _
                                     & "<td class=""p-1"" width=99%>&nbsp;</td>" _
                                     & "</TR></Table>" _
                                     & "</TD>" _
@@ -308,13 +311,13 @@ Namespace Views
                                 '
                                 result &= groupTab _
                                     & "<TR>" _
-                                    & "<td class=""p-1 cmRowCaption"">" & field.FieldCaption & "</TD>" _
+                                    & "<td class=""p-1 cmRowCaption"">" & field.fieldCaption & "</TD>" _
                                     & "<td class=""p-1 cmRowField"" valign=absmiddle>" _
                                     & "<table border=0 width=100% cellspacing=0 cellpadding=0><TR>" _
-                                    & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_T", "", field.currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "  ignore</TD>" _
-                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_T", "1", field.currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "empty</TD>" _
-                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_T", "2", field.currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "not&nbsp;empty</TD>" _
-                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.FieldName & "_T", "3", field.currentValue, field.FieldName & "_r") & "</TD><td class=""p-1"" align=center width=100>" & "&nbsp;includes&nbsp;" & "</TD><td class=""p-1"" align=left width=99%>" & getFormInputText(cp, field.FieldName, field.currentValue, "1", "20", "", "cmTextInclude") & "</TD>" _
+                                    & "<td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_T", "", field.currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "  ignore</TD>" _
+                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_T", "1", field.currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "empty</TD>" _
+                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_T", "2", field.currentValue, "") & "</TD><td class=""p-1"" align=left width=100>" & "not&nbsp;empty</TD>" _
+                                    & "<td class=""p-1"" width=10>&nbsp;&nbsp;</TD><td class=""p-1"" width=10 align=right>" & getFormInputRadioBox(cp, field.fieldName & "_T", "3", field.currentValue, field.fieldName & "_r") & "</TD><td class=""p-1"" align=center width=100>" & "&nbsp;includes&nbsp;" & "</TD><td class=""p-1"" align=left width=99%>" & getFormInputText(cp, field.fieldName, field.currentValue, "", "cmTextInclude") & "</TD>" _
                                     & "</TR></Table>" _
                                     & "</TD>" _
                                     & "</TR>"
@@ -325,20 +328,20 @@ Namespace Views
                                 ' Lookup
                                 '
                                 result &= groupTab _
-                                        & "<TR><td class=""p-1 cmRowCaption"">" & field.FieldCaption & "</TD>" _
+                                        & "<TR><td class=""p-1 cmRowCaption"">" & field.fieldCaption & "</TD>" _
                                         & ""
-                                If field.FieldLookupContentName <> "" Then
+                                If Not String.IsNullOrEmpty(field.fieldLookupContentName) Then
                                     result = result _
                                             & "<td class=""p-1 cmRowField"">" _
-                                            & cp.Html.SelectContent(field.FieldName, field.currentValue, field.FieldLookupContentName, "", "Any", "form-control select") & "</TD>"
+                                            & cp.Html.SelectContent(field.fieldName, field.currentValue, field.fieldLookupContentName, "", "Any", "form-control select") & "</TD>"
                                 Else
                                     result = result _
                                             & "<td class=""p-1 cmRowField"">" _
-                                            & cp.Html.SelectList(field.FieldName, field.currentValue, field.FieldLookupList, "Any", "form-control select") & "</TD>"
+                                            & cp.Html.SelectList(field.fieldName, field.currentValue, field.FieldLookupList, "Any", "form-control select") & "</TD>"
                                 End If
                                 result &= "</TR>"
                                 groupTab = ""
-                                RowPointer = RowPointer + 1
+                                RowPointer += 1
                         End Select
                     Next
                 End Using
@@ -348,13 +351,14 @@ Namespace Views
                 '
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function processRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As Views.CMngrClass.RequestClass) As FormIdEnum
+        Public Shared Function processRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As RequestModel) As FormIdEnum
             Dim result As FormIdEnum = FormIdEnum.FormList
             Try
                 Select Case request.Button
@@ -393,7 +397,7 @@ Namespace Views
                                     Select Case fieldType
                                         Case FieldTypeDate
                                             NumericOption = cp.Doc.GetText(FieldName & "_D")
-                                            If NumericOption <> "" Then
+                                            If Not String.IsNullOrEmpty(NumericOption) Then
                                                 ContactSearchCriteria = ContactSearchCriteria _
                                                             & vbCrLf _
                                                             & FieldName & vbTab _
@@ -403,7 +407,7 @@ Namespace Views
                                             End If
                                         Case FieldTypeCurrency, FieldTypeFloat, FieldTypeInteger
                                             NumericOption = cp.Doc.GetText(FieldName & "_N")
-                                            If NumericOption <> "" Then
+                                            If Not String.IsNullOrEmpty(NumericOption) Then
                                                 ContactSearchCriteria = ContactSearchCriteria _
                                                             & vbCrLf _
                                                             & FieldName & vbTab _
@@ -412,7 +416,7 @@ Namespace Views
                                                             & NumericOption
                                             End If
                                         Case FieldTypeBoolean
-                                            If FieldValue <> "" Then
+                                            If Not String.IsNullOrEmpty(FieldValue) Then
                                                 ContactSearchCriteria = ContactSearchCriteria _
                                                             & vbCrLf _
                                                             & FieldName & vbTab _
@@ -422,7 +426,7 @@ Namespace Views
                                             End If
                                         Case FieldTypeText
                                             Dim TextOption As String = cp.Doc.GetText(FieldName & "_T")
-                                            If TextOption <> "" Then
+                                            If Not String.IsNullOrEmpty(TextOption) Then
                                                 ContactSearchCriteria = ContactSearchCriteria _
                                                             & vbCrLf _
                                                             & FieldName & vbTab _
@@ -431,7 +435,7 @@ Namespace Views
                                                             & TextOption
                                             End If
                                         Case FieldTypeLookup
-                                            If FieldValue <> "" Then
+                                            If Not String.IsNullOrEmpty(FieldValue) Then
                                                 ContactSearchCriteria = ContactSearchCriteria _
                                                             & vbCrLf _
                                                             & FieldName & vbTab _
@@ -449,6 +453,7 @@ Namespace Views
                 End Select
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
@@ -461,14 +466,14 @@ Namespace Views
         '
         '=================================================================================
         '
-        Public Shared Function getFormInputText(cp As CPBaseClass, htmlName As String, CurrentValue As String, Height As String, Width As String, htmlId As String, htmlClass As String) As String
-            Return cp.Html.InputText(htmlName, CurrentValue, Height, Width, False, htmlClass & " form-control", htmlId)
+        Public Shared Function getFormInputText(cp As CPBaseClass, htmlName As String, CurrentValue As String, htmlId As String, htmlClass As String) As String
+            Return cp.Html.InputText(htmlName, CurrentValue, 255, htmlClass & " form-control", htmlId)
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function getFormInputDate(cp As CPBaseClass, ElementName As String, CurrentValue As String, Width As String, ElementID As String, OnFocus As String) As String
-            Return cp.Html.InputDate(ElementName, CurrentValue, Width, "", ElementID)
+        Public Shared Function getFormInputDate(cp As CPBaseClass, ElementName As String, CurrentValue As Date, ElementID As String) As String
+            Return cp.Html5.InputDate(ElementName, CurrentValue, "", ElementID)
         End Function
         '
     End Class

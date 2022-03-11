@@ -1,15 +1,8 @@
-﻿
-Option Explicit On
-Option Strict On
-
-Imports System
-Imports System.Collections.Generic
-Imports System.Text
+﻿Imports System.Reflection
 Imports Contensive.BaseClasses
-Imports System.Reflection
 
 Namespace Models.Domain
-    Public MustInherit Class baseDomainModel
+    Public MustInherit Class BaseDomainModel
         '
         '====================================================================================================
         ''' <summary>
@@ -17,7 +10,7 @@ Namespace Models.Domain
         ''' </summary>
         ''' <param name="cp"></param>
         ''' <param name="cs"></param>
-        Private Shared Function loadRecord(Of T As baseDomainModel)(cp As CPBaseClass, cs As CPCSBaseClass) As T
+        Private Shared Function loadRecord(Of T As BaseDomainModel)(cp As CPBaseClass, cs As CPCSBaseClass) As T
             Dim instance As T = Nothing
             Try
                 If cs.OK() Then
@@ -61,7 +54,7 @@ Namespace Models.Domain
         ''' <summary>
         ''' pattern get a list of objects from this model
         ''' </summary>
-        Protected Shared Function createListFromSql(Of T As baseDomainModel)(cp As CPBaseClass, sql As String, pageSize As Integer, pageNumber As Integer) As List(Of T)
+        Protected Shared Function createListFromSql(Of T As BaseDomainModel)(cp As CPBaseClass, sql As String, pageSize As Integer, pageNumber As Integer) As List(Of T)
             Dim result As New List(Of T)
             Try
                 Dim cs As CPCSBaseClass = cp.CSNew()
@@ -80,6 +73,7 @@ Namespace Models.Domain
                 cs.Close()
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function

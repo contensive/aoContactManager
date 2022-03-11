@@ -7,7 +7,7 @@ using Contensive.BaseClasses;
 using static Contensive.Addons.ContactManagerTools.Constants;
 
 namespace Contensive.Addons.ContactManagerTools {
-    public class HtmlController {
+    public static class HtmlController {
         //
         internal const string ButtonDelete = "  Delete  ";
         internal const string ButtonFileChange = "   Upload   ";
@@ -15,14 +15,6 @@ namespace Contensive.Addons.ContactManagerTools {
         internal const string ButtonClose = "  Close   ";
         internal const string ButtonAdd = "   Add    ";
         //
-        public class ButtonMetadata {
-            public string name = "button";
-            public string value = "";
-            public string classList = "";
-            public bool isDelete = false;
-            public bool isClose = false;
-            public bool isAdd = false;
-        }
         //
         //====================================================================================================
         /// <summary>
@@ -84,7 +76,7 @@ namespace Contensive.Addons.ContactManagerTools {
         public static string ul(string innerHtml, string htmlClass, string htmlId) => genericBlockTag("ul", innerHtml, htmlClass, htmlId);
         //
         //====================================================================================================
-        public static string getButtonsFromList(CPBaseClass cp, List<ButtonMetadata> ButtonList, bool AllowDelete, bool AllowAdd) {
+        public static string getButtonsFromList(List<ButtonMetadata> ButtonList, bool AllowDelete, bool AllowAdd) {
             string s = "";
             foreach (ButtonMetadata button in ButtonList) {
 
@@ -103,17 +95,16 @@ namespace Contensive.Addons.ContactManagerTools {
         }
         //
         //====================================================================================================
-        public static string getButtonsFromList(CPBaseClass cp, string ButtonList, bool AllowDelete, bool AllowAdd, string ButtonName) {
-            return getButtonsFromList(cp, buttonStringToButtonList(ButtonList), AllowDelete, AllowAdd);
+        public static string getButtonsFromList( string ButtonList, bool AllowDelete, bool AllowAdd) {
+            return getButtonsFromList(buttonStringToButtonList(ButtonList), AllowDelete, AllowAdd);
         }
         //
         // ====================================================================================================
         //
         public static List<ButtonMetadata> buttonStringToButtonList(string ButtonList) {
             var result = new List<ButtonMetadata>();
-            string[] Buttons = null;
             if (!string.IsNullOrEmpty(ButtonList.Trim(' '))) {
-                Buttons = ButtonList.Split(',');
+                string[] Buttons = ButtonList.Split(',');
                 foreach (string buttonValue in Buttons) {
                     string buttonValueTrim = buttonValue.Trim();
                     result.Add(new ButtonMetadata() {
@@ -135,7 +126,7 @@ namespace Contensive.Addons.ContactManagerTools {
         /// <param name="LeftButtons"></param>
         /// <param name="RightButtons"></param>
         /// <returns></returns>
-        public static string getButtonBar(CPBaseClass cp, string LeftButtons, string RightButtons) {
+        public static string getButtonBar(string LeftButtons, string RightButtons) {
             if (string.IsNullOrWhiteSpace(LeftButtons + RightButtons)) {
                 return "";
             } else if (string.IsNullOrWhiteSpace(RightButtons)) {
@@ -167,7 +158,7 @@ namespace Contensive.Addons.ContactManagerTools {
         /// <param name="actionQueryString"></param>
         /// <returns></returns>
         public static string formMultipart_start(CPBaseClass cp, string actionQueryString = "", string htmlName = "", string htmlClass = "", string htmlId = "") {
-            string result = "<form action=\"?" + ((actionQueryString == "") ? cp.Doc.RefreshQueryString : actionQueryString) + "\" ENCTYPE=\"MULTIPART/FORM-DATA\" method=\"post\" style=\"display: inline;\"";
+            string result = "<form action=\"?" + (string.IsNullOrEmpty(actionQueryString ) ? cp.Doc.RefreshQueryString : actionQueryString) + "\" ENCTYPE=\"MULTIPART/FORM-DATA\" method=\"post\" style=\"display: inline;\"";
             if (!string.IsNullOrWhiteSpace(htmlName)) result += " name=\"" + htmlName + "\"";
             if (!string.IsNullOrWhiteSpace(htmlClass)) result += " class=\"" + htmlClass + "\"";
             if (!string.IsNullOrWhiteSpace(htmlId)) result += " id=\"" + htmlId + "\"";
@@ -182,14 +173,12 @@ namespace Contensive.Addons.ContactManagerTools {
         /// <param name="Title"></param>
         /// <param name="Description"></param>
         /// <returns></returns>
-        public static string getTitleBar(CPBaseClass cp, string Title, string Description) {
-            string result = "";
-            result = Title;
+        public static string getTitleBar(string Title, string Description) {
+            string result =  Title;
             if (!string.IsNullOrEmpty(Description)) {
-                result += HtmlController.div(Description);
+                return Title + HtmlController.div(Description);
             }
-            result = HtmlController.div(result, "ccAdminTitleBar");
-            return result;
+            return HtmlController.div(result, "ccAdminTitleBar");
         }
         //
         // ====================================================================================================
@@ -229,9 +218,9 @@ namespace Contensive.Addons.ContactManagerTools {
         //
         //====================================================================================================
         //
-        public static string getPanel(string content, string stylePanel, string styleHilite, string styleShadow, string width, int padding, int heightMin) {
-            string ContentPanelWidth = "";
-            string contentPanelWidthStyle = "";
+        public static string getPanel(string content, string stylePanel,  string width, int padding) {
+            string ContentPanelWidth;
+            string contentPanelWidthStyle;
             if (width.IsNumeric()) {
                 ContentPanelWidth = (int.Parse(width) - 2).ToString();
                 contentPanelWidthStyle = ContentPanelWidth + "px";
@@ -273,18 +262,6 @@ namespace Contensive.Addons.ContactManagerTools {
                 + "";
             return result;
         }
-        //
-        public static string getPanel(string content) => getPanel(content, "ccPanel", "ccPanelHilite", "ccPanelShadow", "100%", 5, 1);
-        //
-        public static string getPanel(string content, string stylePanel) => getPanel(content, stylePanel, "ccPanelHilite", "ccPanelShadow", "100%", 5, 1);
-        //
-        public static string getPanel(string content, string stylePanel, string styleHilite) => getPanel(content, stylePanel, styleHilite, "ccPanelShadow", "100%", 5, 1);
-        //
-        public static string getPanel(string content, string stylePanel, string styleHilite, string styleShadow) => getPanel(content, stylePanel, styleHilite, styleShadow, "100%", 5, 1);
-        //
-        public static string getPanel(string content, string stylePanel, string styleHilite, string styleShadow, string width) => getPanel(content, stylePanel, styleHilite, styleShadow, width, 5, 1);
-        //
-        public static string getPanel(string content, string stylePanel, string styleHilite, string styleShadow, string width, int padding) => getPanel(content, stylePanel, styleHilite, styleShadow, width, padding, 1);
         //
         // ====================================================================================================
         /// <summary>
@@ -361,5 +338,13 @@ namespace Contensive.Addons.ContactManagerTools {
         public static string tableRow(string Cell, int ColSpan = 0, bool EvenRow = false) {
             return tableRowStart() + td(Cell, "100%", ColSpan, EvenRow) + Constants.kmaEndTableRow;
         }
+    }
+    public class ButtonMetadata {
+        public string name = "button";
+        public string value = "";
+        public string classList = "";
+        public bool isDelete = false;
+        public bool isClose = false;
+        public bool isAdd = false;
     }
 }

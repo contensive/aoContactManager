@@ -33,8 +33,9 @@
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
     <DocumentationFile>ContactManager.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <NoWarn>42353,42354,42355</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -43,8 +44,9 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DocumentationFile>ContactManager.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <NoWarn>42353,42354,42355</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <OptionExplicit>On</OptionExplicit>
@@ -53,7 +55,7 @@
     <OptionCompare>Binary</OptionCompare>
   </PropertyGroup>
   <PropertyGroup>
-    <OptionStrict>Off</OptionStrict>
+    <OptionStrict>On</OptionStrict>
   </PropertyGroup>
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
@@ -65,18 +67,14 @@
     <AssemblyOriginatorKeyFile>key1.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="adminFramework, Version=1.0.7240.21241, Culture=neutral, PublicKeyToken=df99052d01433f97, processorArchitecture=MSIL">
-      <HintPath>..\packages\Contensive.PortalApi.5.1.191028.3\lib\net461\adminFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="ContensiveDbModels, Version=5.2001.3.8, Culture=neutral, PublicKeyToken=c014b235a9c6bb22, processorArchitecture=MSIL">
-      <HintPath>..\packages\Contensive.DbModels.5.2001.3.8\lib\net461\ContensiveDbModels.dll</HintPath>
+    <Reference Include="ContensiveDbModels, Version=4.1.2.0, Culture=neutral, PublicKeyToken=c014b235a9c6bb22, processorArchitecture=MSIL">
+      <HintPath>..\packages\Contensive.DbModels.22.2.11.2\lib\net472\ContensiveDbModels.dll</HintPath>
     </Reference>
     <Reference Include="CPBase, Version=4.1.2.0, Culture=neutral, PublicKeyToken=10b3c53389b845fb, processorArchitecture=MSIL">
-      <HintPath>..\packages\Contensive.CPBaseClass.5.2001.3.8\lib\net472\CPBase.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\Contensive.CPBaseClass.22.2.11.2\lib\net472\CPBase.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="PortalFramework, Version=20.9.21.3, Culture=neutral, PublicKeyToken=df99052d01433f97, processorArchitecture=MSIL">
+      <HintPath>..\packages\Contensive.PortalApi.21.11.11.1\lib\net472\PortalFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -93,15 +91,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="constants.vb" />
-    <Compile Include="Controllers\applicationController.vb" />
+    <Compile Include="Controllers\ApplicationController.vb" />
     <Compile Include="Controllers\DetailFormController.vb" />
     <Compile Include="Controllers\ListFormController.vb" />
     <Compile Include="Controllers\SearchFormClass.vb" />
     <Compile Include="Models\Domain\baseDomainModel.vb" />
+    <Compile Include="Models\Domain\PackageErrorModel.vb" />
+    <Compile Include="Models\Domain\PackageNodeModel.vb" />
+    <Compile Include="Models\Domain\FieldMetaModel.vb" />
+    <Compile Include="Models\Domain\PackageModel.vb" />
+    <Compile Include="Models\Domain\PackageProfileModel.vb" />
+    <Compile Include="Models\Domain\RequestModel.vb" />
     <Compile Include="Models\Domain\UserPropertiesModel.vb" />
-    <Compile Include="Models\Domain\_blankModel.vb" />
-    <Compile Include="Views\CMngrClass.vb" />
-    <Compile Include="Views\_sampleAddon.vb" />
+    <Compile Include="Addons\ContactManagerAddon.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -117,7 +119,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Views\_sampleRemote.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
@@ -142,13 +143,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\genericController.vb" />
+    <Compile Include="Controllers\GenericController.vb" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\sampleSql.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Db\" />
+    <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ContactManagerTools\ContactManagerTools.csproj">

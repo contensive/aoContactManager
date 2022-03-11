@@ -1,6 +1,6 @@
 ﻿
-Option Strict On
-Option Explicit On
+
+
 
 Imports Contensive.BaseClasses
 Imports Contensive.Models.Db
@@ -9,11 +9,11 @@ Imports System.Linq
 Imports Contensive.Addons.ContactManagerTools
 
 Namespace Views
-    Public Class DetailFormController
+    Public NotInheritable Class DetailFormController
         '
         '=================================================================================
         '
-        Public Shared Function ProcessRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As Views.CMngrClass.RequestClass) As FormIdEnum
+        Public Shared Function processRequest(cp As CPBaseClass, request As RequestModel) As FormIdEnum
             request.DetailMemberID = cp.Doc.GetInteger(RequestNameMemberID)
             Select Case request.Button
                 Case ButtonCancel
@@ -44,9 +44,9 @@ Namespace Views
                 Using csPerson As CPCSBaseClass = cp.CSNew()
                     csPerson.Open("people", "ID=" & DetailMemberID, "", False)
                     Dim memberName As String = csPerson.GetText("name")
-                    If memberName = "" Then
+                    If String.IsNullOrEmpty(memberName) Then
                         memberName = Trim(csPerson.GetText("FirstName") & " " & csPerson.GetText("LastName"))
-                        If memberName = "" Then
+                        If String.IsNullOrEmpty(memberName) Then
                             memberName = "Record " & csPerson.GetText("ID")
                         End If
                     End If
@@ -73,9 +73,9 @@ Namespace Views
                     '
                     Dim Nav As New TabController()
                     Call Nav.addEntry("Contact", getFormDetail_TabContact(cp, csPerson), "ccAdminTab")
-                    Call Nav.addEntry("Permissions", GetFormDetail_TabPermissions(cp, csPerson), "ccAdminTab")
-                    Call Nav.addEntry("Notes", GetFormDetail_TabNotes(cp, csPerson), "ccAdminTab")
-                    Call Nav.addEntry("Photos", GetFormDetail_TabPhoto(cp, csPerson), "ccAdminTab")
+                    Call Nav.addEntry("Permissions", getFormDetail_TabPermissions(cp, csPerson), "ccAdminTab")
+                    Call Nav.addEntry("Notes", getFormDetail_TabNotes(cp, csPerson), "ccAdminTab")
+                    Call Nav.addEntry("Photos", getFormDetail_TabPhoto(cp, csPerson), "ccAdminTab")
                     Call Nav.addEntry("Groups", getFormDetail_TabGroup(cp, csPerson), "ccAdminTab")
                     Call csPerson.Close()
                     '
@@ -87,6 +87,7 @@ Namespace Views
                 End Using
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
@@ -111,25 +112,25 @@ Namespace Views
                     & "<td width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
                     & "<td width=350><img src=/cclib/images/spacer.gif width=350 height=1></TD>" _
                     & "</TR>"
-                    left &= GetFormDetail_InputTextRow(cp, "Full Name", "Name", csPerson.GetText("name"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "First Name", "FirstName", csPerson.GetText("FirstName"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Last Name", "LastName", csPerson.GetText("LastName"), False)
-                    left &= GetFormDetail_DividerRow(cp, "Contact")
-                    left &= GetFormDetail_InputTextRow(cp, "Email", "EMAIL", csPerson.GetText("email"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Phone", "PHONE", csPerson.GetText("PHONE"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Fax", "Fax", csPerson.GetText("Fax"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Address", "ADDRESS", csPerson.GetText("ADDRESS"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Line 2", "ADDRESS2", csPerson.GetText("ADDRESS2"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "City", "City", csPerson.GetText("City"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "State", "State", csPerson.GetText("State"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Zip", "Zip", csPerson.GetText("Zip"), False)
-                    left &= GetFormDetail_DividerRow(cp, "Company")
-                    left &= GetFormDetail_InputTextRow(cp, "Name", "Company", csPerson.GetText("Company"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Title", "Title", csPerson.GetText("Title"), False)
-                    left &= GetFormDetail_DividerRow(cp, "Birthday")
-                    left &= GetFormDetail_InputTextRow(cp, "Day", "BirthdayDay", csPerson.GetText("BirthdayDay"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Month", "BirthdayMonth", csPerson.GetText("BirthdayMonth"), False)
-                    left &= GetFormDetail_InputTextRow(cp, "Year", "BirthdayYear", csPerson.GetText("BirthdayYear"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Full Name", "Name", csPerson.GetText("name"), False)
+                    left &= getFormDetail_InputTextRow(cp, "First Name", "FirstName", csPerson.GetText("FirstName"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Last Name", "LastName", csPerson.GetText("LastName"), False)
+                    left &= getFormDetail_DividerRow(cp, "Contact")
+                    left &= getFormDetail_InputTextRow(cp, "Email", "EMAIL", csPerson.GetText("email"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Phone", "PHONE", csPerson.GetText("PHONE"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Fax", "Fax", csPerson.GetText("Fax"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Address", "ADDRESS", csPerson.GetText("ADDRESS"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Line 2", "ADDRESS2", csPerson.GetText("ADDRESS2"), False)
+                    left &= getFormDetail_InputTextRow(cp, "City", "City", csPerson.GetText("City"), False)
+                    left &= getFormDetail_InputTextRow(cp, "State", "State", csPerson.GetText("State"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Zip", "Zip", csPerson.GetText("Zip"), False)
+                    left &= getFormDetail_DividerRow(cp, "Company")
+                    left &= getFormDetail_InputTextRow(cp, "Name", "Company", csPerson.GetText("Company"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Title", "Title", csPerson.GetText("Title"), False)
+                    left &= getFormDetail_DividerRow(cp, "Birthday")
+                    left &= getFormDetail_InputTextRow(cp, "Day", "BirthdayDay", csPerson.GetText("BirthdayDay"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Month", "BirthdayMonth", csPerson.GetText("BirthdayMonth"), False)
+                    left &= getFormDetail_InputTextRow(cp, "Year", "BirthdayYear", csPerson.GetText("BirthdayYear"), False)
                     left &= "</table>"
                     '
                     ' Right Side
@@ -142,7 +143,7 @@ Namespace Views
                         & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
                         & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                         & "</TR>"
-                    right &= GetFormDetail_DividerRow(cp, "Add to Notes")
+                    right &= getFormDetail_DividerRow(cp, "Add to Notes")
                     right &= "<TR><td colspan=2>" & copy & "</TD></TR>"
                     right &= "</table>"
                 End If
@@ -157,13 +158,13 @@ Namespace Views
                 Return "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
-                Return String.Empty
+                Throw
             End Try
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_TabPermissions(cp As CPBaseClass, CS As CPCSBaseClass) As String
+        Public Shared Function getFormDetail_TabPermissions(cp As CPBaseClass, CS As CPCSBaseClass) As String
             Dim result As String = ""
             Try
                 If Not CS.OK() Then
@@ -176,22 +177,23 @@ Namespace Views
                         & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
                         & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                         & "</TR>"
-                    result &= GetFormDetail_DividerRow(cp, "Login")
-                    result &= GetFormDetail_InputTextRow(cp, "Username", "Username", CS.GetText("Username"), False)
-                    result &= GetFormDetail_InputTextRow(cp, "Password", "Password", CS.GetText("Password"), True)
-                    result &= GetFormDetail_InputBooleanRow(cp, "Allow Auto Login", "AutoLogin", CS.GetBoolean("AutoLogin").ToString())
+                    result &= getFormDetail_DividerRow(cp, "Login")
+                    result &= getFormDetail_InputTextRow(cp, "Username", "Username", CS.GetText("Username"), False)
+                    result &= getFormDetail_InputTextRow(cp, "Password", "Password", CS.GetText("Password"), True)
+                    result &= getFormDetail_InputBooleanRow(cp, "Allow Auto Login", "AutoLogin", CS.GetBoolean("AutoLogin").ToString())
                     result &= "</table>"
                 End If
                 result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_TabNotes(cp As CPBaseClass, CS As CPCSBaseClass) As String
+        Public Shared Function getFormDetail_TabNotes(cp As CPBaseClass, CS As CPCSBaseClass) As String
             Dim result As String = ""
             Try
                 If Not CS.OK() Then
@@ -203,48 +205,51 @@ Namespace Views
                         & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
                         & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
                         & "</TR>"
-                    result &= GetFormDetail_InputHTMLRow(cp, "Notes", "NotesFilename", CS.GetText("NotesFilename"))
-                    result &= "</table>"
-                End If
-                '
-                result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
-                GetFormDetail_TabNotes = result
-            Catch ex As Exception
-                cp.Site.ErrorReport(ex)
-            End Try
-            Return result
-        End Function
-        '
-        '=================================================================================
-        '
-        Public Shared Function GetFormDetail_TabPhoto(cp As CPBaseClass, CS As CPCSBaseClass) As String
-            Dim result As String = ""
-            Try
-                If Not CS.OK() Then
-                    result &= "<div>There was a problem retrieving this person's information.</div>"
-                Else
-                    '
-                    result &= "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
-                        & "<TR>" _
-                        & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
-                        & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
-                        & "</TR>"
-                    result &= GetFormDetail_InputImageRow(cp, "Thumbnail", "ThumbnailFilename", CS.GetText("ThumbnailFilename"))
-                    result &= GetFormDetail_InputImageRow(cp, "Image", "ImageFilename", CS.GetText("ImageFilename"))
+                    result &= getFormDetail_InputHTMLRow(cp, "Notes", "NotesFilename", CS.GetText("NotesFilename"))
                     result &= "</table>"
                 End If
                 '
                 result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
+                getFormDetail_TabNotes = result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_InputTextRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String, IsPassword As Boolean) As String
+        Public Shared Function getFormDetail_TabPhoto(cp As CPBaseClass, CS As CPCSBaseClass) As String
             Dim result As String = ""
+            Try
+                If Not CS.OK() Then
+                    result &= "<div>There was a problem retrieving this person's information.</div>"
+                Else
+                    '
+                    result &= "<table border=0 width=100% cellspacing=0 cellpadding=0>" _
+                        & "<TR>" _
+                        & "<td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD>" _
+                        & "<td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD>" _
+                        & "</TR>"
+                    result &= getFormDetail_InputImageRow(cp, "Thumbnail", "ThumbnailFilename", CS.GetText("ThumbnailFilename"))
+                    result &= getFormDetail_InputImageRow(cp, "Image", "ImageFilename", CS.GetText("ImageFilename"))
+                    result &= "</table>"
+                End If
+                '
+                result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & result & "</div>"
+            Catch ex As Exception
+                cp.Site.ErrorReport(ex)
+                Throw
+            End Try
+            Return result
+        End Function
+        '
+        '=================================================================================
+        '
+        Public Shared Function getFormDetail_InputTextRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String, IsPassword As Boolean) As String
+            Dim result As String
+
             Try
                 result = "" _
                     & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
@@ -256,65 +261,64 @@ Namespace Views
                     result &= "<input type=text name=""" & FieldName & """ value=""" & cp.Utils.EncodeHTML(DefaultValue) & """ style=""width:350px;"">"
                 End If
                 result &= "</TD></TR>"
+                Return result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
-            Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_InputBooleanRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
-            Dim result As String = ""
+        Public Shared Function getFormDetail_InputBooleanRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
             Try
+                Dim result As String = ""
                 result = "" _
                     & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
                     & Caption & ":" _
                     & "</TD><td style=""TEXT-ALIGN:left;"">"
                 result &= "<input type=checkbox name=""" & FieldName & """ value=""" & DefaultValue & """>"
                 result &= "</TD></TR>"
+                Return result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
-            Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_InputHTMLRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
-            Dim result As String = ""
+        Public Shared Function getFormDetail_InputHTMLRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
+
             Try
-                result = "" _
+                Dim result As String = "" _
                     & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
                     & Caption & ":" _
                     & "</TD><td style=""TEXT-ALIGN:left;"">"
                 result &= cp.Html.InputWysiwyg(FieldName, DefaultValue, CPHtmlBaseClass.EditorUserScope.Administrator)
                 result &= "</TD></TR>"
+                Return result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
-            Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_InputImageRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
-            Dim result As String = ""
+        Public Shared Function getFormDetail_InputImageRow(cp As CPBaseClass, Caption As String, FieldName As String, DefaultValue As String) As String
             Try
-                Dim EncodedLink As String
-                Dim Filename As String
-                '
-                result = "" _
+                Dim result As String = "" _
                     & "<TR><td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;"">" _
                     & Caption & ":" _
                     & "</TD><td style=""TEXT-ALIGN:left;"">"
-                If DefaultValue = "" Then
+                If String.IsNullOrEmpty(DefaultValue) Then
                     result &= cp.Html.InputFile(FieldName)
                     result &= "</TD></TR>"
                 Else
-                    Filename = cp.Utils.EncodeHTML(DefaultValue)
-                    EncodedLink = cp.Utils.EncodeUrl("http://" & cp.Request.Host & cp.Site.FilePath & DefaultValue)
-                    result = result _
+                    Dim Filename As String = cp.Utils.EncodeHTML(DefaultValue)
+                    Dim EncodedLink As String = cp.Utils.EncodeUrl(cp.Http.CdnFilePathPrefixAbsolute & DefaultValue)
+                    result = "" _
                         & "<table border=0 width=100% cellspacing=0 cellpadding=4><TR>" _
                         & "<td width=200><a href=""" & EncodedLink & """ target=""_blank""><img src=""" & EncodedLink & """ width=200 border=0></a></TD>" _
                         & "<td width=100% valign=top>" _
@@ -328,27 +332,28 @@ Namespace Views
                         & "" _
                         & "</TD></TR>"
                 End If
+                Return ""
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
-            Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function GetFormDetail_DividerRow(cp As CPBaseClass, Caption As String) As String
-            Dim result As String = ""
+        Public Shared Function getFormDetail_DividerRow(cp As CPBaseClass, Caption As String) As String
             Try
-                result = Replace(Caption, " ", "&nbsp;")
+                Dim result As String = Replace(Caption, " ", "&nbsp;")
                 result = "<TR><td colspan=2 style=""Padding-top:10px;"">" _
                     & "<TABLE border=0 width=100% cellspacing=0 cellpadding=0>" _
                     & "<TR><td width=1 style=""white-space:nowrap;"">" & result & "&nbsp;&nbsp;</TD><td width=100%><HR></TD>" _
                     & "</TABLE>" _
                     & "</tr>"
+                Return result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
-            Return result
         End Function
         '
         '=================================================================================
@@ -387,7 +392,7 @@ Namespace Views
                         ' Notes
                         '
                         Dim Copy As String = cp.Doc.GetText("AppendNotes")
-                        If Copy <> "" Then
+                        If Not String.IsNullOrEmpty(Copy) Then
                             Copy = "" _
                                 & "<div style=""margin-top:10px;border-top:1px dashed black;"">Added " & Now & " by " & cp.Content.GetRecordName("people", cp.User.Id) & "</div>" _
                                 & "<div style=""margin-left:20px;margin-top:5px;"">" & Copy & "</div>"
@@ -403,7 +408,7 @@ Namespace Views
                         Dim originalFilename As String = cp.Doc.GetText(thumbnailFieldName)
 
                         Dim Path As String
-                        If originalFilename <> "" Then
+                        If Not String.IsNullOrEmpty(originalFilename) Then
                             Dim Filename As String = csPerson.GetFilename(thumbnailFieldName, originalFilename)
                             Path = Filename
                             Path = Replace(Path, "/", "\")
@@ -417,7 +422,7 @@ Namespace Views
                             Call csPerson.SetField(imageFieldName, "")
                         End If
                         originalFilename = cp.Doc.GetText(imageFieldName)
-                        If originalFilename <> "" Then
+                        If Not String.IsNullOrEmpty(originalFilename) Then
                             Dim Filename As String = csPerson.GetFilename(imageFieldName, originalFilename)
                             Path = Filename
                             Path = Replace(Path, "/", "\")
@@ -441,6 +446,7 @@ Namespace Views
                 End Using
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
@@ -448,8 +454,8 @@ Namespace Views
         '========================================================================
         '
         Public Shared Function getFormDetail_TabGroup(cp As CPBaseClass, CSMember As CPCSBaseClass) As String
-            Dim result As String = ""
             Try
+                Dim result As String = ""
 
                 '
                 ' ----- Gather all the SecondaryContent that associates to the PrimaryContent
@@ -516,9 +522,9 @@ Namespace Views
                             If (Mid(GroupName, 1, 1) <> "_") Or CanSeeHiddenGroups Then
                                 Dim GroupCaption As String = CS.GetText("GroupCaption")
                                 Dim GroupID As Integer = CS.GetInteger("ID")
-                                If GroupCaption = "" Then
+                                If String.IsNullOrEmpty(GroupCaption) Then
                                     GroupCaption = GroupName
-                                    If GroupCaption = "" Then
+                                    If String.IsNullOrEmpty(GroupCaption) Then
                                         GroupCaption = "Group&nbsp;" & GroupID
                                     End If
                                 End If
@@ -556,7 +562,7 @@ Namespace Views
                                         & "<td style=""TEXT-ALIGN:left;PADDING-LEFT:20px;border-top:1px solid white;"">" & cp.Html.CheckBox("MemberRules." & GroupCount, GroupActive) & GroupCaption & "</TD>" _
                                         & "<td style=""TEXT-ALIGN:left;PADDING-LEFT:10px;border-top:1px solid white;"">Expires " & cp.Html.InputText("MemberRules." & GroupCount & ".DateExpires", DateExpireValue, 255) & "</TD>" _
                                         & "</TR>")
-                                GroupCount = GroupCount + 1
+                                GroupCount += 1
                             End If
                             CS.GoNext()
                         Loop
@@ -578,10 +584,11 @@ Namespace Views
                 End If
                 sb.Append(vbCrLf & "<!-- GroupRule Table End --></table>")
                 result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & sb.ToString() & "</div>"
+                Return result
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
-            Return result
         End Function
         '
         '========================================================================
@@ -646,18 +653,20 @@ Namespace Views
                 End If
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
+                Throw
             End Try
         End Sub
         '
         '========================================================================
         '
-        Public Shared Function GetFormDetail_TabHomes(cp As CPBaseClass, CSMember As CPCSBaseClass) As String
-            Dim result As String = ""
+        Public Shared Function getFormDetail_TabHomes(cp As CPBaseClass, CSMember As CPCSBaseClass) As String
+            Dim result As String
+
             Try
-                Dim Cell As String
+
                 Dim DetailMemberID As Integer
-                Dim RowClassOdd As String
-                Dim RowClassEven As String
+
                 Dim ColumnCount As Integer
                 Dim CS As CPCSBaseClass = cp.CSNew()
                 Dim SQL As String
@@ -670,14 +679,11 @@ Namespace Views
                 Dim TopCount As Integer
                 Dim RowCnt As Integer
                 Dim DataRowCount As Integer
-                Dim PreTableCopy As String
-                Dim PostTableCopy As String
                 Dim ColumnPtr As Integer
                 Dim ColCaption() As String
                 Dim ColAlign() As String
                 Dim ColWidth() As String
                 Dim Cells(,) As String
-                Dim Stream As String
                 Dim SQLWhere As String
                 Dim SQLFrom As String
                 Dim SortField As String
@@ -687,11 +693,11 @@ Namespace Views
                 Dim RowClass As String
                 Dim PeopleCID As Integer
                 Dim RecordID As Integer
-                Dim RecordName As String
+
                 Dim DateCompleted As Date
                 Dim IsGrgOK As Boolean
                 '
-                Const DateRangeAll = 0
+
                 Const DateRangeToday = 10
                 Const DateRangeYesterday = 20
                 Const DateRangePastWeek = 30
@@ -699,6 +705,7 @@ Namespace Views
                 Const ColumnCnt = 4
                 '
                 IsGrgOK = True
+                Dim Stream As String = ""
                 '
                 If Not IsGrgOK Then
                     '
@@ -708,7 +715,7 @@ Namespace Views
                 Else
                     SortField = cp.Doc.GetText("SortField")
                     SortDirection = cp.Doc.GetInteger("SortDirection")
-                    If SortField = "" Then
+                    If String.IsNullOrEmpty(SortField) Then
                         SortField = "DateAdded"
                         SortDirection = -1
                     End If
@@ -734,22 +741,22 @@ Namespace Views
                     ColCaption(ColumnPtr) = "Date"
                     ColAlign(ColumnPtr) = "center"
                     ColWidth(ColumnPtr) = "150"
-                    ColumnPtr = ColumnPtr + 1
+                    ColumnPtr += 1
                     '
                     ColCaption(ColumnPtr) = "Emailed"
                     ColAlign(ColumnPtr) = "left"
                     ColWidth(ColumnPtr) = "50"
-                    ColumnPtr = ColumnPtr + 1
+                    ColumnPtr += 1
                     '
                     ColCaption(ColumnPtr) = "Property"
                     ColAlign(ColumnPtr) = "Left"
                     ColWidth(ColumnPtr) = "300"
-                    ColumnPtr = ColumnPtr + 1
+                    ColumnPtr += 1
                     '
                     ColCaption(ColumnPtr) = "Search"
                     ColAlign(ColumnPtr) = "left"
                     ColWidth(ColumnPtr) = "100%"
-                    ColumnPtr = ColumnPtr + 1
+                    ColumnPtr += 1
                     '
                     ' Build Query
                     '
@@ -761,26 +768,26 @@ Namespace Views
                         & "and(L.MemberID=" & CSMember.GetInteger("ID") & ")" _
                         & ""
                     If Not AllowNonEmail Then
-                        SQLWhere = SQLWhere & "and(L.IsEmailSearch is not null)and(L.IsEmailSearch<>0)"
+                        SQLWhere &= "and(L.IsEmailSearch is not null)and(L.IsEmailSearch<>0)"
                     End If
                     Dim rightNow As Date = Now()
                     Dim rightNowDate As Date = rightNow.Date
                     Select Case DateRangeID
                         Case DateRangeToday
-                            SQLWhere = SQLWhere & "and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate) & ")"
+                            SQLWhere &= "and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate) & ")"
                         Case DateRangeYesterday
-                            SQLWhere = SQLWhere & "and(L.DateAdded<" & cp.Db.EncodeSQLDate(rightNowDate) & ")and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-1)) & ")"
+                            SQLWhere &= "and(L.DateAdded<" & cp.Db.EncodeSQLDate(rightNowDate) & ")and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-1)) & ")"
                         Case DateRangePastWeek
-                            SQLWhere = SQLWhere & "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-7)) & ")"
+                            SQLWhere &= "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-7)) & ")"
                         Case DateRangePastMonth
-                            SQLWhere = SQLWhere & "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-30)) & ")"
+                            SQLWhere &= "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-30)) & ")"
                     End Select
                     SQLOrderBy = " ORDER BY L." & SortField
                     If SortDirection <> 0 Then
-                        SQLOrderBy = SQLOrderBy & " Desc"
+                        SQLOrderBy &= " Desc"
                     End If
                     If UCase(SortField) <> "PROPERTYSEARCHID" Then
-                        SQLOrderBy = SQLOrderBy & ",L.PropertySearchID"
+                        SQLOrderBy &= ",L.PropertySearchID"
                     End If
                     '
                     ' Get DataRowCount
@@ -801,18 +808,18 @@ Namespace Views
                         & ",L.IsEmailSearch as ViewingIsEmailSearch" _
                         & ",L.VisitID as ViewingVisitID" _
                         & " " & SQLFrom & SQLWhere & SQLOrderBy
-                    CS.OpenSQL(SQL, "", PageSize, PageNumber)
-                    If Not CS.OK() Then
+
+                    If CS.OpenSQL(SQL, "", PageSize, PageNumber) Then
                         '
                         ' No Searchs saved
                         '
-                        Stream = Stream & "<tr class=D0><td class=D0 colspan=""" & ColumnCount & """ width="" 100%"">No Auto Agent records were found.</td></tr>"
+                        Stream &= "<tr class=D0><td class=D0 colspan=""" & ColumnCount & """ width="" 100%"">No Auto Agent records were found.</td></tr>"
                     Else
                         '
                         ' List out the AutoAgents
                         '
                         RowCnt = 0
-                        RowClass = RowClassEven
+                        RowClass = ""
                         PeopleCID = cp.Content.GetID("People")
                         If Not CS.OK() Then
                             '
@@ -827,26 +834,29 @@ Namespace Views
                                 Cells(RowCnt, 2) = If(CS.GetBoolean("ViewingIsEmailSearch"), "Yes", "No")
                                 Propertyid = CS.GetInteger("PropertyID")
                                 Copy = CS.GetText("PropertyName")
-                                If Copy = "" Then
+                                If String.IsNullOrEmpty(Copy) Then
                                     Copy = "&nbsp;"
                                 Else
                                     Copy = "<a href=/index.asp?grg_pid=" & Propertyid & " target=_blank>" & Copy & "</a>"
                                 End If
                                 Cells(RowCnt, 4) = Copy
-                                RowCnt = RowCnt + 1
+                                RowCnt += 1
                                 Call CS.GoNext()
                             Loop
                         End If
-                        Stream = Stream & cp.Html.Hidden("RowCount", RowCnt.ToString())
+                        Stream &= cp.Html.Hidden("RowCount", RowCnt.ToString())
                     End If
                     Call CS.Close()
                     '
                     DetailMemberID = CSMember.GetInteger("ID")
+                    Dim PreTableCopy As String = ""
+                    Dim PostTableCopy As String = ""
                     Stream = AdminUIController.getReport(cp, RowCnt, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "")
                 End If
                 result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & Stream & "</div>"
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function

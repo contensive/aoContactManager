@@ -10,8 +10,8 @@ using static Contensive.Addons.ContactManagerTools.Constants;
 using static Contensive.Addons.ContactManagerTools.HtmlController;
 
 namespace Contensive.Addons.ContactManagerTools {
-    public class AdminUIController {
-        public  enum SortingStateEnum {
+    public static  class AdminUIController {
+        public enum SortingStateEnum {
             NotSortable = 0,
             SortableSetAZ = 1,
             SortableSetza = 2,
@@ -30,8 +30,7 @@ namespace Contensive.Addons.ContactManagerTools {
         //       RQS
         //       SortingState
         //
-        public static string getReport_CellHeader(CPBaseClass cp, int ColumnPtr, string Title, string Width, string Align, string ClassStyle, string RefreshQueryString, SortingStateEnum SortingState) {
-            string result = "";
+        public static string getReport_CellHeader( int ColumnPtr, string Title, string Width, string Align, string ClassStyle, string RefreshQueryString, SortingStateEnum SortingState) {
             try {
                 if (string.IsNullOrEmpty(Title)) Title = "&nbsp;";
                 string Style = "VERTICAL-ALIGN:bottom;";
@@ -55,11 +54,10 @@ namespace Contensive.Addons.ContactManagerTools {
                         Title = "<a href=\"?" + QS + "\" title=\"Sort Z-A\" class=\"ccAdminListCaption\">" + Title + "<img src=\"/ccLib/images/arrowdown.gif\" width=8 height=8 border=0></a>";
                         break;
                 }
-                result = "<td style=\"" + Style + "\" class=\"" + ClassStyle + "\">" + Title + "</td>";
-            } catch (Exception ) {
+                return "<td style=\"" + Style + "\" class=\"" + ClassStyle + "\">" + Title + "</td>";
+            } catch (Exception) {
                 throw;
             }
-            return result;
         }
         //
         //====================================================================================================
@@ -70,11 +68,9 @@ namespace Contensive.Addons.ContactManagerTools {
         /// <param name="DefaultSortColumnPtr"></param>
         /// <returns></returns>
         public static int getReportSortColumnPtr(CPBaseClass cp, int DefaultSortColumnPtr) {
-            int tempGetReportSortColumnPtr = 0;
-            string VarText;
             //
-            VarText = cp.Doc.GetText("ColPtr");
-            tempGetReportSortColumnPtr = encodeInteger(VarText);
+            string VarText = cp.Doc.GetText("ColPtr");
+            int tempGetReportSortColumnPtr = encodeInteger(VarText);
             if ((tempGetReportSortColumnPtr == 0) && (VarText != "0")) {
                 tempGetReportSortColumnPtr = DefaultSortColumnPtr;
             }
@@ -94,10 +90,9 @@ namespace Contensive.Addons.ContactManagerTools {
         //   This call returns a comma delimited list of integers representing the columns to sort
         //
         public static int getReportSortType(CPBaseClass cp) {
-            int tempGetReportSortType = 0;
-            string VarText;
             //
-            VarText = cp.Doc.GetText("ColPtr");
+            string VarText = cp.Doc.GetText("ColPtr");
+            int tempGetReportSortType;
             if ((encodeInteger(VarText) != 0) || (VarText == "0")) {
                 //
                 // A valid ColPtr was found
@@ -108,14 +103,13 @@ namespace Contensive.Addons.ContactManagerTools {
             }
             return tempGetReportSortType;
         }
-        public static string kmaStartTableCell(string widthPercent , int dontKNow , bool isRowEvent , string align ) {
+        public static string kmaStartTableCell(string widthPercent ) {
             return "<td width=\"" + widthPercent + "\">";
         }
         //
         //
         //====================================================================================================
         public static string getReport(CPBaseClass cp, int RowCount, string[] ColCaption, string[] ColAlign, string[] ColWidth, string[,] Cells, int PageSize, int PageNumber, string PreTableCopy, string PostTableCopy, int DataRowCount, string ClassStyle) {
-            string result = "";
             try {
                 int ColCnt = Cells.GetUpperBound(1);
                 bool[] ColSortable = new bool[ColCnt + 1];
@@ -123,11 +117,10 @@ namespace Contensive.Addons.ContactManagerTools {
                     ColSortable[Ptr] = false;
                 }
                 //
-                result = getReport2(cp, RowCount, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, ClassStyle, ColSortable, 0);
+                return getReport2(cp, RowCount, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, ClassStyle, ColSortable, 0);
             } catch (Exception) {
                 throw;
             }
-            return result;
         }
         //
         //====================================================================================================
@@ -181,24 +174,24 @@ namespace Contensive.Addons.ContactManagerTools {
                 // ----- Header
                 //
                 Content.Append("\r\n<tr>");
-                Content.Append(getReport_CellHeader(cp, 0, "&nbsp", "50px", "Right", "ccAdminListCaption", RQS, SortingStateEnum.NotSortable));
+                Content.Append(getReport_CellHeader( 0, "&nbsp", "50px", "Right", "ccAdminListCaption", RQS, SortingStateEnum.NotSortable));
                 for (ColumnPtr = 0; ColumnPtr < ColumnCount; ColumnPtr++) {
                     ColumnWidth = ColWidth[ColumnPtr];
                     if (!ColSortable[ColumnPtr]) {
                         //
                         // not sortable column
                         //
-                        Content.Append(getReport_CellHeader(cp, ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, SortingStateEnum.NotSortable));
+                        Content.Append(getReport_CellHeader( ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, SortingStateEnum.NotSortable));
                     } else if (ColumnPtr == SortColPtr) {
                         //
                         // This is the current sort column
                         //
-                        Content.Append(getReport_CellHeader(cp, ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, (SortingStateEnum)SortColType));
+                        Content.Append(getReport_CellHeader( ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, (SortingStateEnum)SortColType));
                     } else {
                         //
                         // Column is sortable, but not selected
                         //
-                        Content.Append(getReport_CellHeader(cp, ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, SortingStateEnum.SortableNotSet));
+                        Content.Append(getReport_CellHeader( ColumnPtr, ColCaption[ColumnPtr], ColumnWidth, ColAlign[ColumnPtr], "ccAdminListCaption", RQS, SortingStateEnum.SortableNotSet));
                     }
 
                     //If ColumnPtr = SortColPtr Then
@@ -216,16 +209,16 @@ namespace Contensive.Addons.ContactManagerTools {
                 //
                 if (RowCount == 0) {
                     Content.Append("\r\n<tr>");
-                    Content.Append(getReport_Cell(cp, (RowBAse + RowPointer).ToString(), "right", 1, RowPointer));
-                    Content.Append(getReport_Cell(cp, "-- End --", "left", ColumnCount, 0));
+                    Content.Append(getReport_Cell( (RowBAse + RowPointer).ToString(), "right", 1, RowPointer));
+                    Content.Append(getReport_Cell( "-- End --", "left", ColumnCount, 0));
                     Content.Append("\r\n</tr>");
                 } else {
                     RowBAse = (ReportPageSize * (ReportPageNumber - 1)) + 1;
                     for (RowPointer = 0; RowPointer < RowCount; RowPointer++) {
                         Content.Append("\r\n<tr>");
-                        Content.Append(getReport_Cell(cp, (RowBAse + RowPointer).ToString(), "right", 1, RowPointer));
+                        Content.Append(getReport_Cell( (RowBAse + RowPointer).ToString(), "right", 1, RowPointer));
                         for (ColumnPtr = 0; ColumnPtr < ColumnCount; ColumnPtr++) {
-                            Content.Append(getReport_Cell(cp, Cells[RowPointer, ColumnPtr], ColAlign[ColumnPtr], 1, RowPointer));
+                            Content.Append(getReport_Cell( Cells[RowPointer, ColumnPtr], ColAlign[ColumnPtr], 1, RowPointer));
                         }
                         Content.Append("\r\n</tr>");
                     }
@@ -267,8 +260,8 @@ namespace Contensive.Addons.ContactManagerTools {
                                 WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
                                 result += "<a href=\"" + "?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
                             }
-                            PagePointer = PagePointer + 1;
-                            LinkCount = LinkCount + 1;
+                            PagePointer++;
+                            LinkCount++;
                         }
                         if (PagePointer < PageCount) {
                             WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
@@ -293,12 +286,12 @@ namespace Contensive.Addons.ContactManagerTools {
         }
         //
         //====================================================================================================
-        public  static string getReport_Cell(CPBaseClass cp, string copy, string align, int columns, int rowPointer) {
+        public static string getReport_Cell( string copy, string align, int columns, int rowPointer) {
             string result = "\r\n<td valign=\"middle\" align=\"" + align + "\"";
             result += ((rowPointer % 2) > 0) ? " class=\"ccAdminListRowOdd\"" : " class=\"ccAdminListRowEven\"";
             result += (align.Equals("right")) ? " style=\"text-align:right\"" : (align.Equals("center")) ? " style=\"text-align:center\"" : " style=\"text-align:left\"";
             result += (columns > 1) ? " colspan=\"" + columns + "\"" : "";
-            return result + ">" + ((String.IsNullOrWhiteSpace(copy)) ? "&nbsp;" : copy ) + "</td>";
+            return result + ">" + ((String.IsNullOrWhiteSpace(copy)) ? "&nbsp;" : copy) + "</td>";
         }
         //
         ////====================================================================================================
@@ -455,8 +448,8 @@ namespace Contensive.Addons.ContactManagerTools {
         //                        WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
         //                        result += "<a href=\"" + "?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
         //                    }
-        //                    PagePointer = PagePointer + 1;
-        //                    LinkCount = LinkCount + 1;
+        //                    PagePointer ++;
+        //                    LinkCount ++;
         //                }
         //                if (PagePointer < PageCount) {
         //                    WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
@@ -483,7 +476,6 @@ namespace Contensive.Addons.ContactManagerTools {
         //====================================================================================================
         public static string getBody(CPBaseClass cp, string Caption, string ButtonListLeft, string ButtonListRight, bool AllowAdd, bool AllowDelete, string Description, string ContentSummary, int ContentPadding, string Content) {
             string result = "";
-            string ButtonBar = null;
             string LeftButtons = "";
             string RightButtons = "";
             string CellContentSummary = "";
@@ -491,21 +483,21 @@ namespace Contensive.Addons.ContactManagerTools {
             // Build ButtonBar
             //
             if (!string.IsNullOrEmpty(ButtonListLeft.Trim(' '))) {
-                LeftButtons = getButtonsFromList(cp, ButtonListLeft, AllowDelete, AllowAdd, "Button");
+                LeftButtons = getButtonsFromList( ButtonListLeft, AllowDelete, AllowAdd);
             }
             if (!string.IsNullOrEmpty(ButtonListRight.Trim(' '))) {
-                RightButtons = getButtonsFromList(cp, ButtonListRight, AllowDelete, AllowAdd, "Button");
+                RightButtons = getButtonsFromList( ButtonListRight, AllowDelete, AllowAdd);
             }
-            ButtonBar = getButtonBar(cp, LeftButtons, RightButtons);
+            string ButtonBar = getButtonBar(LeftButtons, RightButtons);
             if (!string.IsNullOrEmpty(ContentSummary)) {
                 CellContentSummary = ""
                     + "\r<div class=\"ccPanelBackground\" style=\"padding:10px;\">"
-                    + getPanel(ContentSummary, "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 5)
+                    + getPanel(ContentSummary, "ccPanel",  "100%", 5)
                     + "\r</div>";
             }
             result += ""
                 + ButtonBar
-                + getTitleBar(cp, Caption, Description)
+                + getTitleBar(Caption, Description)
                 + CellContentSummary
                 + "<div style=\"padding:" + ContentPadding + "px;\">" + Content + "\r</div>"
                 + ButtonBar;

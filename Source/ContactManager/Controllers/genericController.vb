@@ -1,6 +1,6 @@
 ﻿
-Option Explicit On
-Option Strict On
+
+
 
 'Imports System.Collections.Generic
 'Imports System.Text
@@ -10,7 +10,7 @@ Option Strict On
 'Imports AddonCollectionVb.Controllers
 
 Namespace Controllers
-    Public NotInheritable Class genericController
+    Public NotInheritable Class GenericController
         Private Sub New()
         End Sub
         '

@@ -1,6 +1,6 @@
 ﻿
-Option Explicit On
-Option Strict On
+
+
 
 Public Module constants
     '
@@ -55,7 +55,7 @@ Public Module constants
     '
     '
     ' -- errors for resultErrList
-    Public Enum resultErrorEnum
+    Public Enum ResultErrorEnum
         errPermission = 50
         errDuplicate = 100
         errVerification = 110
@@ -72,7 +72,7 @@ Public Module constants
     End Enum
     '
     ' -- http errors
-    Public Enum httpErrorEnum
+    Public Enum HttpErrorEnum
         badRequest = 400
         unauthorized = 401
         paymentRequired = 402
@@ -138,20 +138,4 @@ Public Module constants
         ExportGroup = 3
         SetGroupEmail = 4
     End Enum
-    '
-    '========================================================================
-    ''' <summary>
-    ''' meta data for each row of the people filter
-    ''' </summary>
-    Public Class FieldMeta
-        Public FieldName As String
-        Public FieldCaption As String
-        Public fieldId As Integer
-        Public fieldType As Integer
-        Public currentValue As String
-        Public FieldOperator As Integer
-        Public FieldLookupContentName As String
-        Public FieldLookupList As String
-        Public fieldEditTab As String
-    End Class
 End Module

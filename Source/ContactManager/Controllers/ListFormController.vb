@@ -1,20 +1,20 @@
 ﻿
-Option Strict On
-Option Explicit On
+
+
 
 Imports Contensive.BaseClasses
 Imports Contensive.Models.Db
 
 Namespace Views
-    Public Class ListFormController
+    Public NotInheritable Class ListFormController
         '
         '=================================================================================
         '
-        Public Shared Function ProcessRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As Views.CMngrClass.RequestClass) As FormIdEnum
+        Public Shared Function processRequest(cp As CPBaseClass, ae As Controllers.ApplicationController, request As RequestModel) As FormIdEnum
             Dim resultFormId As FormIdEnum = FormIdEnum.FormList
             Try
                 '
-                cp.Utils.AppendLogFile("ListFormController.ProcessRequest, enter")
+                cp.Utils.AppendLog("ListFormController.ProcessRequest, enter")
                 '
                 Select Case request.Button
                     Case ButtonNewSearch
@@ -28,7 +28,7 @@ Namespace Views
                         '
                         Dim SQLCriteria As String = ""
                         Dim SearchCaption As String = ""
-                        Call BuildSearch(cp, ae, SQLCriteria, SearchCaption)
+                        Call buildSearch(cp, ae, SQLCriteria, SearchCaption)
                         Dim GroupName As String
                         Dim RowPointer As Integer
                         Dim memberID As Integer
@@ -111,7 +111,7 @@ Namespace Views
                                 '
                                 ' ----- Export
                                 '
-                                cp.Utils.AppendLogFile("ListFormController.ProcessRequest, export")
+                                cp.Utils.AppendLog("ListFormController.ProcessRequest, export")
                                 '
                                 Dim Aborttask As Boolean = False
                                 If True Then
@@ -131,13 +131,13 @@ Namespace Views
                                                     RowSQL = RowSQL & "OR(ccMembers.ID=" & memberID & ")"
                                                 End If
                                             Next
-                                            If RowSQL = "" Then
+                                            If String.IsNullOrEmpty(RowSQL) Then
                                                 '
                                                 ' nothing selected, abort export
                                                 '
                                                 Aborttask = True
-                                                ae.StatusMessage = "<P>You requested to only download the selected entries, and none were selected.<P>"
-                                            ElseIf SQLCriteria = "" Then
+                                                ae.statusMessage = "<P>You requested to only download the selected entries, and none were selected.<P>"
+                                            ElseIf String.IsNullOrEmpty(SQLCriteria) Then
                                                 '
                                                 ' This is the only criteria
                                                 '
@@ -157,10 +157,10 @@ Namespace Views
                                     If Not Aborttask Then
                                         Dim SQLFrom As String = "ccMembers"
                                         Dim JoinTableCnt As Integer = 0
-                                        If ae.userProperties.contactGroupCriteria <> "" Then
+                                        If Not String.IsNullOrEmpty(ae.userProperties.contactGroupCriteria) Then
                                             SQLFrom = "(" & SQLFrom & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )"
                                         End If
-                                        Dim ContentID As Integer = ae.userProperties.ContactContentID
+                                        Dim ContentID As Integer = ae.userProperties.contactContentID
                                         Dim cs As CPCSBaseClass = cp.CSNew()
                                         cs.Open("Content Fields", "ContentID=" & ContentID, "EditSortPriority", True, "Name,Caption,Type,LookupContentID")
                                         Dim SelectList As String = ""
@@ -189,11 +189,11 @@ Namespace Views
                                             Call cs.GoNext()
                                         Loop
                                         Call cs.Close()
-                                        If SelectList = "" Then
-                                            ae.StatusMessage = "<P>There was a problem requesting your download.<P>"
+                                        If String.IsNullOrEmpty(SelectList) Then
+                                            ae.statusMessage = "<P>There was a problem requesting your download.<P>"
                                         Else
                                             SelectList = Mid(SelectList, 2)
-                                            If FieldNameList <> "" Then
+                                            If Not String.IsNullOrEmpty(FieldNameList) Then
                                                 FieldNameList = Mid(FieldNameList, 2)
                                             End If
                                             'ExportName = CStr(Now()) & " snapshot of " & LCase(ExportName)
@@ -204,11 +204,11 @@ Namespace Views
                                             Dim addon As AddonModel = AddonModel.create(Of AddonModel)(cp, addonGuidExportCSV)
                                             If (addon Is Nothing) Then
                                                 '
-                                                ae.StatusMessage = "<P>There was a problem requesting your download. The Csv Export Addon is not installed.<P>"
+                                                ae.statusMessage = "<P>There was a problem requesting your download. The Csv Export Addon is not installed.<P>"
                                             Else
-                                                ae.StatusMessage = "<P>Your download request has been submitted and will be available on the <a href=" & cp.Site.GetText("adminurl") & "?af=30>Download Requests</a> page shortly.<P>"
+                                                ae.statusMessage = "<P>Your download request has been submitted and will be available on the <a href=" & cp.Site.GetText("adminurl") & "?af=30>Download Requests</a> page shortly.<P>"
                                                 '
-                                                Dim download As DownloadModel = DownloadModel.addDefault(Of DownloadModel)(cp)
+                                                Dim download As DownloadModel = DbBaseModel.addDefault(Of DownloadModel)(cp)
                                                 download.name = "Contact Manager Export by " & cp.User.Name & ", " & Now.ToString()
                                                 download.requestedBy = cp.User.Id
                                                 download.dateRequested = Now()
@@ -216,8 +216,9 @@ Namespace Views
                                                 download.filename.filename = ContactManagerTools.Controllers.GenericController.getVirtualRecordUnixPathFilename(DownloadModel.tableMetadata.tableNameLower, "filename", download.id, "export.csv")
                                                 download.save(cp)
                                                 '
-                                                Dim args As New Dictionary(Of String, String)
-                                                args.Add("sql", SQL)
+                                                Dim args As New Dictionary(Of String, String) From {
+                                                    {"sql", SQL}
+                                                }
                                                 '
                                                 Dim cmdDetail As New TaskModel.CmdDetailClass() With {
                                                     .addonId = addon.id,
@@ -227,7 +228,7 @@ Namespace Views
                                                 '
                                                 Dim task As TaskModel = TaskModel.addDefault(Of TaskModel)(cp)
                                                 task.name = "addon [#" & cmdDetail.addonId & "," & cmdDetail.addonName & "]"
-                                                task.cmdDetail = Newtonsoft.Json.JsonConvert.SerializeObject(cmdDetail)
+                                                task.cmdDetail = cp.JSON.Serialize(cmdDetail)
                                                 task.resultDownloadId = download.id
                                                 task.save(cp)
                                             End If
@@ -250,11 +251,11 @@ Namespace Views
                                             If cp.Doc.GetBoolean("M." & RowPointer) Then
                                                 memberID = cp.Doc.GetInteger("MID." & RowPointer)
                                                 Call cp.Db.ExecuteNonQuery("update ccMembers set AllowBulkEmail=1 where ID=" & memberID)
-                                                RecordCnt = RecordCnt + 1
+                                                RecordCnt += 1
                                             End If
                                         Next
                                     End If
-                                    ae.StatusMessage = "<P>Allow Group Email was set for " & RecordCnt & " people.<P>"
+                                    ae.statusMessage = "<P>Allow Group Email was set for " & RecordCnt & " people.<P>"
                                 Else
                                     '
                                     ' Set for everyone in search criteria
@@ -266,40 +267,41 @@ Namespace Views
                                                             & " " & SQLCriteria _
                                                             & ")"
                                     Call cp.Db.ExecuteNonQuery(SQL)
-                                    ae.StatusMessage = "<P>Allow Group Email was set for all people in this selection.<P>"
+                                    ae.statusMessage = "<P>Allow Group Email was set for all people in this selection.<P>"
                                 End If
                         End Select
                 End Select
                 '
-                cp.Utils.AppendLogFile("ListFormController.ProcessRequest, exit")
+                cp.Utils.AppendLog("ListFormController.ProcessRequest, exit")
                 '
             Catch ex As Exception
                 '
-                cp.Utils.AppendLogFile("ListFormController.ProcessRequest, exception [" & ex.ToString() & "]")
+                cp.Utils.AppendLog("ListFormController.ProcessRequest, exception [" & ex.ToString() & "]")
                 '
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return resultFormId
         End Function
         '
         '=================================================================================
         '
-        Public Shared Function getResponse(cp As CPBaseClass, ae As Controllers.ApplicationController, IsAdminPath As Boolean) As String
+        Public Shared Function getResponse(cp As CPBaseClass, ae As Controllers.ApplicationController) As String
             Dim result As String = ""
             Try
                 '
                 If True Then
                     Dim IsAdmin As Boolean = cp.User.IsAdmin()
                     Dim TextTest As String = cp.Doc.GetText(RequestNamePageSize)
-                    Dim PageSize As Integer
-                    If TextTest = "" Then
-                        PageSize = cp.Utils.EncodeInteger(cp.Visit.GetText("cmPageSize", "50"))
+                    Dim pageSize As Integer
+                    If String.IsNullOrEmpty(TextTest) Then
+                        pageSize = cp.Utils.EncodeInteger(cp.Visit.GetText("cmPageSize", "50"))
                     Else
-                        PageSize = cp.Utils.EncodeInteger(TextTest)
-                        Call cp.Visit.SetProperty("cmPageSize", CStr(PageSize))
+                        pageSize = cp.Utils.EncodeInteger(TextTest)
+                        Call cp.Visit.SetProperty("cmPageSize", CStr(pageSize))
                     End If
-                    If PageSize = 0 Then
-                        PageSize = 50
+                    If pageSize = 0 Then
+                        pageSize = 50
                     End If
                     Dim PageNumber As Integer = cp.Doc.GetInteger(RequestNamePageNumber)
                     If PageNumber = 0 Then
@@ -310,7 +312,7 @@ Namespace Views
                     Dim AdminURL As String = cp.Site.GetText("adminurl")
                     Dim ColumnMax As Integer = 5
                     '
-                    Dim TopCount As Integer = PageNumber * PageSize
+                    Dim TopCount As Integer = PageNumber * pageSize
                     Dim ColCaption() As String
                     '
                     ReDim ColCaption(ColumnMax)
@@ -321,11 +323,11 @@ Namespace Views
                     Dim ColSortable() As Boolean
                     ReDim ColSortable(ColumnMax)
                     Dim Cells(,) As String
-                    ReDim Cells(PageSize, ColumnMax)
+                    ReDim Cells(pageSize, ColumnMax)
                     '
                     Dim SortColPtr As Integer = 3
                     TextTest = cp.Visit.GetText("cmSortColumn", "")
-                    If TextTest <> "" Then
+                    If Not String.IsNullOrEmpty(TextTest) Then
                         SortColPtr = cp.Utils.EncodeInteger(TextTest)
                     End If
                     SortColPtr = ContactManagerTools.AdminUIController.getReportSortColumnPtr(cp, SortColPtr)
@@ -345,7 +347,7 @@ Namespace Views
                     ColAlign(CPtr) = "center"
                     ColWidth(CPtr) = "30px"
                     ColSortable(CPtr) = False
-                    CPtr = CPtr + 1
+                    CPtr += 1
                     '
                     ColCaption(CPtr) = "Name"
                     ColAlign(CPtr) = "left"
@@ -356,7 +358,7 @@ Namespace Views
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By ccMembers.Name"
                     End If
-                    CPtr = CPtr + 1
+                    CPtr += 1
                     '
                     ColCaption(CPtr) = "Organization"
                     ColAlign(CPtr) = "left"
@@ -365,7 +367,7 @@ Namespace Views
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By Organizations.Name"
                     End If
-                    CPtr = CPtr + 1
+                    CPtr += 1
                     '
                     ColCaption(CPtr) = "Phone"
                     'ColCaption(CPtr) = "Phone<BR><img src=/cclib/images/spacer.gif width=100 height=1>"
@@ -375,7 +377,7 @@ Namespace Views
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By ccMembers.Phone"
                     End If
-                    CPtr = CPtr + 1
+                    CPtr += 1
                     '
                     ColCaption(CPtr) = "email"
                     'ColCaption(CPtr) = "email<BR><img src=/cclib/images/spacer.gif width=150 height=1>"
@@ -385,16 +387,16 @@ Namespace Views
                     If CPtr = SortColPtr Then
                         SQLOrderBy = "Order By ccMembers.Email"
                     End If
-                    CPtr = CPtr + 1
+                    CPtr += 1
                     Dim RQS As String = cp.Doc.RefreshQueryString
                     '
                     ' SubTab Menu
                     '
                     RQS = cp.Doc.RefreshQueryString
                     RQS = cp.Utils.ModifyQueryString(RQS, "tab", "", False)
-                    Dim Criteria As String
-                    Dim SearchCaption As String
-                    Call BuildSearch(cp, ae, Criteria, SearchCaption)
+                    Dim Criteria As String = ""
+                    Dim SearchCaption As String = ""
+                    Call buildSearch(cp, ae, Criteria, SearchCaption)
                     '
                     '   Get DataRowCount
                     '       This had been commented out - but it is needed for the "matches found" caption
@@ -420,32 +422,32 @@ Namespace Views
                             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID)" _
                             & Criteria _
                             & SQLOrderBy & SQLOrderDir
-                        CS.OpenSQL(SQL, "", PageSize, PageNumber)
+                        CS.OpenSQL(SQL, "", pageSize, PageNumber)
                         Dim RowPointer As Integer = 0
                         If Not CS.OK() Then
                             Cells(0, 3) = "This search returned no results"
                             RowPointer = 1
                         Else
                             'DataRowCount = Main.GetCSRowCount(CS)
-                            Do While CS.OK() And (RowPointer < PageSize)
+                            Do While CS.OK() And (RowPointer < pageSize)
                                 CPtr = 0
                                 Dim RecordID As Integer = CS.GetInteger("ID")
                                 Dim CheckBox As String = cp.Html.CheckBox("M." & RowPointer, False, "cmSelect")
                                 Cells(RowPointer, CPtr) = CheckBox & cp.Html.Hidden("MID." & RowPointer, RecordID.ToString())
-                                CPtr = CPtr + 1
+                                CPtr += 1
                                 Dim RecordName As String = CS.GetText("name")
-                                If RecordName = "" Then
+                                If String.IsNullOrEmpty(RecordName) Then
                                     RecordName = DefaultName & "&nbsp;" & RecordID
                                 End If
                                 Cells(RowPointer, CPtr) = "<a href=""?" & RQS & "&" & RequestNameMemberID & "=" & RecordID & """>" & RecordName & "</a>"
-                                CPtr = CPtr + 1
+                                CPtr += 1
                                 Cells(RowPointer, CPtr) = CS.GetText("OrgName")
-                                CPtr = CPtr + 1
+                                CPtr += 1
                                 Cells(RowPointer, CPtr) = CS.GetText("phone")
-                                CPtr = CPtr + 1
+                                CPtr += 1
                                 Cells(RowPointer, CPtr) = CS.GetText("email")
-                                CPtr = CPtr + 1
-                                RowPointer = RowPointer + 1
+                                CPtr += 1
+                                RowPointer += 1
                                 Call CS.GoNext()
                             Loop
                         End If
@@ -455,7 +457,7 @@ Namespace Views
                         Dim RowPageSize As String = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500>" _
                             & "<TR>" _
                             & "<td class=""p-1"" class=APLeft>Rows Per Page</TD>" _
-                            & "<td class=""p-1"" class=apright>" & cp.Html.InputText(RequestNamePageSize, PageSize.ToString(), "1", "10") & "</TD>" _
+                            & "<td class=""p-1"" class=apright>" & cp.Html5.InputText(RequestNamePageSize, 4, pageSize.ToString()) & "</TD>" _
                             & "</TR>" _
                             & "</Table>"
                         Dim RowGroups As String = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500><TR>" _
@@ -463,15 +465,15 @@ Namespace Views
                             & "<td class=""p-1"" class=APRight>" _
                                 & "" _
                                 & "<div class=APRight>Source Contacts</div>" _
-                                & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolSelect", 0, 0) & "&nbsp;Only those selected on this page</div>" _
+                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolSelect", 0, 0) & "&nbsp;Only those selected on this page</div>" _
                                 & "<div class=APRightIndent><input type=radio name=GroupToolSelect value=1>&nbsp;Everyone in search results</div>" _
                                 & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
                                 & "<div class=APRight>Perform Action</div>" _
-                                & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 0, 0) & " No Action</div>" _
-                                & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 1, 0) & " Add to Target Group</div>" _
-                                & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 2, 0) & " Remove from Target Group</div>" _
-                                & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 3, 0) & " Export comma delimited file</div>" _
-                                & "<div class=APRightIndent>" & cp.Html.RadioBox("GroupToolAction", 4, 0) & " Set Allow Group Email</div>" _
+                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 0, 0) & " No Action</div>" _
+                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 1, 0) & " Add to Target Group</div>" _
+                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 2, 0) & " Remove from Target Group</div>" _
+                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 3, 0) & " Export comma delimited file</div>" _
+                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 4, 0) & " Set Allow Group Email</div>" _
                                 & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
                                 & "<div class=APRight style=""padding-bottom:6px;"">Target Group</div>" _
                                 & "<div class=APRightIndent>" & cp.Html.SelectContent("GroupID", GroupID.ToString(), "Groups") & "</div>" _
@@ -497,13 +499,13 @@ Namespace Views
                         ' Header
                         '
                         Dim Description As String = "" & DataRowCount & " Matches found" _
-                            & ae.StatusMessage _
+                            & ae.statusMessage _
                             & vbCrLf
-                        Dim Header As String = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", "ccPanelHilite", "100%", 20)
+                        Dim Header As String = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", 20)
                         Header = "<div class=ccPanelBackground style=""padding:10px;"">" & Header & "</div>"
                         Dim ButtonList As String = ButtonApply & "," & ButtonNewSearch
-                        Dim PreTableCopy As String
-                        Dim Body As String = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
+                        Dim PreTableCopy As String = ""
+                        Dim Body As String = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, pageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
                         '
                         ' Assemble page
                         result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; People" & SearchCaption, ButtonList, "", True, True, Description, "", 0, Body)
@@ -511,13 +513,14 @@ Namespace Views
                 End If
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
             Return result
         End Function
         '
         '=================================================================================
         '
-        Public Shared Sub BuildSearch(cp As CPBaseClass, ae As Controllers.ApplicationController, ByRef return_Criteria As String, ByRef return_SearchCaption As String)
+        Public Shared Sub buildSearch(cp As CPBaseClass, ae As Controllers.ApplicationController, ByRef return_Criteria As String, ByRef return_SearchCaption As String)
             Try
                 Dim LookupName As String
                 Dim ContactContentID As Integer
@@ -531,31 +534,28 @@ Namespace Views
                 Dim GroupIDs() As String
                 Dim GroupDelimiter As String
                 Dim GroupPtr As Integer
-                Dim ContentName As String
-                Dim GroupCriteria As String
                 Dim SQLNow As String
                 Dim SQL As String
-                Dim CS As CPCSBaseClass = cp.CSNew()
                 Dim FieldCaption As String
                 Dim FieldContentLookupID As Integer
                 Dim FieldContentLookupName As String
-                Dim hint As String
                 '
                 ContactContentID = cp.Content.GetID("people")
                 ContactGroupCriteria = ae.userProperties.contactGroupCriteria
                 ContactSearchCriteria = ae.userProperties.contactSearchCriteria
                 return_SearchCaption = ""
+                Dim hint As String = ""
                 '
                 ' Search Criteria Fields  (crlf FieldName tab FieldType tab FieldVAlue tab Operator)
                 '
-                If ContactSearchCriteria <> "" Then
-                    hint = hint & ",110"
+                If Not String.IsNullOrEmpty(ContactSearchCriteria) Then
+                    hint &= ",110"
                     CriteriaValues = Split(ContactSearchCriteria, vbCrLf)
                     CriteriaCount = UBound(CriteriaValues) + 1
                     For CriteriaPointer = 0 To CriteriaCount - 1
-                        hint = hint & ",120"
-                        If CriteriaValues(CriteriaPointer) <> "" Then
-                            hint = hint & ",130"
+                        hint &= ",120"
+                        If Not String.IsNullOrEmpty(CriteriaValues(CriteriaPointer)) Then
+                            hint &= ",130"
                             FieldParms = Split(CriteriaValues(CriteriaPointer), vbTab)
                             If UBound(FieldParms) >= 3 Then
                                 '
@@ -563,13 +563,15 @@ Namespace Views
                                 '
                                 FieldCaption = ""
                                 SQL = "select caption,LookupContentID from ccfields where name=" & cp.Db.EncodeSQLText(FieldParms(0)) & " and contentid=" & ContactContentID
-                                CS.OpenSQL(SQL)
-                                If CS.OK() Then
-                                    FieldCaption = CS.GetText("caption")
-                                    FieldContentLookupID = CS.GetInteger("LookupContentID")
-                                End If
-                                Call CS.Close()
-                                If FieldCaption = "" Then
+                                Using CS As CPCSBaseClass = cp.CSNew()
+                                    CS.OpenSQL(SQL)
+                                    If CS.OK() Then
+                                        FieldCaption = CS.GetText("caption")
+                                        FieldContentLookupID = CS.GetInteger("LookupContentID")
+                                    End If
+                                    Call CS.Close()
+                                End Using
+                                If String.IsNullOrEmpty(FieldCaption) Then
                                     FieldCaption = FieldParms(0)
                                     FieldContentLookupID = 0
                                 End If
@@ -578,101 +580,101 @@ Namespace Views
                                         '
                                         ' text
                                         '
-                                        hint = hint & ",140"
+                                        hint &= ",140"
                                         Select Case FieldParms(3)
                                             Case "1"
                                                 '
                                                 ' is empty
                                                 '
-                                                hint = hint & ",150"
+                                                hint &= ",150"
                                                 return_Criteria = return_Criteria & "AND((ccMembers." & FieldParms(0) & " is null)or(ccMembers." & FieldParms(0) & "=''))"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " is empty"
+                                                return_SearchCaption &= ", " & FieldCaption & " is empty"
                                             Case "2"
                                                 '
                                                 ' is not empty
                                                 '
-                                                hint = hint & ",160"
+                                                hint &= ",160"
                                                 return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & " is not null)"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " is not empty"
+                                                return_SearchCaption &= ", " & FieldCaption & " is not empty"
                                             Case "3"
                                                 '
                                                 ' includes a string
                                                 '
-                                                hint = hint & ",170"
-                                                If FieldParms(2) <> "" Then
+                                                hint &= ",170"
+                                                If Not String.IsNullOrEmpty(FieldParms(2)) Then
                                                     SQLValue = cp.Db.EncodeSQLText(FieldParms(2))
                                                     SQLValue = "'%" & Mid(SQLValue, 2, Len(SQLValue) - 2) & "%'"
                                                     return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & " like " & SQLValue & ")"
-                                                    return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " includes '" & FieldParms(2) & "'"
+                                                    return_SearchCaption &= ", " & FieldCaption & " includes '" & FieldParms(2) & "'"
                                                 End If
                                         End Select
                                     Case FieldTypeLookup
                                         '
                                         ' Lookup
                                         '
-                                        hint = hint & ",180"
+                                        hint &= ",180"
                                         LookupName = ""
                                         If FieldContentLookupID <> 0 Then
                                             FieldContentLookupName = cp.Content.GetRecordName("Content", FieldContentLookupID)
-                                            If (FieldContentLookupName <> "") And (FieldParms(2).IsNumeric) Then
+                                            If (Not String.IsNullOrEmpty(FieldContentLookupName)) And (FieldParms(2).IsNumeric) Then
                                                 LookupName = cp.Content.GetRecordName(FieldContentLookupName, cp.Utils.EncodeInteger(FieldParms(2)))
                                             End If
                                         End If
-                                        If LookupName = "" Then
+                                        If String.IsNullOrEmpty(LookupName) Then
                                             LookupName = FieldParms(2)
                                         End If
 
                                         return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & "=" & FieldParms(2) & ")"
-                                        return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " = " & LookupName
+                                        return_SearchCaption &= ", " & FieldCaption & " = " & LookupName
                                     Case FieldTypeDate
                                         '
                                         ' date
                                         '
-                                        hint = hint & ",185"
+                                        hint &= ",185"
                                         Select Case cp.Utils.EncodeInteger(FieldParms(3))
                                             Case 1
                                                 return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & "=" & cp.Db.EncodeSQLDate(cp.Utils.EncodeDate(FieldParms(2))) & ")"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " = " & FieldParms(2)
+                                                return_SearchCaption &= ", " & FieldCaption & " = " & FieldParms(2)
                                             Case 2
                                                 return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & ">" & cp.Db.EncodeSQLDate(cp.Utils.EncodeDate(FieldParms(2))) & ")"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " > " & FieldParms(2)
+                                                return_SearchCaption &= ", " & FieldCaption & " > " & FieldParms(2)
                                             Case 3
                                                 return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & "<" & cp.Db.EncodeSQLDate(cp.Utils.EncodeDate(FieldParms(2))) & ")"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " < " & FieldParms(2)
+                                                return_SearchCaption &= ", " & FieldCaption & " < " & FieldParms(2)
                                         End Select
                                     Case FieldTypeCurrency, FieldTypeFloat, FieldTypeInteger, FieldTypeLookup
                                         '
                                         ' number
                                         '
-                                        hint = hint & ",190"
+                                        hint &= ",190"
                                         Select Case cp.Utils.EncodeInteger(FieldParms(3))
                                             Case 1
                                                 return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & "=" & cp.Db.EncodeSQLNumber(cp.Utils.EncodeNumber(FieldParms(2))) & ")"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " = " & FieldParms(2)
+                                                return_SearchCaption &= ", " & FieldCaption & " = " & FieldParms(2)
                                             Case 2
                                                 return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & ">" & cp.Db.EncodeSQLNumber(cp.Utils.EncodeNumber(FieldParms(2))) & ")"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " > " & FieldParms(2)
+                                                return_SearchCaption &= ", " & FieldCaption & " > " & FieldParms(2)
                                             Case 3
                                                 return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & "<" & cp.Db.EncodeSQLNumber(cp.Utils.EncodeNumber(FieldParms(2))) & ")"
-                                                return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " < " & FieldParms(2)
+                                                return_SearchCaption &= ", " & FieldCaption & " < " & FieldParms(2)
                                         End Select
                                     Case FieldTypeBoolean
                                         '
                                         ' boolean
                                         '
-                                        hint = hint & ",200"
+                                        hint &= ",200"
                                         If (FieldParms(2).Equals("1")) Then
                                             '
                                             ' 1 = search for true
                                             '
                                             return_Criteria = return_Criteria & "AND(ccMembers." & FieldParms(0) & ">0)"
-                                            return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " is true"
+                                            return_SearchCaption &= ", " & FieldCaption & " is true"
                                         ElseIf (FieldParms(2).Equals("2")) Then
                                             '
                                             ' 2 = search for false
                                             '
                                             return_Criteria = return_Criteria & "AND((ccMembers." & FieldParms(0) & "=0)or(ccMembers." & FieldParms(0) & " is null))"
-                                            return_SearchCaption = return_SearchCaption & ", " & FieldCaption & " is false"
+                                            return_SearchCaption &= ", " & FieldCaption & " is false"
                                         Else
                                             '
                                             ' 0 = ignore
@@ -684,51 +686,52 @@ Namespace Views
                         End If
                     Next
                 End If
-                If return_SearchCaption <> "" Then
-                    hint = hint & ",210"
+                If Not String.IsNullOrEmpty(return_SearchCaption) Then
+                    hint &= ",210"
                     return_SearchCaption = Mid(return_SearchCaption, 3)
                     return_SearchCaption = " where " & return_SearchCaption
                 End If
                 '
                 ' Group Rules Criteria
                 '
-                hint = hint & ",220"
+                hint &= ",220"
                 If Left(ContactGroupCriteria, 1) = "," Then
                     ContactGroupCriteria = Mid(ContactGroupCriteria, 2)
                 End If
                 If Right(ContactGroupCriteria, 1) = "," Then
                     ContactGroupCriteria = Mid(ContactGroupCriteria, 1, Len(ContactGroupCriteria) - 1)
                 End If
-                If ContactGroupCriteria <> "" Then
-                    hint = hint & ",230"
+                If Not String.IsNullOrEmpty(ContactGroupCriteria) Then
+                    hint &= ",230"
                     GroupIDs = Split(ContactGroupCriteria, ",")
                     GroupDelimiter = ""
                     SQLNow = cp.Db.EncodeSQLDate(Now)
                     If UBound(GroupIDs) = 0 Then
-                        hint = hint & ",240"
-                        If return_SearchCaption = "" Then
+                        hint &= ",240"
+                        If String.IsNullOrEmpty(return_SearchCaption) Then
                             return_SearchCaption = " in group " & "'" & getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs(GroupPtr))) & "'"
                         Else
-                            return_SearchCaption = return_SearchCaption & ", in group " & "'" & getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs(GroupPtr))) & "'"
+                            return_SearchCaption &= ", in group " & "'" & getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs(GroupPtr))) & "'"
                         End If
                         return_Criteria = return_Criteria & "AND((ccMemberRules.GroupID=" & GroupIDs(0) & ")and((ccMemberRules.DateExpires is null)or(ccMemberRules.DateExpires>" & SQLNow & ")))"
                     Else
-                        hint = hint & ",250"
-                        If return_SearchCaption <> "" Then
-                            return_SearchCaption = return_SearchCaption & ", in group(s) "
+                        hint &= ",250"
+                        If Not String.IsNullOrEmpty(return_SearchCaption) Then
+                            return_SearchCaption &= ", in group(s) "
                         Else
                             return_SearchCaption = " in group(s) "
                         End If
+                        Dim GroupCriteria As String = ""
                         For GroupPtr = 0 To UBound(GroupIDs)
-                            hint = hint & ",260"
+                            hint &= ",260"
                             GroupCriteria = GroupCriteria & "OR((ccMemberRules.GroupID=" & GroupIDs(GroupPtr) & ")and((ccMemberRules.DateExpires is null)or(ccMemberRules.DateExpires>" & SQLNow & ")))"
                             'Criteria = Criteria & "AND(ccMemberRules.GroupID=GroupIDs(GroupPtr))"
                             If GroupPtr = UBound(GroupIDs) And GroupPtr <> 0 Then
-                                hint = hint & ",270"
-                                return_SearchCaption = return_SearchCaption & " or " & "'" & getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs(GroupPtr))) & "'"
+                                hint &= ",270"
+                                return_SearchCaption &= " or " & "'" & getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs(GroupPtr))) & "'"
                             Else
-                                hint = hint & ",280"
-                                return_SearchCaption = return_SearchCaption & GroupDelimiter & "'" & getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs(GroupPtr))) & "'"
+                                hint &= ",280"
+                                return_SearchCaption &= GroupDelimiter & "'" & getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs(GroupPtr))) & "'"
                             End If
                             GroupDelimiter = ", "
                         Next
@@ -738,13 +741,14 @@ Namespace Views
                 '
                 ' Add Content Criteria
                 '
-                hint = hint & ",300"
-                If return_Criteria <> "" Then
+                hint &= ",300"
+                If Not String.IsNullOrEmpty(return_Criteria) Then
                     return_Criteria = " WHERE " & Mid(return_Criteria, 4)
                 End If
                 Exit Sub
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
+                Throw
             End Try
 
             '

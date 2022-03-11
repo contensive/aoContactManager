@@ -1,6 +1,6 @@
 ﻿
-Option Explicit On
-Option Strict On
+
+
 
 Imports System
 Imports System.Collections.Generic
@@ -13,7 +13,7 @@ Namespace Models.Domain
     ''' </summary>
     Public Class UserPropertiesModel
         '
-        Private cp As CPBaseClass
+        Private ReadOnly cp As CPBaseClass
         '
         '
         '====================================================================================================
@@ -88,7 +88,7 @@ Namespace Models.Domain
         ''' 
         ''' </summary>
         ''' <returns></returns>
-        Public Property ContactContentID As Integer
+        Public Property contactContentID As Integer
             Get
                 Return cp.User.GetInteger(nameContactContentID, cp.Content.GetID("people"))
             End Get
