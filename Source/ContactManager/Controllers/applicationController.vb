@@ -23,20 +23,20 @@ Namespace Controllers
         ''' </summary>
         ''' <returns></returns>
         Public Property packageErrorList As New List(Of PackageErrorModel)
-        '
-        '====================================================================================================
-        ''' <summary>
-        ''' data accumulated during rendering
-        ''' </summary>
-        ''' <returns></returns>
-        Public Property packageNodeList As New List(Of PackageNodeModel)
-        '
-        '====================================================================================================
-        ''' <summary>
-        ''' list of name/time used to performance analysis
-        ''' </summary>
-        ''' <returns></returns>
-        Public Property packageProfileList As New List(Of PackageProfileModel)
+        ''
+        ''====================================================================================================
+        '''' <summary>
+        '''' data accumulated during rendering
+        '''' </summary>
+        '''' <returns></returns>
+        'Public Property packageNodeList As New List(Of PackageNodeModel)
+        ''
+        ''====================================================================================================
+        '''' <summary>
+        '''' list of name/time used to performance analysis
+        '''' </summary>
+        '''' <returns></returns>
+        'Public Property packageProfileList As New List(Of PackageProfileModel)
         '
         '====================================================================================================
         ''' <summary>
@@ -67,25 +67,25 @@ Namespace Controllers
             End Get
         End Property
         Private _userProperties As Domain.UserPropertiesModel = Nothing
-        '
-        '====================================================================================================
-        ''' <summary>
-        ''' get the serialized results
-        ''' </summary>
-        ''' <returns></returns>
-        Public Function getSerializedPackage() As String
-            Try
-                Return cp.JSON.Serialize(New PackageModel With {
-                    .success = packageErrorList.Count.Equals(0),
-                    .nodeList = packageNodeList,
-                    .errorList = packageErrorList,
-                    .profileList = packageProfileList
-                })
-            Catch ex As Exception
-                cp.Site.ErrorReport(ex)
-                Throw
-            End Try
-        End Function
+        ''
+        ''====================================================================================================
+        '''' <summary>
+        '''' get the serialized results
+        '''' </summary>
+        '''' <returns></returns>
+        'Public Function getSerializedPackage() As String
+        '    Try
+        '        Return cp.JSON.Serialize(New PackageModel With {
+        '            .success = packageErrorList.Count.Equals(0),
+        '            .nodeList = packageNodeList,
+        '            .errorList = packageErrorList,
+        '            .profileList = packageProfileList
+        '        })
+        '    Catch ex As Exception
+        '        cp.Site.ErrorReport(ex)
+        '        Throw
+        '    End Try
+        'End Function
         '
         '====================================================================================================
         ''' <summary>

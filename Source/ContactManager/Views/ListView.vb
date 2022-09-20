@@ -1,12 +1,9 @@
 ﻿
-
-
-
 Imports Contensive.BaseClasses
 Imports Contensive.Models.Db
 
 Namespace Views
-    Public NotInheritable Class ListFormController
+    Public NotInheritable Class ListView
         '
         '=================================================================================
         '
@@ -26,7 +23,7 @@ Namespace Views
                         '
                         ' Add to or remove from group
                         '
-                        Dim SQLCriteria As String = ""
+                        Dim SQLCriteria As String = "(1=1)"
                         Dim SearchCaption As String = ""
                         Call buildSearch(cp, ae, SQLCriteria, SearchCaption)
                         Dim GroupName As String
@@ -67,7 +64,7 @@ Namespace Views
                                                             & " from (ccMembers" _
                                                             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )" _
                                                             & " left join ( select MemberID  from ccMemberRules where GroupID in (" & request.GroupID & ")) as InGroups on InGroups.MemberID=ccMembers.ID" _
-                                                            & " " & SQLCriteria _
+                                                            & " where " & SQLCriteria _
                                                             & " and InGroups.MemberID is null" _
                                                             & ""
                                     Call cp.Db.ExecuteNonQuery(SQL)
@@ -103,7 +100,7 @@ Namespace Views
                                                             & " select ccMembers.ID" _
                                                             & " from (ccMembers" _
                                                             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID )" _
-                                                            & " " & SQLCriteria _
+                                                            & " " & " where " & SQLCriteria _
                                                             & ")"
                                     Call cp.Db.ExecuteNonQuery(SQL)
                                 End If
@@ -197,7 +194,7 @@ Namespace Views
                                                 FieldNameList = Mid(FieldNameList, 2)
                                             End If
                                             'ExportName = CStr(Now()) & " snapshot of " & LCase(ExportName)
-                                            SQL = "select Distinct " & SelectList & " from " & SQLFrom & SQLCriteria
+                                            SQL = "select Distinct " & SelectList & " from " & SQLFrom & " where " & SQLCriteria
                                             '
                                             ' --- tmp only -- need a new api method to cp.addon,executeAsync( addonid, dictionaryofArgs, DownloadName, downloadfilename )
                                             '
@@ -394,7 +391,7 @@ Namespace Views
                     '
                     RQS = cp.Doc.RefreshQueryString
                     RQS = cp.Utils.ModifyQueryString(RQS, "tab", "", False)
-                    Dim Criteria As String = ""
+                    Dim Criteria As String = "(1=1)"
                     Dim SearchCaption As String = ""
                     Call buildSearch(cp, ae, Criteria, SearchCaption)
                     '
@@ -404,7 +401,7 @@ Namespace Views
                     Dim SQL As String = "Select distinct ccMembers.ID" _
                         & " from ccMembers" _
                         & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID" _
-                        & Criteria
+                        & " where " & Criteria
                     Using CS As CPCSBaseClass = cp.CSNew()
                         CS.OpenSQL(SQL)
                         Dim DataRowCount As Integer
@@ -420,7 +417,7 @@ Namespace Views
                             & " from ((ccMembers" _
                             & " left join organizations on Organizations.ID=ccMembers.OrganizationID)" _
                             & " left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID)" _
-                            & Criteria _
+                            & " where " & Criteria _
                             & SQLOrderBy & SQLOrderDir
                         CS.OpenSQL(SQL, "", pageSize, PageNumber)
                         Dim RowPointer As Integer = 0
@@ -464,19 +461,21 @@ Namespace Views
                             & "<td class=""p-1"" valign=top class=APLeft>Actions</TD>" _
                             & "<td class=""p-1"" class=APRight>" _
                                 & "" _
-                                & "<div class=APRight>Source Contacts</div>" _
-                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolSelect", 0, 0) & "&nbsp;Only those selected on this page</div>" _
-                                & "<div class=APRightIndent><input type=radio name=GroupToolSelect value=1>&nbsp;Everyone in search results</div>" _
-                                & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
-                                & "<div class=APRight>Perform Action</div>" _
-                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 0, 0) & " No Action</div>" _
-                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 1, 0) & " Add to Target Group</div>" _
-                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 2, 0) & " Remove from Target Group</div>" _
-                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 3, 0) & " Export comma delimited file</div>" _
-                                & "<div class=APRightIndent>" & cp.Html5.RadioBox("GroupToolAction", 4, 0) & " Set Allow Group Email</div>" _
-                                & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
-                                & "<div class=APRight style=""padding-bottom:6px;"">Target Group</div>" _
-                                & "<div class=APRightIndent>" & cp.Html.SelectContent("GroupID", GroupID.ToString(), "Groups") & "</div>" _
+                                & "<div class=""APRight"">Source Contacts</div>" _
+                                & "<div class=""form-check"">" _
+                                    & "<div class=""APRight form-check"">" & cp.Html5.RadioBox("GroupToolSelect", 0, 0, "form-check-input", "js-source-on-page") & "&nbsp;<label for=""js-source-on-page"">Only those selected on this page</label></div>" _
+                                    & "<div class=""APRight form-check""><input class=""form-check-input"" type=radio name=GroupToolSelect value=1 id=""js-source-everyone"">&nbsp;<label for=""js-source-everyone"">Everyone in search results</label></div>" _
+                                    & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></div>" _
+                                    & "<div class=APRight>Perform Action</div>" _
+                                    & "<div class=""APRight form-check"">" & cp.Html5.RadioBox("GroupToolAction", 0, 0, "form-check-input", "js-action-none") & " <label for=""js-action-none"">No Action</label></div>" _
+                                    & "<div class=""APRight form-check"">" & cp.Html5.RadioBox("GroupToolAction", 1, 0, "form-check-input", "js-action-add") & " <label for=""js-action-add"">Add to Target Group</label></div>" _
+                                    & "<div class=""APRight form-check"">" & cp.Html5.RadioBox("GroupToolAction", 2, 0, "form-check-input", "js-action-remove") & " <label for=""js-action-remove"">Remove from Target Group</label></div>" _
+                                    & "<div class=""APRight form-check"">" & cp.Html5.RadioBox("GroupToolAction", 3, 0, "form-check-input", "js-action-export") & " <label for=""js-action-export"">Export comma delimited file</label></div>" _
+                                    & "<div class=""APRight form-check"">" & cp.Html5.RadioBox("GroupToolAction", 4, 0, "form-check-input", "js-action-allowEmail") & " <label for=""js-action-allowEmail"">Set Allow Group Email</label></div>" _
+                                    & "<div style=""border-top:1px solid black;border-bottom:1px solid white;margin-top:4px;margin-bottom:4px;""></label></div>" _
+                                    & "<div class=APRight style=""padding-bottom:6px;"">Target Group</div>" _
+                                    & "<div class=""APRight form-check"">" & cp.Html.SelectContent("GroupID", GroupID.ToString(), "Groups", "", "Select Target Group", "form-control") & "</div>" _
+                                & "</div>" _
                                 & "</TD>" _
                             & "</TR></Table>"
                         Dim ActionPanel As String = "" _
@@ -498,17 +497,35 @@ Namespace Views
                         '
                         ' Header
                         '
-                        Dim Description As String = "" & DataRowCount & " Matches found" _
-                            & ae.statusMessage _
-                            & vbCrLf
-                        Dim Header As String = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", 20)
-                        Header = "<div class=ccPanelBackground style=""padding:10px;"">" & Header & "</div>"
+                        Dim Description As String = "" _
+                            & "This is a list of people that satisfy the current search criteria. Create a new search to change the criteria. Use the tools at the bottom to make changes to this selection.</p><p>" _
+                            & DataRowCount & " Matches found" _
+                            & ae.statusMessage
+                        'Dim Header As String = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", 20)
+                        'Header = "<div class=ccPanelBackground style=""padding:10px;"">" & Header & "</div>"
                         Dim ButtonList As String = ButtonApply & "," & ButtonNewSearch
                         Dim PreTableCopy As String = ""
                         Dim Body As String = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, pageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
                         '
                         ' Assemble page
-                        result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; People" & SearchCaption, ButtonList, "", True, True, Description, "", 0, Body)
+                        Dim layout As New PortalFramework.LayoutBuilderSimple With {
+                            .body = Body,
+                            .description = Description,
+                            .failMessage = "",
+                            .formActionQueryString = "",
+                            .includeBodyColor = True,
+                            .includeBodyPadding = True,
+                            .infoMessage = "",
+                            .isOuterContainer = True,
+                            .portalSubNavTitle = "",
+                            .successMessage = "",
+                            .title = "Contact Manager",
+                            .warningMessage = ""
+                        }
+                        layout.addFormButton(ButtonApply)
+                        layout.addFormButton(ButtonNewSearch)
+                        result = layout.getHtml(cp)
+                        'result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; People" & SearchCaption, ButtonList, "", True, True, Description, "", Body)
                     End Using
                 End If
             Catch ex As Exception
@@ -742,9 +759,9 @@ Namespace Views
                 ' Add Content Criteria
                 '
                 hint &= ",300"
-                If Not String.IsNullOrEmpty(return_Criteria) Then
-                    return_Criteria = " WHERE " & Mid(return_Criteria, 4)
-                End If
+                'If Not String.IsNullOrEmpty(return_Criteria) Then
+                '    return_Criteria = " WHERE " & Mid(return_Criteria, 4)
+                'End If
                 Exit Sub
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)

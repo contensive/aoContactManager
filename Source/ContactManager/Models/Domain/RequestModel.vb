@@ -1,21 +1,19 @@
 ﻿
-'
-'========================================================================
 Imports Contensive.BaseClasses
 ''' <summary>
 ''' requests processed by this form
 ''' </summary>
 Public Class RequestModel
-    Public TabNumber As Integer
-    Public Button As String
-    Public DetailMemberID As Integer
-    Public FormID As FormIdEnum
-    Public RowCount As Integer
-    Public GroupID As Integer
-    Public GroupToolAction As GroupToolActionEnum
-    Public GroupToolSelect As Integer
-    Public SelectionGroupSubTab As String
-    Public SelectionSearchSubTab As String
+    Public Property TabNumber As Integer
+    Public Property Button As String
+    Public Property DetailMemberID As Integer
+    Public Property FormID As FormIdEnum
+    Public Property RowCount As Integer
+    Public Property GroupID As Integer
+    Public Property GroupToolAction As GroupToolActionEnum
+    Public Property GroupToolSelect As Integer
+    Public Property SelectionGroupSubTab As String
+    Public Property SelectionSearchSubTab As String
     '
     Public Sub New(cp As CPBaseClass)
         '

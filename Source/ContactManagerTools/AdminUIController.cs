@@ -46,12 +46,12 @@ namespace Contensive.Addons.ContactManagerTools {
                     case SortingStateEnum.SortableSetza:
                         QS = modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetAZ).ToString(), true);
                         QS = modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
-                        Title = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Title + "<img src=\"/ccLib/images/arrowup.gif\" width=8 height=8 border=0></a>";
+                        Title = "<a href=\"?" + QS + "\" title=\"Sort A-Z\" class=\"ccAdminListCaption\">" + Title + "<i title=\"down\" class=\"fas fa-arrow-circle-up\"></i>";
                         break;
                     case SortingStateEnum.SortableSetAZ:
                         QS = modifyQueryString(RefreshQueryString, "ColSort", ((int)SortingStateEnum.SortableSetza).ToString(), true);
                         QS = modifyQueryString(QS, "ColPtr", ColumnPtr.ToString(), true);
-                        Title = "<a href=\"?" + QS + "\" title=\"Sort Z-A\" class=\"ccAdminListCaption\">" + Title + "<img src=\"/ccLib/images/arrowdown.gif\" width=8 height=8 border=0></a>";
+                        Title = "<a href=\"?" + QS + "\" title=\"Sort Z-A\" class=\"ccAdminListCaption\">" + Title + "<i title=\"down\" class=\"fas fa-arrow-circle-down\"></i>";
                         break;
                 }
                 return "<td style=\"" + Style + "\" class=\"" + ClassStyle + "\">" + Title + "</td>";
@@ -70,7 +70,7 @@ namespace Contensive.Addons.ContactManagerTools {
         public static int getReportSortColumnPtr(CPBaseClass cp, int DefaultSortColumnPtr) {
             //
             string VarText = cp.Doc.GetText("ColPtr");
-            int tempGetReportSortColumnPtr = encodeInteger(VarText);
+            int tempGetReportSortColumnPtr = cp.Utils.EncodeInteger(VarText);
             if ((tempGetReportSortColumnPtr == 0) && (VarText != "0")) {
                 tempGetReportSortColumnPtr = DefaultSortColumnPtr;
             }
@@ -93,7 +93,7 @@ namespace Contensive.Addons.ContactManagerTools {
             //
             string VarText = cp.Doc.GetText("ColPtr");
             int tempGetReportSortType;
-            if ((encodeInteger(VarText) != 0) || (VarText == "0")) {
+            if ((cp.Utils.EncodeInteger(VarText) != 0) || (VarText == "0")) {
                 //
                 // A valid ColPtr was found
                 //
@@ -106,22 +106,22 @@ namespace Contensive.Addons.ContactManagerTools {
         public static string kmaStartTableCell(string widthPercent ) {
             return "<td width=\"" + widthPercent + "\">";
         }
-        //
-        //
-        //====================================================================================================
-        public static string getReport(CPBaseClass cp, int RowCount, string[] ColCaption, string[] ColAlign, string[] ColWidth, string[,] Cells, int PageSize, int PageNumber, string PreTableCopy, string PostTableCopy, int DataRowCount, string ClassStyle) {
-            try {
-                int ColCnt = Cells.GetUpperBound(1);
-                bool[] ColSortable = new bool[ColCnt + 1];
-                for (int Ptr = 0; Ptr < ColCnt; Ptr++) {
-                    ColSortable[Ptr] = false;
-                }
-                //
-                return getReport2(cp, RowCount, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, ClassStyle, ColSortable, 0);
-            } catch (Exception) {
-                throw;
-            }
-        }
+        ////
+        ////
+        ////====================================================================================================
+        //public static string getReport(CPBaseClass cp, int RowCount, string[] ColCaption, string[] ColAlign, string[] ColWidth, string[,] Cells, int PageSize, int PageNumber, string PreTableCopy, string PostTableCopy, int DataRowCount, string ClassStyle) {
+        //    try {
+        //        int ColCnt = Cells.GetUpperBound(1);
+        //        bool[] ColSortable = new bool[ColCnt + 1];
+        //        for (int Ptr = 0; Ptr < ColCnt; Ptr++) {
+        //            ColSortable[Ptr] = false;
+        //        }
+        //        //
+        //        return getReport2(cp, RowCount, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, ClassStyle, ColSortable, 0);
+        //    } catch (Exception) {
+        //        throw;
+        //    }
+        //}
         //
         //====================================================================================================
         public static string getReport2(CPBaseClass cp, int RowCount, string[] ColCaption, string[] ColAlign, string[] ColWidth, string[,] Cells, int PageSize, int PageNumber, string PreTableCopy, string PostTableCopy, int DataRowCount, string ClassStyle, bool[] ColSortable, int DefaultSortColumnPtr) {
@@ -138,7 +138,7 @@ namespace Contensive.Addons.ContactManagerTools {
                 string WorkingQS = null;
                 //
                 int PageCount = 0;
-                int PagePointer = 0;
+                int pagePtr = 0;
                 int LinkCount = 0;
                 int ReportPageNumber = 0;
                 int ReportPageSize = 0;
@@ -231,58 +231,63 @@ namespace Contensive.Addons.ContactManagerTools {
                 //
                 // ----- Post Table copy
                 //
-                if ((DataRowCount / (double)ReportPageSize) != Math.Floor((DataRowCount / (double)ReportPageSize))) {
-                    PageCount = encodeInteger((DataRowCount / (double)ReportPageSize) + 0.5);
-                } else {
-                    PageCount = encodeInteger(DataRowCount / (double)ReportPageSize);
+                PageCount = 1;
+                if (DataRowCount > 0) {
+                    PageCount = 1 + cp.Utils.EncodeInteger(((double)DataRowCount-1.0) / (double)ReportPageSize);
                 }
+                //if ((DataRowCount / (double)ReportPageSize) != Math.Floor((DataRowCount / (double)ReportPageSize))) {
+                //    PageCount = 1 + encodeInteger(((double)DataRowCount / (double)ReportPageSize) + 0.5);
+                //} else {
+                //    PageCount = 1 + encodeInteger(DataRowCount / (double)ReportPageSize);
+                //}
                 if (PageCount > 1) {
-                    result += "<br>Page " + ReportPageNumber + " (Row " + (RowBAse) + " of " + DataRowCount + ")";
+                    result += "<div class=\"small mt-4\">Page " + ReportPageNumber + " (Row " + (RowBAse) + " of " + DataRowCount + ")</div>";
                     if (PageCount > 20) {
-                        PagePointer = ReportPageNumber - 10;
+                        pagePtr = ReportPageNumber - 10;
                     }
-                    if (PagePointer < 1) {
-                        PagePointer = 1;
+                    if (pagePtr < 1) {
+                        pagePtr = 1;
                     }
                     if (PageCount > 1) {
-                        result += "<br>Go to Page ";
-                        if (PagePointer != 1) {
+                        result += "<div class=\"small my-4\">Go to Page ";
+                        if (pagePtr != 1) {
                             WorkingQS = cp.Doc.RefreshQueryString;
                             WorkingQS = modifyQueryString(WorkingQS, "GotoPage", "1", true);
-                            result += "<a href=\"" + "?" + WorkingQS + "\">1</A>...&nbsp;";
+                            result += "<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">1</A>...&nbsp;";
                         }
                         WorkingQS = cp.Doc.RefreshQueryString;
                         WorkingQS = modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
-                        while ((PagePointer <= PageCount) && (LinkCount < 20)) {
-                            if (PagePointer == ReportPageNumber) {
-                                result += PagePointer + "&nbsp;";
+                        while ((pagePtr <= PageCount) && (LinkCount < 20)) {
+                            if (pagePtr == ReportPageNumber) {
+                                result += "<span class=\"mx-1 p-2 border\" >" + pagePtr + "</span>";
                             } else {
-                                WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
-                                result += "<a href=\"" + "?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
+                                WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, pagePtr.ToString(), true);
+                                result += "<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">" + pagePtr + "</A>";
                             }
-                            PagePointer++;
+                            pagePtr++;
                             LinkCount++;
                         }
-                        if (PagePointer < PageCount) {
+                        if (pagePtr < PageCount) {
                             WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
-                            result += "...<a href=\"" + "?" + WorkingQS + "\">" + PageCount + "</A>&nbsp;";
+                            result += "...<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">" + PageCount + "</A>";
                         }
                         if (ReportPageNumber < PageCount) {
                             WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
-                            result += "...<a href=\"" + "?" + WorkingQS + "\">next</A>&nbsp;";
+                            result += "...<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">next</A>";
                         }
-                        result += "<br>&nbsp;";
+                        result += "</div>";
                     }
                 }
-                //
-                result = ""
-                + PreTableCopy + "<table border=0 cellpadding=0 cellspacing=0 width=\"100%\"><tr><td style=\"padding:10px;\">"
-                + result + "</td></tr></table>"
-                + PostTableCopy + "";
+                return PreTableCopy + result + PostTableCopy;
+                ////
+                //result = ""
+                //+ PreTableCopy + "<table border=0 cellpadding=0 cellspacing=0 width=\"100%\"><tr><td style=\"padding:10px;\">"
+                //+ result + "</td></tr></table>"
+                //+ PostTableCopy + "";
             } catch (Exception) {
                 throw;
             }
-            return result;
+            //return result;
         }
         //
         //====================================================================================================
@@ -474,7 +479,7 @@ namespace Contensive.Addons.ContactManagerTools {
         //}
         //
         //====================================================================================================
-        public static string getBody(CPBaseClass cp, string Caption, string ButtonListLeft, string ButtonListRight, bool AllowAdd, bool AllowDelete, string Description, string ContentSummary, int ContentPadding, string Content) {
+        public static string getBody(CPBaseClass cp, string Caption, string ButtonListLeft, string ButtonListRight, bool AllowAdd, bool AllowDelete, string Description, string ContentSummary, string Content) {
             string result = "";
             string LeftButtons = "";
             string RightButtons = "";
@@ -497,9 +502,11 @@ namespace Contensive.Addons.ContactManagerTools {
             }
             result += ""
                 + ButtonBar
+                + "<div class=\"p-2\">"
                 + getTitleBar(Caption, Description)
                 + CellContentSummary
-                + "<div style=\"padding:" + ContentPadding + "px;\">" + Content + "\r</div>"
+                + "</div>"
+                + "<div>" + Content + "</div>"
                 + ButtonBar;
             result = HtmlController.formMultipart(cp, result, cp.Doc.RefreshQueryString, "", "ccForm");
             return result;

@@ -48,16 +48,16 @@ namespace Contensive.Addons.ContactManagerTools {
         //
         // ====================================================================================================
         //
-        public static string a(string innerHtml, string href) => "<a href=\"" + WebUtility.HtmlEncode(href) + "\">" + innerHtml + "</a>";
+        //public static string a(string innerHtml, string href) => "<a href=\"" + WebUtility.HtmlEncode(href) + "\">" + innerHtml + "</a>";
         public static string a(string innerHtml, string href, string htmlClass) => "<a href=\"" + WebUtility.HtmlEncode(href) + "\" class=\"" + htmlClass + "\">" + innerHtml + "</a>";
         //
         //====================================================================================================
         //
-        public static string li(string innerHtml) => genericBlockTag("li", innerHtml);
-        //
-        public static string li(string innerHtml, string htmlClass) => genericBlockTag("li", innerHtml, htmlClass, "");
-        //
-        public static string li(string innerHtml, string htmlClass, string htmlId) => genericBlockTag("li", innerHtml, htmlClass, htmlId);
+        //public static string li(string innerHtml) => genericBlockTag("li", innerHtml);
+        ////
+        //public static string li(string innerHtml, string htmlClass) => genericBlockTag("li", innerHtml, htmlClass, "");
+        ////
+        //public static string li(string innerHtml, string htmlClass, string htmlId) => genericBlockTag("li", innerHtml, htmlClass, htmlId);
         //
         //====================================================================================================
         //
@@ -69,11 +69,11 @@ namespace Contensive.Addons.ContactManagerTools {
         //
         //====================================================================================================
         //
-        public static string ul(string innerHtml) => genericBlockTag("ul", innerHtml, "", "", "");
+        //public static string ul(string innerHtml) => genericBlockTag("ul", innerHtml, "", "", "");
         //
         public static string ul(string innerHtml, string htmlClass) => genericBlockTag("ul", innerHtml, htmlClass);
         //
-        public static string ul(string innerHtml, string htmlClass, string htmlId) => genericBlockTag("ul", innerHtml, htmlClass, htmlId);
+        //public static string ul(string innerHtml, string htmlClass, string htmlId) => genericBlockTag("ul", innerHtml, htmlClass, htmlId);
         //
         //====================================================================================================
         public static string getButtonsFromList(List<ButtonMetadata> ButtonList, bool AllowDelete, bool AllowAdd) {
@@ -326,18 +326,18 @@ namespace Contensive.Addons.ContactManagerTools {
         public static string td(string Copy, string Width = "", int ColSpan = 0, bool EvenRow = false, string Align = "", string BGColor = "") {
             return tableCellStart(Width, ColSpan, EvenRow, Align, BGColor) + Copy + tableCellEnd;
         }
-        //
-        // ====================================================================================================
-        /// <summary>
-        /// create a <tr><td>content</td></tr>
-        /// </summary>
-        /// <param name="Cell"></param>
-        /// <param name="ColSpan"></param>
-        /// <param name="EvenRow"></param>
-        /// <returns></returns>
-        public static string tableRow(string Cell, int ColSpan = 0, bool EvenRow = false) {
-            return tableRowStart() + td(Cell, "100%", ColSpan, EvenRow) + Constants.kmaEndTableRow;
-        }
+        ////
+        //// ====================================================================================================
+        ///// <summary>
+        ///// create a <tr><td>content</td></tr>
+        ///// </summary>
+        ///// <param name="Cell"></param>
+        ///// <param name="ColSpan"></param>
+        ///// <param name="EvenRow"></param>
+        ///// <returns></returns>
+        //public static string tableRow(string Cell, int ColSpan = 0, bool EvenRow = false) {
+        //    return tableRowStart() + td(Cell, "100%", ColSpan, EvenRow) + Constants.kmaEndTableRow;
+        //}
     }
     public class ButtonMetadata {
         public string name = "button";

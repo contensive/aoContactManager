@@ -1,11 +1,4 @@
-﻿
-
-
-
-Imports System
-Imports System.Collections.Generic
-Imports System.Text
-Imports Contensive.BaseClasses
+﻿Imports Contensive.BaseClasses
 
 Namespace Models.Domain
     ''' <summary>

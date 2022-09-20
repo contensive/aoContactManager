@@ -8,7 +8,7 @@ Imports System.Text
 Imports System.Linq
 
 Namespace Views
-    Public NotInheritable Class SearchFormClass
+    Public NotInheritable Class SearchView
         '
         '=================================================================================
         '
@@ -20,7 +20,7 @@ Namespace Views
                 Dim Nav As New ContactManagerTools.TabController()
                 Dim Header As String
                 Dim Content As String
-                Dim ButtonList As String
+                'Dim ButtonList As String
                 '
                 If True Then
                     '
@@ -41,11 +41,6 @@ Namespace Views
                     ' SubTab Menu
                     '
                     Call cp.Doc.AddRefreshQueryString("tab", "")
-                    If IsAdminPath Then
-                        ButtonList = ButtonCancelAll & "," & ButtonSearch
-                    Else
-                        ButtonList = ButtonSearch
-                    End If
                     '
                     Header = "<div>Use the selections in each tab below to create a criteria for your search and hit the Search button.</div>"
                     '
@@ -53,11 +48,41 @@ Namespace Views
                     Call Nav.addEntry("Groups", getResponse_TabGroup(cp, ae), "ccAdminTab")
                     '
                     Content = "" _
+                            & "<div class=""mt-4"">" _
                             & cp.Html.Hidden("SelectionForm", "1") _
                             & Nav.getTabs(cp) _
                             & cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormSearch).ToString()) _
-                            & ""
-                    result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", 0, Content)
+                            & "</div>"
+
+
+                    '
+                    ' Assemble page
+                    Dim layout As New PortalFramework.LayoutBuilderSimple With {
+                            .body = Content,
+                            .description = "Select groups and record fields for search. The search will return only people who satisfy all the selections.",
+                            .failMessage = "",
+                            .formActionQueryString = "",
+                            .includeBodyColor = True,
+                            .includeBodyPadding = True,
+                            .infoMessage = "",
+                            .isOuterContainer = True,
+                            .portalSubNavTitle = "",
+                            .successMessage = "",
+                            .title = "Contact Manager - Create Search",
+                            .warningMessage = ""
+                        }
+
+                    If IsAdminPath Then
+                        layout.addFormButton(ButtonCancelAll)
+                        layout.addFormButton(ButtonSearch)
+                    Else
+                        layout.addFormButton(ButtonSearch)
+                    End If
+                    result = layout.getHtml(cp)
+
+
+
+                    'result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Selection Criteria", ButtonList, "", True, True, Header, "", Content)
                 End If
                 Return result
             Catch ex As Exception
@@ -77,9 +102,9 @@ Namespace Views
                     Dim RQS As String = cp.Doc.RefreshQueryString
                     Dim ContactGroupCriteria As String = ae.userProperties.contactGroupCriteria
                     '
-                    result = result _
-                            & "<div>Select groups to narrow your results. If any groups are selected, your search will be limited to people in any of the selected groups.</div>" _
-                            & "<div>&nbsp;</div>"
+                    'result = result _
+                    '        & "<div>Select groups to narrow your results. If any groups are selected, your search will be limited to people in any of the selected groups.</div>" _
+                    '        & "<div>&nbsp;</div>"
                     '
                     ' Add headers to stream
                     '
@@ -213,9 +238,9 @@ Namespace Views
                     '
                     ' header
                     '
-                    result = result _
-                            & "<div>Enter criteria for each field to identify and select your results. The results of a search will have to have all of the criteria you enter.</div>" _
-                            & "<div>&nbsp;</div>"
+                    'result = result _
+                    '        & "<div>Enter criteria for each field to identify and select your results. The results of a search will have to have all of the criteria you enter.</div>" _
+                    '        & "<div>&nbsp;</div>"
                     '
                     ' Add headers to stream
                     '

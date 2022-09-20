@@ -21,7 +21,7 @@ Namespace Views
                     Dim request As New RequestModel(cp)
                     Call cp.Doc.AddRefreshQueryString("tab", request.TabNumber.ToString())
                     '
-                    request.FormID = If((request.FormID <> FormIdEnum.FormUnknown), request.FormID, getDefaultFormId(request))
+                    request.FormID = If(request.FormID <> FormIdEnum.FormUnknown, request.FormID, getDefaultFormId(request))
                     If (Not String.IsNullOrEmpty(request.Button)) Then
                         '
                         ' ----- Process Previous Forms
@@ -29,13 +29,13 @@ Namespace Views
                         Select Case request.FormID
                             Case FormIdEnum.FormSearch
                                 '
-                                request.FormID = SearchFormClass.processRequest(cp, ae, request)
+                                request.FormID = SearchView.processRequest(cp, ae, request)
                             Case FormIdEnum.FormList
                                 '
-                                request.FormID = ListFormController.processRequest(cp, ae, request)
+                                request.FormID = ListView.processRequest(cp, ae, request)
                             Case FormIdEnum.FormDetails
                                 ' 
-                                request.FormID = DetailFormController.processRequest(cp, request)
+                                request.FormID = DetailView.processRequest(cp, request)
                         End Select
                     End If
                     Dim IsAdminPath As Boolean = True
@@ -44,22 +44,18 @@ Namespace Views
                     Select Case request.FormID
                         Case FormIdEnum.FormDetails
                             '
-                            result &= DetailFormController.getResponse(cp, ae, request.DetailMemberID)
+                            result &= DetailView.getResponse(cp, ae, request.DetailMemberID)
                         Case FormIdEnum.FormList
                             '
-                            result &= ListFormController.getResponse(cp, ae)
+                            result &= ListView.getResponse(cp, ae)
                         Case Else
                             '
-                            result &= SearchFormClass.getResponse(cp, ae, IsAdminPath)
+                            result &= SearchView.getResponse(cp, ae, IsAdminPath)
                     End Select
-                    result = "<div class=ccbodyadmin>" & result & "</div>"
+                    'result = "<div class=ccbodyadmin>" & result & "</div>"
                     '
                     ' wrapper for style strength
-                    result = "" _
-                    & vbCrLf & vbTab & "<div class=""contactManager"">" _
-                    & result _
-                    & vbCrLf & vbTab & "</div>" _
-                    & ""
+                    result = "<div class=""contactManager"">" & result & "</div>"
                 End Using
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)

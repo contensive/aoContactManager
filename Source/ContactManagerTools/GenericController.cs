@@ -1,13 +1,6 @@
 ﻿
 using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Data;
-using System.Net;
-using System.Web;
 using System.Text;
-using Contensive.BaseClasses;
-using static Contensive.Addons.ContactManagerTools.Constants;
 
 namespace Contensive.Addons.ContactManagerTools.Controllers {
     //
@@ -148,23 +141,23 @@ namespace Contensive.Addons.ContactManagerTools.Controllers {
         /// <param name="AnchorText">A string containing a <link>toBeAnchored</link> tag set</param>
         /// <returns></returns>
 
-        public static int encodeInteger(object expression) {
-            if (expression == null) {
-                return 0;
-            } else {
-                string tmpString = expression.ToString();
-                if (string.IsNullOrWhiteSpace(tmpString)) {
-                    return 0;
-                } else {
-                    if (int.TryParse(tmpString, out int result)) {
-                        return result;
-                    } else {
-                        return 0;
-                    }
-                }
-            }
+        //public static int encodeInteger(object expression) {
+        //    if (expression == null) {
+        //        return 0;
+        //    } else {
+        //        string tmpString = expression.ToString();
+        //        if (string.IsNullOrWhiteSpace(tmpString)) {
+        //            return 0;
+        //        } else {
+        //            if (int.TryParse(tmpString, out int result)) {
+        //                return result;
+        //            } else {
+        //                return 0;
+        //            }
+        //        }
+        //    }
 
-        }
+        //}
         //
         //====================================================================================================
         //

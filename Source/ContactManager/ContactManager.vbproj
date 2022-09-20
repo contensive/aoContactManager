@@ -68,13 +68,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ContensiveDbModels, Version=4.1.2.0, Culture=neutral, PublicKeyToken=c014b235a9c6bb22, processorArchitecture=MSIL">
-      <HintPath>..\packages\Contensive.DbModels.22.2.11.2\lib\net472\ContensiveDbModels.dll</HintPath>
+      <HintPath>..\packages\Contensive.DbModels.22.8.16.1\lib\net472\ContensiveDbModels.dll</HintPath>
     </Reference>
     <Reference Include="CPBase, Version=4.1.2.0, Culture=neutral, PublicKeyToken=10b3c53389b845fb, processorArchitecture=MSIL">
-      <HintPath>..\packages\Contensive.CPBaseClass.22.2.11.2\lib\net472\CPBase.dll</HintPath>
+      <HintPath>..\packages\Contensive.CPBaseClass.22.8.16.1\lib\net472\CPBase.dll</HintPath>
     </Reference>
-    <Reference Include="PortalFramework, Version=20.9.21.3, Culture=neutral, PublicKeyToken=df99052d01433f97, processorArchitecture=MSIL">
-      <HintPath>..\packages\Contensive.PortalApi.21.11.11.1\lib\net472\PortalFramework.dll</HintPath>
+    <Reference Include="PortalFramework, Version=22.9.20.6, Culture=neutral, PublicKeyToken=df99052d01433f97, processorArchitecture=MSIL">
+      <HintPath>..\packages\Contensive.PortalApi.22.9.20.6\lib\net472\PortalFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -92,9 +92,9 @@
   <ItemGroup>
     <Compile Include="constants.vb" />
     <Compile Include="Controllers\ApplicationController.vb" />
-    <Compile Include="Controllers\DetailFormController.vb" />
-    <Compile Include="Controllers\ListFormController.vb" />
-    <Compile Include="Controllers\SearchFormClass.vb" />
+    <Compile Include="Views\DetailView.vb" />
+    <Compile Include="Views\ListView.vb" />
+    <Compile Include="Views\SearchView.vb" />
     <Compile Include="Models\Domain\baseDomainModel.vb" />
     <Compile Include="Models\Domain\PackageErrorModel.vb" />
     <Compile Include="Models\Domain\PackageNodeModel.vb" />
@@ -143,14 +143,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\GenericController.vb" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Resources\sampleSql.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Db\" />
-    <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ContactManagerTools\ContactManagerTools.csproj">

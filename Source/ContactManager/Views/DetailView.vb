@@ -1,15 +1,11 @@
-﻿
-
-
-
+﻿Imports System.Linq
+Imports System.Text
+Imports Contensive.Addons.ContactManagerTools
 Imports Contensive.BaseClasses
 Imports Contensive.Models.Db
-Imports System.Text
-Imports System.Linq
-Imports Contensive.Addons.ContactManagerTools
 
 Namespace Views
-    Public NotInheritable Class DetailFormController
+    Public NotInheritable Class DetailView
         '
         '=================================================================================
         '
@@ -28,12 +24,6 @@ Namespace Views
                     Return FormIdEnum.FormSearch
             End Select
             Return FormIdEnum.FormDetails
-        End Function
-        '
-        '=================================================================================
-        '
-        Public Shared Function getEventsTab() As String
-            Return "events"
         End Function
         '
         '=================================================================================
@@ -83,7 +73,7 @@ Namespace Views
                     Content &= cp.Html.Hidden(RequestNameFormID, Convert.ToInt32(FormIdEnum.FormDetails).ToString())
                     Content &= cp.Html.Hidden(RequestNameMemberID, DetailMemberID.ToString())
                     '
-                    result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", 0, Content)
+                    result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", True, True, Header, "", Content)
                 End Using
             Catch ex As Exception
                 cp.Site.ErrorReport(ex)
@@ -657,209 +647,209 @@ Namespace Views
                 Throw
             End Try
         End Sub
-        '
-        '========================================================================
-        '
-        Public Shared Function getFormDetail_TabHomes(cp As CPBaseClass, CSMember As CPCSBaseClass) As String
-            Dim result As String
+        ''
+        ''========================================================================
+        ''
+        'Public Shared Function getFormDetail_TabHomes(cp As CPBaseClass, CSMember As CPCSBaseClass) As String
+        '    Dim result As String
 
-            Try
+        '    Try
 
-                Dim DetailMemberID As Integer
+        '        Dim DetailMemberID As Integer
 
-                Dim ColumnCount As Integer
-                Dim CS As CPCSBaseClass = cp.CSNew()
-                Dim SQL As String
-                Dim SQLOrderBy As String
-                Dim DateRangeID As Integer
-                Dim AllowNonEmail As Boolean
-                Dim RQS As String
-                Dim PageSize As Integer
-                Dim PageNumber As Integer
-                Dim TopCount As Integer
-                Dim RowCnt As Integer
-                Dim DataRowCount As Integer
-                Dim ColumnPtr As Integer
-                Dim ColCaption() As String
-                Dim ColAlign() As String
-                Dim ColWidth() As String
-                Dim Cells(,) As String
-                Dim SQLWhere As String
-                Dim SQLFrom As String
-                Dim SortField As String
-                Dim SortDirection As Integer
-                Dim Propertyid As Integer
-                Dim Copy As String
-                Dim RowClass As String
-                Dim PeopleCID As Integer
-                Dim RecordID As Integer
+        '        Dim ColumnCount As Integer
+        '        Dim CS As CPCSBaseClass = cp.CSNew()
+        '        Dim SQL As String
+        '        Dim SQLOrderBy As String
+        '        Dim DateRangeID As Integer
+        '        Dim AllowNonEmail As Boolean
+        '        Dim RQS As String
+        '        Dim PageSize As Integer
+        '        Dim PageNumber As Integer
+        '        Dim TopCount As Integer
+        '        Dim RowCnt As Integer
+        '        Dim DataRowCount As Integer
+        '        Dim ColumnPtr As Integer
+        '        Dim ColCaption() As String
+        '        Dim ColAlign() As String
+        '        Dim ColWidth() As String
+        '        Dim Cells(,) As String
+        '        Dim SQLWhere As String
+        '        Dim SQLFrom As String
+        '        Dim SortField As String
+        '        Dim SortDirection As Integer
+        '        Dim Propertyid As Integer
+        '        Dim Copy As String
+        '        Dim RowClass As String
+        '        Dim PeopleCID As Integer
+        '        Dim RecordID As Integer
 
-                Dim DateCompleted As Date
-                Dim IsGrgOK As Boolean
-                '
+        '        Dim DateCompleted As Date
+        '        Dim IsGrgOK As Boolean
+        '        '
 
-                Const DateRangeToday = 10
-                Const DateRangeYesterday = 20
-                Const DateRangePastWeek = 30
-                Const DateRangePastMonth = 40
-                Const ColumnCnt = 4
-                '
-                IsGrgOK = True
-                Dim Stream As String = ""
-                '
-                If Not IsGrgOK Then
-                    '
-                    ' The RealEstate datasource is not available
-                    '
-                    Stream = "<P>This site is not configured to display the Homes Viewed tab. This tab requires the grgRealEstate Datasource.</P>"
-                Else
-                    SortField = cp.Doc.GetText("SortField")
-                    SortDirection = cp.Doc.GetInteger("SortDirection")
-                    If String.IsNullOrEmpty(SortField) Then
-                        SortField = "DateAdded"
-                        SortDirection = -1
-                    End If
-                    '
-                    RQS = cp.Doc.RefreshQueryString
-                    PageSize = cp.Doc.GetInteger(RequestNamePageSize)
-                    If PageSize = 0 Then
-                        PageSize = 50
-                    End If
-                    PageNumber = cp.Doc.GetInteger(RequestNamePageNumber)
-                    If PageNumber = 0 Then
-                        PageNumber = 1
-                    End If
-                    TopCount = PageNumber * PageSize
-                    '
-                    ' Setup Headings
-                    '
-                    ReDim ColCaption(ColumnCnt)
-                    ReDim ColAlign(ColumnCnt)
-                    ReDim ColWidth(ColumnCnt)
-                    ReDim Cells(PageSize, ColumnCnt)
-                    '
-                    ColCaption(ColumnPtr) = "Date"
-                    ColAlign(ColumnPtr) = "center"
-                    ColWidth(ColumnPtr) = "150"
-                    ColumnPtr += 1
-                    '
-                    ColCaption(ColumnPtr) = "Emailed"
-                    ColAlign(ColumnPtr) = "left"
-                    ColWidth(ColumnPtr) = "50"
-                    ColumnPtr += 1
-                    '
-                    ColCaption(ColumnPtr) = "Property"
-                    ColAlign(ColumnPtr) = "Left"
-                    ColWidth(ColumnPtr) = "300"
-                    ColumnPtr += 1
-                    '
-                    ColCaption(ColumnPtr) = "Search"
-                    ColAlign(ColumnPtr) = "left"
-                    ColWidth(ColumnPtr) = "100%"
-                    ColumnPtr += 1
-                    '
-                    ' Build Query
-                    '
-                    SQLFrom = "" _
-                        & " From grgPropertyLog L" _
-                        & " left join grgPropertySearches S on S.ID=L.PropertySearchID"
-                    SQLWhere = " Where" _
-                        & "(S.ID is not null)" _
-                        & "and(L.MemberID=" & CSMember.GetInteger("ID") & ")" _
-                        & ""
-                    If Not AllowNonEmail Then
-                        SQLWhere &= "and(L.IsEmailSearch is not null)and(L.IsEmailSearch<>0)"
-                    End If
-                    Dim rightNow As Date = Now()
-                    Dim rightNowDate As Date = rightNow.Date
-                    Select Case DateRangeID
-                        Case DateRangeToday
-                            SQLWhere &= "and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate) & ")"
-                        Case DateRangeYesterday
-                            SQLWhere &= "and(L.DateAdded<" & cp.Db.EncodeSQLDate(rightNowDate) & ")and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-1)) & ")"
-                        Case DateRangePastWeek
-                            SQLWhere &= "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-7)) & ")"
-                        Case DateRangePastMonth
-                            SQLWhere &= "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-30)) & ")"
-                    End Select
-                    SQLOrderBy = " ORDER BY L." & SortField
-                    If SortDirection <> 0 Then
-                        SQLOrderBy &= " Desc"
-                    End If
-                    If UCase(SortField) <> "PROPERTYSEARCHID" Then
-                        SQLOrderBy &= ",L.PropertySearchID"
-                    End If
-                    '
-                    ' Get DataRowCount
-                    '
-                    SQL = "select count(*) as Cnt " & SQLFrom & SQLWhere
-                    CS.OpenSQL(SQL)
-                    If CS.OK() Then
-                        DataRowCount = CS.GetInteger("cnt")
-                    End If
-                    Call CS.Close()
-                    '
-                    ' Get Data
-                    '
-                    SQL = "select S.*" _
-                        & ",L.PropertyID as PropertyID" _
-                        & ",L.PropertyName as PropertyName" _
-                        & ",L.DateAdded as ViewingDateAdded" _
-                        & ",L.IsEmailSearch as ViewingIsEmailSearch" _
-                        & ",L.VisitID as ViewingVisitID" _
-                        & " " & SQLFrom & SQLWhere & SQLOrderBy
+        '        Const DateRangeToday = 10
+        '        Const DateRangeYesterday = 20
+        '        Const DateRangePastWeek = 30
+        '        Const DateRangePastMonth = 40
+        '        Const ColumnCnt = 4
+        '        '
+        '        IsGrgOK = True
+        '        Dim Stream As String = ""
+        '        '
+        '        If Not IsGrgOK Then
+        '            '
+        '            ' The RealEstate datasource is not available
+        '            '
+        '            Stream = "<P>This site is not configured to display the Homes Viewed tab. This tab requires the grgRealEstate Datasource.</P>"
+        '        Else
+        '            SortField = cp.Doc.GetText("SortField")
+        '            SortDirection = cp.Doc.GetInteger("SortDirection")
+        '            If String.IsNullOrEmpty(SortField) Then
+        '                SortField = "DateAdded"
+        '                SortDirection = -1
+        '            End If
+        '            '
+        '            RQS = cp.Doc.RefreshQueryString
+        '            PageSize = cp.Doc.GetInteger(RequestNamePageSize)
+        '            If PageSize = 0 Then
+        '                PageSize = 50
+        '            End If
+        '            PageNumber = cp.Doc.GetInteger(RequestNamePageNumber)
+        '            If PageNumber = 0 Then
+        '                PageNumber = 1
+        '            End If
+        '            TopCount = PageNumber * PageSize
+        '            '
+        '            ' Setup Headings
+        '            '
+        '            ReDim ColCaption(ColumnCnt)
+        '            ReDim ColAlign(ColumnCnt)
+        '            ReDim ColWidth(ColumnCnt)
+        '            ReDim Cells(PageSize, ColumnCnt)
+        '            '
+        '            ColCaption(ColumnPtr) = "Date"
+        '            ColAlign(ColumnPtr) = "center"
+        '            ColWidth(ColumnPtr) = "150"
+        '            ColumnPtr += 1
+        '            '
+        '            ColCaption(ColumnPtr) = "Emailed"
+        '            ColAlign(ColumnPtr) = "left"
+        '            ColWidth(ColumnPtr) = "50"
+        '            ColumnPtr += 1
+        '            '
+        '            ColCaption(ColumnPtr) = "Property"
+        '            ColAlign(ColumnPtr) = "Left"
+        '            ColWidth(ColumnPtr) = "300"
+        '            ColumnPtr += 1
+        '            '
+        '            ColCaption(ColumnPtr) = "Search"
+        '            ColAlign(ColumnPtr) = "left"
+        '            ColWidth(ColumnPtr) = "100%"
+        '            ColumnPtr += 1
+        '            '
+        '            ' Build Query
+        '            '
+        '            SQLFrom = "" _
+        '                & " From grgPropertyLog L" _
+        '                & " left join grgPropertySearches S on S.ID=L.PropertySearchID"
+        '            SQLWhere = " Where" _
+        '                & "(S.ID is not null)" _
+        '                & "and(L.MemberID=" & CSMember.GetInteger("ID") & ")" _
+        '                & ""
+        '            If Not AllowNonEmail Then
+        '                SQLWhere &= "and(L.IsEmailSearch is not null)and(L.IsEmailSearch<>0)"
+        '            End If
+        '            Dim rightNow As Date = Now()
+        '            Dim rightNowDate As Date = rightNow.Date
+        '            Select Case DateRangeID
+        '                Case DateRangeToday
+        '                    SQLWhere &= "and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate) & ")"
+        '                Case DateRangeYesterday
+        '                    SQLWhere &= "and(L.DateAdded<" & cp.Db.EncodeSQLDate(rightNowDate) & ")and(L.DateAdded>=" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-1)) & ")"
+        '                Case DateRangePastWeek
+        '                    SQLWhere &= "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-7)) & ")"
+        '                Case DateRangePastMonth
+        '                    SQLWhere &= "and(L.DateAdded>" & cp.Db.EncodeSQLDate(rightNowDate.AddDays(-30)) & ")"
+        '            End Select
+        '            SQLOrderBy = " ORDER BY L." & SortField
+        '            If SortDirection <> 0 Then
+        '                SQLOrderBy &= " Desc"
+        '            End If
+        '            If UCase(SortField) <> "PROPERTYSEARCHID" Then
+        '                SQLOrderBy &= ",L.PropertySearchID"
+        '            End If
+        '            '
+        '            ' Get DataRowCount
+        '            '
+        '            SQL = "select count(*) as Cnt " & SQLFrom & SQLWhere
+        '            CS.OpenSQL(SQL)
+        '            If CS.OK() Then
+        '                DataRowCount = CS.GetInteger("cnt")
+        '            End If
+        '            Call CS.Close()
+        '            '
+        '            ' Get Data
+        '            '
+        '            SQL = "select S.*" _
+        '                & ",L.PropertyID as PropertyID" _
+        '                & ",L.PropertyName as PropertyName" _
+        '                & ",L.DateAdded as ViewingDateAdded" _
+        '                & ",L.IsEmailSearch as ViewingIsEmailSearch" _
+        '                & ",L.VisitID as ViewingVisitID" _
+        '                & " " & SQLFrom & SQLWhere & SQLOrderBy
 
-                    If CS.OpenSQL(SQL, "", PageSize, PageNumber) Then
-                        '
-                        ' No Searchs saved
-                        '
-                        Stream &= "<tr class=D0><td class=D0 colspan=""" & ColumnCount & """ width="" 100%"">No Auto Agent records were found.</td></tr>"
-                    Else
-                        '
-                        ' List out the AutoAgents
-                        '
-                        RowCnt = 0
-                        RowClass = ""
-                        PeopleCID = cp.Content.GetID("People")
-                        If Not CS.OK() Then
-                            '
-                            ' EMPTY
-                            '
-                        Else
-                            Do While CS.OK() And (RowCnt < PageSize)
-                                RecordID = CS.GetInteger("ID")
-                                DateCompleted = CS.GetDate("DateCompleted")
-                                Cells(RowCnt, 0) = CS.GetDate("DateAdded") & cp.Html.Hidden("RowID" & RowCnt, RecordID.ToString())
-                                Cells(RowCnt, 1) = CS.GetText("name")
-                                Cells(RowCnt, 2) = If(CS.GetBoolean("ViewingIsEmailSearch"), "Yes", "No")
-                                Propertyid = CS.GetInteger("PropertyID")
-                                Copy = CS.GetText("PropertyName")
-                                If String.IsNullOrEmpty(Copy) Then
-                                    Copy = "&nbsp;"
-                                Else
-                                    Copy = "<a href=/index.asp?grg_pid=" & Propertyid & " target=_blank>" & Copy & "</a>"
-                                End If
-                                Cells(RowCnt, 4) = Copy
-                                RowCnt += 1
-                                Call CS.GoNext()
-                            Loop
-                        End If
-                        Stream &= cp.Html.Hidden("RowCount", RowCnt.ToString())
-                    End If
-                    Call CS.Close()
-                    '
-                    DetailMemberID = CSMember.GetInteger("ID")
-                    Dim PreTableCopy As String = ""
-                    Dim PostTableCopy As String = ""
-                    Stream = AdminUIController.getReport(cp, RowCnt, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "")
-                End If
-                result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & Stream & "</div>"
-            Catch ex As Exception
-                cp.Site.ErrorReport(ex)
-                Throw
-            End Try
-            Return result
-        End Function
+        '            If CS.OpenSQL(SQL, "", PageSize, PageNumber) Then
+        '                '
+        '                ' No Searchs saved
+        '                '
+        '                Stream &= "<tr class=D0><td class=D0 colspan=""" & ColumnCount & """ width="" 100%"">No Auto Agent records were found.</td></tr>"
+        '            Else
+        '                '
+        '                ' List out the AutoAgents
+        '                '
+        '                RowCnt = 0
+        '                RowClass = ""
+        '                PeopleCID = cp.Content.GetID("People")
+        '                If Not CS.OK() Then
+        '                    '
+        '                    ' EMPTY
+        '                    '
+        '                Else
+        '                    Do While CS.OK() And (RowCnt < PageSize)
+        '                        RecordID = CS.GetInteger("ID")
+        '                        DateCompleted = CS.GetDate("DateCompleted")
+        '                        Cells(RowCnt, 0) = CS.GetDate("DateAdded") & cp.Html.Hidden("RowID" & RowCnt, RecordID.ToString())
+        '                        Cells(RowCnt, 1) = CS.GetText("name")
+        '                        Cells(RowCnt, 2) = If(CS.GetBoolean("ViewingIsEmailSearch"), "Yes", "No")
+        '                        Propertyid = CS.GetInteger("PropertyID")
+        '                        Copy = CS.GetText("PropertyName")
+        '                        If String.IsNullOrEmpty(Copy) Then
+        '                            Copy = "&nbsp;"
+        '                        Else
+        '                            Copy = "<a href=/index.asp?grg_pid=" & Propertyid & " target=_blank>" & Copy & "</a>"
+        '                        End If
+        '                        Cells(RowCnt, 4) = Copy
+        '                        RowCnt += 1
+        '                        Call CS.GoNext()
+        '                    Loop
+        '                End If
+        '                Stream &= cp.Html.Hidden("RowCount", RowCnt.ToString())
+        '            End If
+        '            Call CS.Close()
+        '            '
+        '            DetailMemberID = CSMember.GetInteger("ID")
+        '            Dim PreTableCopy As String = ""
+        '            Dim PostTableCopy As String = ""
+        '            Stream = AdminUIController.getReport(cp, RowCnt, ColCaption, ColAlign, ColWidth, Cells, PageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "")
+        '        End If
+        '        result = "<div STYLE=""width:100%;"" class=""cmBody ccPanel3DReverse"">" & Stream & "</div>"
+        '    Catch ex As Exception
+        '        cp.Site.ErrorReport(ex)
+        '        Throw
+        '    End Try
+        '    Return result
+        'End Function
         '
 
 
