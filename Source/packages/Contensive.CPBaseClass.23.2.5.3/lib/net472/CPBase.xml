@@ -4,33 +4,6 @@
         <name>CPBase</name>
     </assembly>
     <members>
-        <member name="T:Contensive.BaseClasses.AddonBaseClass">
-             <summary>
-             The base class for all Contensive add-ons.
-             </summary>
-             <remarks>
-             This is a sample addon created from the AddonBaseClass. To use this add-on, Start a new project and reference CPBase in your Contensive installation.
-             Paste this code into a HelloWorld Class and build the DLL.
-             Copy the DLL into the Contensive\Addon folder.
-             Create a new collection on your site and name it Samples. (Manage Add-ons >> Advanced >> click on collections )
-             Create a new Addon on your site, name it Hello World, set the Samples collection and set the Dot Net Class name to Contensive.Addons.HelloWorldClass
-             Open the Navigator to Manage Add-ons >> Samples >> and click on Hello World
-             
-            <code >
-             Namespace Contensive.Addons
-             '
-             'Hello World
-             '
-             Public Class HelloWorldClass
-                 Inherits BaseClasses.AddonBaseClass
-                 Public Overrides Function Execute(ByVal CP As Contensive.BaseClasses.CPBaseClass) As Object
-                     Return "Hello World 2"
-                 End Function
-            End Class
-            End Namespace
-              </code>
-             </remarks>
-        </member>
         <member name="M:Contensive.BaseClasses.AddonBaseClass.Execute(Contensive.BaseClasses.CPBaseClass)">
             <summary>
             The only exposed method of an addon. Performs the functions for this part of the the add-on and returns an object, typically a string. For add-ons executing on a web page or as a remove method, the returned string is added to the page where the addon is placed. For addons run as processes, the returned string is logged in the process log.
@@ -1733,6 +1706,11 @@
             read and write messages to a standard message queue
             </summary>
         </member>
+        <member name="P:Contensive.BaseClasses.CPBaseClass.MQTT">
+            <summary>
+            publish to an mqtt broker
+            </summary>
+        </member>
         <member name="P:Contensive.BaseClasses.CPBaseClass.Mustache">
             <summary>
             Manage mustache compatible template language operations
@@ -2606,7 +2584,8 @@
         </member>
         <member name="M:Contensive.BaseClasses.CPContentBaseClass.GetEditLink(System.String,System.String,System.Boolean,System.String,System.Boolean)">
             <summary>
-            Get the system edit link
+            Use GetEditUrl for simple anchor tag href to the edit page for this record.
+            Get the system edit link, including the design graphic
             </summary>
             <param name="contentName"></param>
             <param name="recordId"></param>
@@ -2694,6 +2673,38 @@
             <param name="contentId"></param>
             <param name="recordGuid"></param>
             <param name="customCaption"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPContentBaseClass.GetEditUrl(System.String,System.Int32)">
+            <summary>
+            Get the url to the admin site edit page
+            </summary>
+            <param name="contentName"></param>
+            <param name="recordId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPContentBaseClass.GetEditUrl(System.String,System.String)">
+            <summary>
+            Get the url to the admin site edit page
+            </summary>
+            <param name="contentName"></param>
+            <param name="recordGuid"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPContentBaseClass.GetEditUrl(System.Int32,System.Int32)">
+            <summary>
+            Get the url to the admin site edit page
+            </summary>
+            <param name="contentId"></param>
+            <param name="recordId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPContentBaseClass.GetEditUrl(System.Int32,System.String)">
+            <summary>
+            Get the url to the admin site edit page
+            </summary>
+            <param name="contentId"></param>
+            <param name="recordGuid"></param>
             <returns></returns>
         </member>
         <member name="M:Contensive.BaseClasses.CPContentBaseClass.GetEditWrapper(System.String)">
@@ -5792,17 +5803,56 @@
             </summary>
             <param name="logMessage"></param>
         </member>
+        <member name="M:Contensive.BaseClasses.CPLogBaseClass.Warn(System.Exception,System.String)">
+            <summary>
+            Log a message
+            </summary>
+            <param name="ex"></param>
+            <param name="logMessage"></param>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPLogBaseClass.Warn(System.Exception)">
+            <summary>
+            Log a message
+            </summary>
+            <param name="ex"></param>
+        </member>
         <member name="M:Contensive.BaseClasses.CPLogBaseClass.Error(System.String)">
             <summary>
             Log a message
             </summary>
             <param name="logMessage"></param>
         </member>
+        <member name="M:Contensive.BaseClasses.CPLogBaseClass.Error(System.Exception,System.String)">
+            <summary>
+            Log a message
+            </summary>
+            <param name="ex"></param>
+            <param name="logMessage"></param>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPLogBaseClass.Error(System.Exception)">
+            <summary>
+            Log a message
+            </summary>
+            <param name="ex"></param>
+        </member>
         <member name="M:Contensive.BaseClasses.CPLogBaseClass.Fatal(System.String)">
             <summary>
             Log a message
             </summary>
             <param name="logMessage"></param>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPLogBaseClass.Fatal(System.Exception,System.String)">
+            <summary>
+            Log a message
+            </summary>
+            <param name="ex"></param>
+            <param name="logMessage"></param>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPLogBaseClass.Fatal(System.Exception)">
+            <summary>
+            Log a message
+            </summary>
+            <param name="ex"></param>
         </member>
         <member name="M:Contensive.BaseClasses.CPLogBaseClass.Dispose">
             <summary>
@@ -5833,6 +5883,20 @@
             </summary>
             <param name="queueUrl"></param>
             <param name="message"></param>
+        </member>
+        <member name="T:Contensive.BaseClasses.CPMQTTBaseClass">
+            <summary>
+            Message queue
+            </summary>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPMQTTBaseClass.Publish(System.String,System.String,System.String)">
+            <summary>
+            Publish a message to a topic
+            </summary>
+            <param name="message">The message to be sent</param>
+            <param name="topic">The topic for this message</param>
+            <param name="clientId">A unique name of the client that is publishing the message</param>
+            <returns>success</returns>
         </member>
         <member name="T:Contensive.BaseClasses.CPMustacheBaseClass">
             <summary>
@@ -6154,9 +6218,17 @@
         </member>
         <member name="M:Contensive.BaseClasses.CPSecurityBaseClass.EncryptOneWay(System.String)">
             <summary>
-            return an encrypted string. This is a one way so use it passwords, etc.
+            return an encrypted string. One-way encryption cannot be reversed. This is a hash.
             </summary>
             <param name="unencryptedString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPSecurityBaseClass.EncryptOneWay(System.String,System.String)">
+            <summary>
+            return an encrypted string. One-way encryption cannot be reversed. This is a hash.
+            </summary>
+            <param name="unencryptedString"></param>
+            <param name="salt"></param>
             <returns></returns>
         </member>
         <member name="M:Contensive.BaseClasses.CPSecurityBaseClass.VerifyOneWay(System.String,System.String)">
@@ -6345,20 +6417,20 @@
         </member>
         <member name="M:Contensive.BaseClasses.CPSiteBaseClass.AddActivity(System.String)">
             <summary>
-            Log a simple activity for the current user
+            Add completed activity for online visit by current user, subject saved as message
             </summary>
             <param name="subject">A brief name for the activity to be shown in a list of other activities. Typically 'Call', 'Message', 'Meeting', 'Online Form', etc.</param>
         </member>
         <member name="M:Contensive.BaseClasses.CPSiteBaseClass.AddActivity(System.String,System.String)">
             <summary>
-            Log an activity for the current user
+            Add completed activity for online visit by current user
             </summary>
             <param name="subject">A brief name for the activity to be shown in a list of other activities. Typically 'Call', 'Message', 'Meeting', 'Online Form', etc.</param>
             <param name="detailsText">The details of the activity, non-html plain text.</param>
         </member>
         <member name="M:Contensive.BaseClasses.CPSiteBaseClass.AddActivity(System.String,System.String,System.Int32)">
             <summary>
-            Log an activity for the specified user
+            Add completed activity for online visit by the selected user
             </summary>
             <param name="subject">A brief name for the activity to be shown in a list of other activities. Typically 'Call', 'Message', 'Meeting', 'Online Form', etc.</param>
             <param name="detailsText">The details of the activity, non-html plain text.</param>
@@ -6366,7 +6438,7 @@
         </member>
         <member name="M:Contensive.BaseClasses.CPSiteBaseClass.AddActivity(System.String,System.String,System.Int32,System.Int32)">
             <summary>
-            Log an activity for the specified user
+            Add completed activity for specific activity type, by the selected user
             </summary>
             <param name="subject">A brief name for the activity to be shown in a list of other activities. Typically 'Call', 'Message', 'Meeting', 'Online Form', etc.</param>
             <param name="detailsText">The details of the activity, non-html plain text.</param>
@@ -6375,7 +6447,7 @@
         </member>
         <member name="M:Contensive.BaseClasses.CPSiteBaseClass.AddActivity(System.String,System.String,System.Int32,System.Int32,System.DateTime,System.Int32,System.Int32)">
             <summary>
-            Log an activity for the specified user for a scheduled event
+            Add a schedule, non-completed activity for specific activity type, by the selected user
             </summary>
             <param name="subject">A brief name for the activity to be shown in a list of other activities. Typically 'Call', 'Message', 'Meeting', 'Online Form', etc.</param>
             <param name="detailsText">The details of the activity, non-html plain text.</param>
@@ -6387,7 +6459,7 @@
         </member>
         <member name="M:Contensive.BaseClasses.CPSiteBaseClass.AddActivity(System.String,System.String,System.Int32,System.DateTime,System.Int32,System.Int32)">
             <summary>
-            Log an activity for the specified user for a scheduled event
+            Add a schedule, non-completed activity online-visit activity, by the selected user
             </summary>
             <param name="subject">A brief name for the activity to be shown in a list of other activities. Typically 'Call', 'Message', 'Meeting', 'Online Form', etc.</param>
             <param name="detailsText">The details of the activity, non-html plain text.</param>
@@ -7006,6 +7078,40 @@
             <param name="value"></param>
             <param name="userId"></param>
         </member>
+        <member name="M:Contensive.BaseClasses.CPUserBaseClass.SetPassword(System.String)">
+            <summary>
+            Set the current user's password. If in plain-text password mode, the password field is populated, else the passwordHash field is populated.
+            Return true if the password meets password policies.
+            </summary>
+            <param name="password"></param>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPUserBaseClass.SetPassword(System.String,System.String@)">
+            <summary>
+            Set the current user's password. If in plain-text password mode, the password field is populated, else the passwordHash field is populated.
+            Return true if the password meets password policies.
+            If error, return a user appropriate error message.
+            </summary>
+            <param name="password"></param>
+            <param name="userErrorMessage"></param>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPUserBaseClass.SetPassword(System.String,System.Int32)">
+            <summary>
+            Set the specific user's password. If in plain-text password mode, the password field is populated, else the passwordHash field is populated.
+            Return true if the password meets password policies.
+            </summary>
+            <param name="password"></param>
+            <param name="userId"></param>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPUserBaseClass.SetPassword(System.String,System.Int32,System.String@)">
+            <summary>
+            Set the specific user's password. If in plain-text password mode, the password field is populated, else the passwordHash field is populated.
+            Return true if the password meets password policies.
+            If error, return a user appropriate error message.
+            </summary>
+            <param name="password"></param>
+            <param name="userId"></param>
+            <param name="userErrorMessage"></param>
+        </member>
         <member name="T:Contensive.BaseClasses.CPUserErrorBaseClass">
             <summary>
             Can be used to accumulate user errors during a disperate process. 
@@ -7413,6 +7519,25 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:Contensive.BaseClasses.CPUtilsBaseClass.GetRandomInteger(System.Int32)">
+            <summary>
+            Return a random integer between 0 and maxValue
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPUtilsBaseClass.GetRandomDouble">
+            <summary>
+            Return a random double between 0.0 and 1.0
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Contensive.BaseClasses.CPUtilsBaseClass.GetRandomString(System.Int32)">
+            <summary>
+            generate a random alphanumeric string, upper and lower case text and numerics (0...9, a...z, A...Z, no special characters)
+            </summary>
+            <param name="length"></param>
+            <returns></returns>
+        </member>
         <member name="M:Contensive.BaseClasses.CPUtilsBaseClass.isGuid(System.String)">
             <summary>
             returns true if the string is a guid (start/end with brace, char count, check dashes
@@ -7691,10 +7816,10 @@
             <returns></returns>
         </member>
         <member name="M:Contensive.BaseClasses.CPUtilsBaseClass.GetDateTimeMockable">
-             <summary>
+            <summary>
             Returns current DateTime.Now if cp.Mock.DateTime is not set, else returns Mock.DateTime
-             </summary>
-             <returns></returns>
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:Contensive.BaseClasses.CPUtilsBaseClass.DecodeHTML(System.String)">
             <summary>

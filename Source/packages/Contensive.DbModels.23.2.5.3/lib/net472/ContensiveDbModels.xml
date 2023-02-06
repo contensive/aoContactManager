@@ -222,12 +222,36 @@
         </member>
         <member name="P:Contensive.Models.Db.AddonModel.jsHeadScriptSrc">
             <summary>
-            The src used for html platform 4 (or unset)
+            The src used by default (if no JSHeadScriptPlatform5Src is present, or if platform is not set to 5)
             </summary>
         </member>
         <member name="P:Contensive.Models.Db.AddonModel.JSHeadScriptPlatform5Src">
             <summary>
             The src used for html platform 5
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.AddonModel.jsFilename">
+            <summary>
+            The javascript added to end-of-body or head for any platform. 
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.AddonModel.minifyJsFilename">
+            <summary>
+            created from jsFilename by minify
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.AddonModel.navTypeId">
+            <summary>
+            The catgegory of addon
+            1 = Add-on
+            2 = Report
+            3 = Setting
+            4 = Tool
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.AddonModel.minifyStylesFilename">
+            <summary>
+            created from stylesfilename by minify
             </summary>
         </member>
         <member name="P:Contensive.Models.Db.AddonModel.stylesLinkHref">
@@ -285,6 +309,13 @@
             If this addon uses a primary content associated to the instanceId (guid) from the page editor, select the content for that record
             </summary>
         </member>
+        <member name="P:Contensive.Models.Db.AddonModel.contentSourceId">
+            <summary>
+            sett ContentSourceEnum
+            The content returned by the addon. If null, return All
+            lookup: All,Content Text,Content Wysiwyg,Remote Asset,Form Execution,Scripting Code Execution,DotNet Code Execution
+            </summary>
+        </member>
         <member name="M:Contensive.Models.Db.AddonModel.createByUniqueName(Contensive.BaseClasses.CPBaseClass,System.String)">
             <summary>
             Create model for Addons. This method allows for the alias field if the name does not match
@@ -299,6 +330,21 @@
             </summary>
             <param name="cp"></param>
             <param name="addonGuid"></param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Contensive.Models.Db.AddonModel.isAssetUrlLocal(Contensive.BaseClasses.CPBaseClass,System.String)" -->
+        <member name="M:Contensive.Models.Db.AddonModel.getPlatformAsset(Contensive.BaseClasses.CPBaseClass,System.String,System.String)">
+            <summary>
+            return either framework5 or framework4 cssUrl.
+            </summary>
+            <param name="cp"></param>
+            <param name="addon"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Contensive.Models.Db.AddonContentSourceEnum">
+            <summary>
+            addon field contentSourceId
+            The content that will be delivered from teh addon
+            </summary>
         </member>
         <member name="P:Contensive.Models.Db.AddonPageRuleModel.tableMetadata">
             <summary>
@@ -453,6 +499,13 @@
         <member name="P:Contensive.Models.Db.ConditionalEmailModel.stylesFilename">
             <summary>
             
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.ConditionalEmailModel.personalizeAddonId">
+            <summary>
+            id of addon used to personalize email when it is sent. 
+            Addon returns an object with public properties used with mustache to personalize.
+            Addon will be run in an environment with the recipient as the session user
             </summary>
         </member>
         <member name="T:Contensive.Models.Db.ConditionEmailConditionId">
@@ -1013,56 +1066,12 @@
             <param name="userId"></param>
             <returns></returns>
         </member>
-        <member name="M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.Int32)">
-            <summary>
-            return a new model with the data selected.
-            </summary>
-            <param name="cp"></param>
-            <param name="recordId"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.Int32,System.Collections.Generic.List{System.String}@)">
-            <summary>
-            return a new model with the data selected. All cacheNames related to the object will be added to the cacheNameList.
-            </summary>
-            <param name="cp"></param>
-            <param name="recordId">The id of the record to be read into the new object</param>
-            <param name="callersCacheNameList">Any cachenames effected by this record will be added to this list. If the method consumer creates a cache object, add these cachenames to its dependent cachename list.</param>
-        </member>
-        <member name="M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.String)">
-            <summary>
-            create an object from a record with matching ccGuid
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="cp"></param>
-            <param name="recordGuid"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.String,System.Collections.Generic.List{System.String}@)">
-            <summary>
-            create an object from a record with a matching ccguid, add an object cache name to the argument list
-            </summary>
-            <param name="cp"></param>
-            <param name="recordGuid"></param>
-            <param name="callersCacheNameList">A list of cache keys whose invalidation will invalidate this data</param>
-        </member>
-        <member name="M:Contensive.Models.Db.DbBaseModel.createByUniqueName``1(Contensive.BaseClasses.CPBaseClass,System.String)">
-            <summary>
-            create an object from the first record found from a list created with matching name records, ordered by id
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="cp"></param>
-            <param name="recordName"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Contensive.Models.Db.DbBaseModel.createByUniqueName``1(Contensive.BaseClasses.CPBaseClass,System.String,System.Collections.Generic.List{System.String}@)">
-            <summary>
-            create an object from the first record found from a list created with matching name records, ordered by id, add an object cache name to the argument list
-            </summary>
-            <param name="cp"></param>
-            <param name="recordName"></param>
-            <param name="callersCacheNameList">method will add the cache name to this list.</param>
-        </member>
+        <!-- Badly formed XML comment ignored for member "M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.Int32)" -->
+        <!-- Badly formed XML comment ignored for member "M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.Int32,System.Collections.Generic.List{System.String}@)" -->
+        <!-- Badly formed XML comment ignored for member "M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:Contensive.Models.Db.DbBaseModel.create``1(Contensive.BaseClasses.CPBaseClass,System.String,System.Collections.Generic.List{System.String}@)" -->
+        <!-- Badly formed XML comment ignored for member "M:Contensive.Models.Db.DbBaseModel.createByUniqueName``1(Contensive.BaseClasses.CPBaseClass,System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:Contensive.Models.Db.DbBaseModel.createByUniqueName``1(Contensive.BaseClasses.CPBaseClass,System.String,System.Collections.Generic.List{System.String}@)" -->
         <member name="M:Contensive.Models.Db.DbBaseModel.loadRecord``1(Contensive.BaseClasses.CPBaseClass,System.Data.DataRow,System.Collections.Generic.List{System.String}@)">
             <summary>
             open an existing object
@@ -1655,6 +1664,13 @@
             
             </summary>
         </member>
+        <member name="P:Contensive.Models.Db.EmailModel.personalizeAddonId">
+            <summary>
+            id of addon used to personalize email when it is sent. 
+            Addon returns an object with public properties used with mustache to personalize.
+            Addon will be run in an environment with the recipient as the session user
+            </summary>
+        </member>
         <member name="P:Contensive.Models.Db.EmailQueueModel.tableMetadata">
             <summary>
             table definition
@@ -1788,6 +1804,13 @@
         <member name="P:Contensive.Models.Db.GroupEmailModel.toAll">
             <summary>
             
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.GroupEmailModel.personalizeAddonId">
+            <summary>
+            id of addon used to personalize email when it is sent. 
+            Addon returns an object with public properties used with mustache to personalize.
+            Addon will be run in an environment with the recipient as the session user
             </summary>
         </member>
         <member name="P:Contensive.Models.Db.GroupModel.tableMetadata">
@@ -2138,6 +2161,11 @@
             deprecated
             </summary>
         </member>
+        <member name="P:Contensive.Models.Db.PageTemplateModel.mustacheDataSetAddonId">
+            <summary>
+            if not empty, this addon returns an object that is used as the data source for a mustance rendering of this template
+            </summary>
+        </member>
         <member name="T:Contensive.Models.Db.PageViewSummaryModel">
             <summary>
             Summary tables for page viewings
@@ -2218,6 +2246,26 @@
             optional, like Jr, or Sr
             </summary>
         </member>
+        <member name="P:Contensive.Models.Db.PersonModel.timeZoneId">
+            <summary>
+            timezone for this person
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.PersonModel.latitude">
+            <summary>
+            location of address
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.PersonModel.longitude">
+            <summary>
+            location of address
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.PersonModel.passwordHash">
+            <summary>
+            if siteproperty "allow plain text password" is false, this is password hashed with encryptOneWay. login tests this field
+            </summary>
+        </member>
         <member name="M:Contensive.Models.Db.PersonModel.createListFromGroupNameList(Contensive.BaseClasses.CPBaseClass,System.Collections.Generic.List{System.String},System.Boolean)">
             <summary>
             return a list of people in a any one of a list of groups. If requireBuldEmail true, the list only includes those with allowBulkEmail.
@@ -2241,6 +2289,27 @@
             return the best name available for this record
             </summary>
             <returns></returns>
+        </member>
+        <member name="M:Contensive.Models.Db.PersonModel.setPassword(Contensive.BaseClasses.CPBaseClass,System.String,System.Int32)">
+            <summary>
+            set the current user's password. returns false if password does not meet password rule criteria
+            </summary>
+            <param name="cp"></param>
+            <param name="password"></param>
+        </member>
+        <member name="M:Contensive.Models.Db.PersonModel.setPassword(Contensive.BaseClasses.CPBaseClass,System.String)">
+            <summary>
+            set the current user's password. returns false if password does not meet password rule criteria
+            </summary>
+            <param name="cp"></param>
+            <param name="password"></param>
+        </member>
+        <member name="M:Contensive.Models.Db.PersonModel.setPassword(Contensive.BaseClasses.CPBaseClass,System.String,System.String@)">
+            <summary>
+            set the current user's password. returns false if password does not meet password rule criteria
+            </summary>
+            <param name="cp"></param>
+            <param name="password"></param>
         </member>
         <member name="T:Contensive.Models.Db.PropertyModel">
             <summary>
@@ -2402,6 +2471,13 @@
             
             </summary>
         </member>
+        <member name="P:Contensive.Models.Db.SystemEmailModel.personalizeAddonId">
+            <summary>
+            id of addon used to personalize email when it is sent. 
+            Addon returns an object with public properties used with mustache to personalize.
+            Addon will be run in an environment with the recipient as the session user
+            </summary>
+        </member>
         <member name="P:Contensive.Models.Db.SystemTextMessageGroupRuleModel.tableMetadata">
             <summary>
             table definition
@@ -2505,6 +2581,11 @@
             </summary>
         </member>
         <member name="P:Contensive.Models.Db.TemplateDomainRuleModel.tableMetadata">
+            <summary>
+            table definition
+            </summary>
+        </member>
+        <member name="P:Contensive.Models.Db.TextMessageLogModel.tableMetadata">
             <summary>
             table definition
             </summary>
