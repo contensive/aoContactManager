@@ -5,7 +5,6 @@
 	<Addon name="Contact Manager" guid="{57602963-CA46-41EB-8053-8ACB8C47C2F2}" type="Tool">
 		<Copy></Copy>
 		<CopyText></CopyText>
-		<ActiveXProgramID></ActiveXProgramID>
 		<DotNetClass><![CDATA[Contensive.Addons.ContactManager.Views.ContactManagerAddon]]></DotNetClass>
 		<ArgumentList></ArgumentList>
 		<AsAjax>No</AsAjax>
