@@ -288,6 +288,8 @@ Namespace Views
             Try
                 '
                 If True Then
+                    Dim layout = cp.AdminUI.CreateLayoutBuilder()
+                    '
                     Dim IsAdmin As Boolean = cp.User.IsAdmin()
                     Dim TextTest As String = cp.Doc.GetText(RequestNamePageSize)
                     Dim pageSize As Integer
@@ -501,31 +503,26 @@ Namespace Views
                             & "This is a list of people that satisfy the current search criteria. Create a new search to change the criteria. Use the tools at the bottom to make changes to this selection.</p><p>" _
                             & DataRowCount & " Matches found" _
                             & ae.statusMessage
-                        'Dim Header As String = ContactManagerTools.HtmlController.getPanel("<P>" & Description & "</P>", "ccPanel", "ccPanelShadow", 20)
-                        'Header = "<div class=ccPanelBackground style=""padding:10px;"">" & Header & "</div>"
                         Dim ButtonList As String = ButtonApply & "," & ButtonNewSearch
                         Dim PreTableCopy As String = ""
                         Dim Body As String = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, pageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr)
                         '
                         ' Assemble page
-                        Dim layout As New PortalFramework.LayoutBuilderSimple With {
-                            .body = Body,
-                            .description = Description,
-                            .failMessage = "",
-                            .formActionQueryString = "",
-                            .includeBodyColor = True,
-                            .includeBodyPadding = True,
-                            .infoMessage = "",
-                            .isOuterContainer = True,
-                            .portalSubNavTitle = "",
-                            .successMessage = "",
-                            .title = "Contact Manager",
-                            .warningMessage = ""
-                        }
+                        layout.body = Body
+                        layout.description = Description
+                        layout.failMessage = ""
+                        layout.includeBodyColor = True
+                        layout.includeBodyPadding = True
+                        layout.infoMessage = ""
+                        layout.isOuterContainer = True
+                        layout.portalSubNavTitle = ""
+                        layout.successMessage = ""
+                        layout.title = "Contact Manager"
+                        layout.warningMessage = ""
                         layout.addFormButton(ButtonApply)
                         layout.addFormButton(ButtonNewSearch)
-                        result = layout.getHtml(cp)
-                        'result = ContactManagerTools.AdminUIController.getBody(cp, "Contact Manager &gt;&gt; People" & SearchCaption, ButtonList, "", True, True, Description, "", Body)
+                        '
+                        result = layout.getHtml()
                     End Using
                 End If
             Catch ex As Exception

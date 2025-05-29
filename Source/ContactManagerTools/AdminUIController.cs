@@ -253,7 +253,7 @@ namespace Contensive.Addons.ContactManagerTools {
                         if (pagePtr != 1) {
                             WorkingQS = cp.Doc.RefreshQueryString;
                             WorkingQS = modifyQueryString(WorkingQS, "GotoPage", "1", true);
-                            result += "<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">1</A>...&nbsp;";
+                            result += "<a class=\"mx-1 p-2 border\" href=\"?" + WorkingQS + "\">1</A>...&nbsp;";
                         }
                         WorkingQS = cp.Doc.RefreshQueryString;
                         WorkingQS = modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
@@ -262,18 +262,18 @@ namespace Contensive.Addons.ContactManagerTools {
                                 result += "<span class=\"mx-1 p-2 border\" >" + pagePtr + "</span>";
                             } else {
                                 WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, pagePtr.ToString(), true);
-                                result += "<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">" + pagePtr + "</A>";
+                                result += "<a class=\"mx-1 p-2 border\" href=\"?" + WorkingQS + "\">" + pagePtr + "</A>";
                             }
                             pagePtr++;
                             LinkCount++;
                         }
                         if (pagePtr < PageCount) {
                             WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
-                            result += "...<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">" + PageCount + "</A>";
+                            result += "...<a class=\"mx-1 p-2 border\" href=\"?" + WorkingQS + "\">" + PageCount + "</A>";
                         }
                         if (ReportPageNumber < PageCount) {
                             WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
-                            result += "...<a class=\"mx-1 p-2 border\" href=\"" + "?" + WorkingQS + "\">next</A>";
+                            result += "...<a class=\"mx-1 p-2 border\" href=\"?" + WorkingQS + "\">next</A>";
                         }
                         result += "</div>";
                     }
@@ -442,7 +442,7 @@ namespace Contensive.Addons.ContactManagerTools {
         //                if (PagePointer != 1) {
         //                    WorkingQS = cp.Doc.RefreshQueryString;
         //                    WorkingQS = modifyQueryString(WorkingQS, "GotoPage", "1", true);
-        //                    result += "<a href=\"" + "?" + WorkingQS + "\">1</A>...&nbsp;";
+        //                    result += "<a href=\"?" + WorkingQS + "\">1</A>...&nbsp;";
         //                }
         //                WorkingQS = cp.Doc.RefreshQueryString;
         //                WorkingQS = modifyQueryString(WorkingQS, RequestNamePageSize, ReportPageSize.ToString(), true);
@@ -451,18 +451,18 @@ namespace Contensive.Addons.ContactManagerTools {
         //                        result += PagePointer + "&nbsp;";
         //                    } else {
         //                        WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PagePointer.ToString(), true);
-        //                        result += "<a href=\"" + "?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
+        //                        result += "<a href=\"?" + WorkingQS + "\">" + PagePointer + "</A>&nbsp;";
         //                    }
         //                    PagePointer ++;
         //                    LinkCount ++;
         //                }
         //                if (PagePointer < PageCount) {
         //                    WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, PageCount.ToString(), true);
-        //                    result += "...<a href=\"" + "?" + WorkingQS + "\">" + PageCount + "</A>&nbsp;";
+        //                    result += "...<a href=\"?" + WorkingQS + "\">" + PageCount + "</A>&nbsp;";
         //                }
         //                if (ReportPageNumber < PageCount) {
         //                    WorkingQS = modifyQueryString(WorkingQS, RequestNamePageNumber, (ReportPageNumber + 1).ToString(), true);
-        //                    result += "...<a href=\"" + "?" + WorkingQS + "\">next</A>&nbsp;";
+        //                    result += "...<a href=\"?" + WorkingQS + "\">next</A>&nbsp;";
         //                }
         //                result += "<br>&nbsp;";
         //            }
