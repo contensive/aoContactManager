@@ -19,58 +19,86 @@ namespace Contensive.Addons.ContactManager.Views {
         /// <param name="IsAdminPath"></param>
         /// <returns></returns>
         public static string getResponse(CPBaseClass cp, Controllers.ApplicationController ae, bool IsAdminPath) {
-
+            //
+            // 
+            //
             try {
-                string result = "";
-                // 
-                if (true) {
-                    // 
-                    // Determine current Subtab
-                    // 
-                    int SubTab = cp.Doc.GetInteger("SubTab");
+                const string guidContactManager = "{57602963-CA46-41EB-8053-8ACB8C47C2F2}";
+                //
+                // -- detect which tab is selected
+                int SubTab = cp.Doc.GetInteger("SubTab");
+                if (SubTab == 0) {
+                    SubTab = ae.userProperties.selectSubTab;
                     if (SubTab == 0) {
-                        SubTab = ae.userProperties.selectSubTab;
-                        if (SubTab == 0) {
-                            SubTab = 1;
-                            ae.userProperties.selectSubTab = SubTab;
-                        }
-                    } else {
+                        SubTab = 1;
                         ae.userProperties.selectSubTab = SubTab;
                     }
-                    cp.Doc.AddRefreshQueryString("SubTab", SubTab.ToString());
-                    // 
-                    // SubTab Menu
-                    // 
-                    cp.Doc.AddRefreshQueryString("tab", "");
-                    var Nav = new ContactManagerTools.TabController();
-                    // 
-                    Nav.addEntry("Record&nbsp;Fields", getResponse_TabPeople(cp, ae), "ccAdminTab");
-                    Nav.addEntry("Groups", getResponse_TabGroup(cp, ae), "ccAdminTab");
-                    // 
-                    string Content = "<div class=\"mt-4\">" + cp.Html.Hidden("SelectionForm", "1") + Nav.getTabs(cp) + cp.Html.Hidden(constants.RequestNameFormID, Convert.ToInt32((int)constants.FormIdEnum.FormSearch).ToString()) + "</div>";
-                    // 
-                    // Assemble page
-                    var layout = cp.AdminUI.CreateLayoutBuilder();
-                    layout.body = Content;
-                    layout.description = "Select groups and record fields for search. The search will return only people who satisfy all the selections.";
-                    layout.failMessage = "";
-                    layout.includeBodyColor = true;
-                    layout.includeBodyPadding = true;
-                    layout.infoMessage = "";
-                    layout.isOuterContainer = true;
-                    layout.portalSubNavTitle = "";
-                    layout.successMessage = "";
-                    layout.title = "Contact Manager - Create Search";
-                    layout.warningMessage = "";
-
-                    if (IsAdminPath) {
-                        layout.addFormButton(constants.ButtonCancelAll);
-                        layout.addFormButton(constants.ButtonSearch);
-                    } else {
-                        layout.addFormButton(constants.ButtonSearch);
-                    }
-                    result = layout.getHtml();
+                } else {
+                    ae.userProperties.selectSubTab = SubTab;
                 }
+                cp.Doc.AddRefreshQueryString("SubTab", SubTab.ToString());
+                //
+                //
+                // -- create inner layout with contentWithTabs that includes the tabs plus the content of the selected tab
+                var layout = cp.AdminUI.CreateLayoutBuilderContentWithTabs();
+
+
+
+                layout.addTab();
+                layout.tabCaption = "Record Fields";
+                layout.tabLink = $"?addonGuid={guidContactManager}&formid=3&SubTab=1";
+                layout.tabStyleClass = "tab-style-class";
+                if (SubTab == 1) {
+                    //
+                    layout.setActiveTab(layout.tabCaption);
+                    var tabLayout = cp.AdminUI.CreateLayoutBuilder();
+                    tabLayout.body = getResponse_TabPeople(cp, ae);
+                    tabLayout.includeBodyPadding = false;
+                    tabLayout.includeForm = false;
+                    layout.body = tabLayout.getHtml();
+                }
+                //
+                layout.addTab();
+                layout.tabCaption = "Groups";
+                layout.tabLink = $"?addonGuid={guidContactManager}&formid=3&SubTab=2";
+                layout.tabStyleClass = "tab-style-class";
+                if (SubTab == 2) {
+                    //
+                    layout.setActiveTab(layout.tabCaption);
+                    var tabLayout = cp.AdminUI.CreateLayoutBuilder();
+                    tabLayout.body = getResponse_TabGroup(cp, ae);
+                    tabLayout.includeBodyPadding = false;
+                    tabLayout.includeForm = false;
+                    layout.body = tabLayout.getHtml();
+                }
+
+                //
+                layout.addFormHidden("selectionForm", "1");
+                layout.addFormHidden(constants.RequestNameFormID, Convert.ToInt32((int)constants.FormIdEnum.FormSearch).ToString());
+
+                //string Content = "<div class=\"mt-4\">" + cp.Html.Hidden("SelectionForm", "1") + layout.getHtml() + cp.Html.Hidden(constants.RequestNameFormID, Convert.ToInt32((int)constants.FormIdEnum.FormSearch).ToString()) + "</div>";
+                // 
+                // Assemble page
+                //var layout = cp.AdminUI.CreateLayoutBuilder();
+                //layout.body = Content;
+                layout.description = "Select groups and record fields for search. The search will return only people who satisfy all the selections.";
+                layout.failMessage = "";
+                layout.includeBodyColor = true;
+                layout.includeBodyPadding = true;
+                layout.infoMessage = "";
+                layout.isOuterContainer = true;
+                layout.portalSubNavTitle = "";
+                layout.successMessage = "";
+                layout.title = "Contact Manager - Create Search";
+                layout.warningMessage = "";
+
+                if (IsAdminPath) {
+                    layout.addFormButton(constants.ButtonCancelAll);
+                    layout.addFormButton(constants.ButtonSearch);
+                } else {
+                    layout.addFormButton(constants.ButtonSearch);
+                }
+                string result = layout.getHtml();
                 return result;
             } catch (Exception ex) {
                 cp.Site.ErrorReport(ex);
