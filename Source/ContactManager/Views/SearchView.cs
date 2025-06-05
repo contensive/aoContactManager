@@ -40,7 +40,7 @@ namespace Contensive.Addons.ContactManager.Views {
                 //
                 //
                 // -- create inner layout with contentWithTabs that includes the tabs plus the content of the selected tab
-                var layout = cp.AdminUI.CreateLayoutBuilderContentWithTabs();
+                var layout = cp.AdminUI.CreateLayoutBuilderTabbedBody();
 
 
 
