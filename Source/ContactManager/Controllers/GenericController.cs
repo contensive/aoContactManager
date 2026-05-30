@@ -1,8 +1,9 @@
 ﻿
+
 using System;
 using System.Text;
 
-namespace Contensive.Addons.ContactManagerTools.Controllers {
+namespace Contensive.Addons.ContactManager.Controllers {
     //
     //====================================================================================================
     /// <summary>
@@ -278,6 +279,10 @@ namespace Contensive.Addons.ContactManagerTools.Controllers {
         public static string getVirtualRecordUnixPathFilename(string tableName, string fieldName, int recordID, string originalFilename) {
             //string iOriginalFilename = originalFilename.Replace(" ", "_").Replace(".", "_");
             return getVirtualTableFieldIdUnixPath(tableName, fieldName, recordID) + originalFilename;
+        }
+        private static string Left(this string str, int length) {
+            if (string.IsNullOrEmpty(str) || length <= 0) return string.Empty;
+            return (str.Length <= length) ? str : str.Substring(0, length);
         }
 
     }

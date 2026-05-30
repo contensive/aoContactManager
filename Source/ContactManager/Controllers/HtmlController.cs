@@ -1,12 +1,11 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using Contensive.BaseClasses;
-using static Contensive.Addons.ContactManagerTools.Constants;
+using static Contensive.Addons.ContactManager.Constants;
 
-namespace Contensive.Addons.ContactManagerTools {
+namespace Contensive.Addons.ContactManager.Controllers {
     public static class HtmlController {
         //
         internal const string ButtonDelete = "  Delete  ";
@@ -221,7 +220,7 @@ namespace Contensive.Addons.ContactManagerTools {
         public static string getPanel(string content, string stylePanel,  string width, int padding) {
             string ContentPanelWidth;
             string contentPanelWidthStyle;
-            if (width.IsNumeric()) {
+            if (IsNumeric(width)) {
                 ContentPanelWidth = (int.Parse(width) - 2).ToString();
                 contentPanelWidthStyle = ContentPanelWidth + "px";
             } else {
@@ -338,6 +337,18 @@ namespace Contensive.Addons.ContactManagerTools {
         //public static string tableRow(string Cell, int ColSpan = 0, bool EvenRow = false) {
         //    return tableRowStart() + td(Cell, "100%", ColSpan, EvenRow) + Constants.kmaEndTableRow;
         //}
+
+        //====================================================================================================
+        /// <summary>
+        /// Determines if a string represents a numeric value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static bool IsNumeric(string value) {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            double temp;
+            return double.TryParse(value, out temp);
+        }
     }
     public class ButtonMetadata {
         public string name = "button";

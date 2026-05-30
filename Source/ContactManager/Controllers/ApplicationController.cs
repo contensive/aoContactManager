@@ -91,8 +91,8 @@ namespace Contensive.Addons.ContactManager.Controllers {
         public ApplicationController(CPBaseClass cp, bool requiresAuthentication = true) {
             this.cp = cp;
             if (requiresAuthentication & !cp.User.IsAuthenticated) {
-                packageErrorList.Add(new PackageErrorModel() { number = (int)constants.ResultErrorEnum.errAuthentication, description = "Authorization is required." });
-                cp.Response.SetStatus(((int)constants.HttpErrorEnum.forbidden).ToString() + " Forbidden");
+                packageErrorList.Add(new PackageErrorModel() { number = (int)Constants.ResultErrorEnum.errAuthentication, description = "Authorization is required." });
+                cp.Response.SetStatus(((int)Constants.HttpErrorEnum.forbidden).ToString() + " Forbidden");
             }
         }
         // 

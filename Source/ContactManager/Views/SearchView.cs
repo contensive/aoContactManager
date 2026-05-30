@@ -1,8 +1,8 @@
-﻿using Contensive.BaseClasses;
-using Microsoft.VisualBasic;
+﻿using Contensive.Addons.ContactManager.Controllers;
+using Contensive.BaseClasses;
 using System;
 using System.Collections.Generic;
-using static Contensive.Addons.ContactManagerTools.Controllers.GenericController;
+using static Contensive.Addons.ContactManager.Controllers.GenericController;
 
 namespace Contensive.Addons.ContactManager.Views {
     /// <summary>
@@ -74,9 +74,9 @@ namespace Contensive.Addons.ContactManager.Views {
 
                 //
                 layout.addFormHidden("selectionForm", "1");
-                layout.addFormHidden(constants.RequestNameFormID, Convert.ToInt32((int)constants.FormIdEnum.FormSearch).ToString());
+                layout.addFormHidden(Constants.RequestNameFormID, Convert.ToInt32((int)Constants.FormIdEnum.FormSearch).ToString());
 
-                //string Content = "<div class=\"mt-4\">" + cp.Html.Hidden("SelectionForm", "1") + layout.getHtml() + cp.Html.Hidden(constants.RequestNameFormID, Convert.ToInt32((int)constants.FormIdEnum.FormSearch).ToString()) + "</div>";
+                //string Content = "<div class=\"mt-4\">" + cp.Html.Hidden("SelectionForm", "1") + layout.getHtml() + cp.Html.Hidden(Constants.RequestNameFormID, Convert.ToInt32((int)Constants.FormIdEnum.FormSearch).ToString()) + "</div>";
                 // 
                 // Assemble page
                 //var layout = cp.AdminUI.CreateLayoutBuilder();
@@ -93,10 +93,10 @@ namespace Contensive.Addons.ContactManager.Views {
                 layout.warningMessage = "";
 
                 if (IsAdminPath) {
-                    layout.addFormButton(constants.ButtonCancelAll);
-                    layout.addFormButton(constants.ButtonSearch);
+                    layout.addFormButton(Constants.ButtonCancelAll);
+                    layout.addFormButton(Constants.ButtonSearch);
                 } else {
-                    layout.addFormButton(constants.ButtonSearch);
+                    layout.addFormButton(Constants.ButtonSearch);
                 }
                 string result = layout.getHtml();
                 return result;
@@ -158,7 +158,7 @@ namespace Contensive.Addons.ContactManager.Views {
                                 }
                             }
                             string GroupLabel = "Group" + GroupPointer;
-                            bool GroupChecked = Strings.InStr(1, ContactGroupCriteria, "," + GroupID + ",") != 0;
+                            bool GroupChecked = ContactGroupCriteria.IndexOf($",{GroupID},", StringComparison.OrdinalIgnoreCase) >= 0;
 
                             string Style;
                             if (GroupPointer % 2 == 0) {
@@ -200,8 +200,8 @@ namespace Contensive.Addons.ContactManager.Views {
                 string[] CriteriaValues = Array.Empty<string>();
                 int CriteriaCount = 0;
                 if (!string.IsNullOrEmpty(ContactSearchCriteria)) {
-                    CriteriaValues = Strings.Split(ContactSearchCriteria, Constants.vbCrLf);
-                    CriteriaCount = Information.UBound(CriteriaValues) + 1;
+                    CriteriaValues = ContactSearchCriteria.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                    CriteriaCount = CriteriaValues.Length;
                 }
                 // 
                 // Setup fields and capture request changes
@@ -234,16 +234,16 @@ namespace Contensive.Addons.ContactManager.Views {
                             var loopTo = CriteriaCount - 1;
                             for (CriteriaPointer = 0; CriteriaPointer <= loopTo; CriteriaPointer++) {
                                 string[] NameValues;
-                                if (Strings.InStr(1, CriteriaValues[CriteriaPointer], @field.fieldName + "=", Constants.vbTextCompare) == 1) {
-                                    NameValues = Strings.Split(CriteriaValues[CriteriaPointer], "=");
+                                if (CriteriaValues[CriteriaPointer].StartsWith($"{@field.fieldName}=", StringComparison.OrdinalIgnoreCase)) {
+                                    NameValues = CriteriaValues[CriteriaPointer].Split('=');
                                     @field.currentValue = NameValues[1];
                                     @field.fieldOperator = 1;
-                                } else if (Strings.InStr(1, CriteriaValues[CriteriaPointer], @field.fieldName + ">", Constants.vbTextCompare) == 1) {
-                                    NameValues = Strings.Split(CriteriaValues[CriteriaPointer], ">");
+                                } else if (CriteriaValues[CriteriaPointer].StartsWith($"{@field.fieldName}>", StringComparison.OrdinalIgnoreCase)) {
+                                    NameValues = CriteriaValues[CriteriaPointer].Split('>');
                                     @field.currentValue = NameValues[1];
                                     @field.fieldOperator = 2;
-                                } else if (Strings.InStr(1, CriteriaValues[CriteriaPointer], @field.fieldName + "<", Constants.vbTextCompare) == 1) {
-                                    NameValues = Strings.Split(CriteriaValues[CriteriaPointer], "<");
+                                } else if (CriteriaValues[CriteriaPointer].StartsWith($"{@field.fieldName}<", StringComparison.OrdinalIgnoreCase)) {
+                                    NameValues = CriteriaValues[CriteriaPointer].Split('<');
                                     @field.currentValue = NameValues[1];
                                     @field.fieldOperator = 3;
                                 }
@@ -266,8 +266,8 @@ namespace Contensive.Addons.ContactManager.Views {
                     result += "<table border=0 width=100% cellspacing=0 cellpadding=4>";
                     result += "<tr>";
                     bool RowEven;
-                    result += ContactManagerTools.AdminUIController.kmaStartTableCell("120") + "<img src=/cclib/images/spacer.gif width=120 height=1></TD>";
-                    result += ContactManagerTools.AdminUIController.kmaStartTableCell("99%") + "<img src=/cclib/images/spacer.gif width=1 height=1></TD>";
+                    result += AdminUIController.kmaStartTableCell("120") + "<img src=/cclib/images/spacer.gif width=120 height=1></TD>";
+                    result += AdminUIController.kmaStartTableCell("99%") + "<img src=/cclib/images/spacer.gif width=1 height=1></TD>";
                     result += "</tr>";
                     // 
                     int RowPointer = 0;
@@ -291,7 +291,7 @@ namespace Contensive.Addons.ContactManager.Views {
                         }
                         RowEven = RowPointer % 2 == 0;
                         switch (@field.fieldType) {
-                            case constants.FieldTypeDate: {
+                            case Constants.FieldTypeDate: {
                                     // 
                                     // Date
                                     // 
@@ -311,9 +311,9 @@ namespace Contensive.Addons.ContactManager.Views {
                                     RowPointer += 1;
                                     break;
                                 }
-                            case constants.FieldTypeCurrency:
-                            case constants.FieldTypeFloat:
-                            case constants.FieldTypeInteger: {
+                            case Constants.FieldTypeCurrency:
+                            case Constants.FieldTypeFloat:
+                            case Constants.FieldTypeInteger: {
                                     // 
                                     // Numeric
                                     // 
@@ -333,7 +333,7 @@ namespace Contensive.Addons.ContactManager.Views {
                                     RowPointer += 1;
                                     break;
                                 }
-                            case constants.FieldTypeBoolean: {
+                            case Constants.FieldTypeBoolean: {
                                     // 
                                     // Boolean
                                     // 
@@ -353,8 +353,8 @@ namespace Contensive.Addons.ContactManager.Views {
                                     groupTab = "";
                                     break;
                                 }
-                            case constants.FieldTypeText:
-                            case constants.FieldTypeLongText: {
+                            case Constants.FieldTypeText:
+                            case Constants.FieldTypeLongText: {
                                     // 
                                     // Text
                                     // 
@@ -373,7 +373,7 @@ namespace Contensive.Addons.ContactManager.Views {
                                     RowPointer += 1;
                                     break;
                                 }
-                            case constants.FieldTypeLookup: {
+                            case Constants.FieldTypeLookup: {
                                     // 
                                     // Lookup
                                     // 
@@ -407,11 +407,11 @@ namespace Contensive.Addons.ContactManager.Views {
         // 
         // =================================================================================
         // 
-        public static constants.FormIdEnum processRequest(CPBaseClass cp, Controllers.ApplicationController ae, RequestModel request) {
-            var result = constants.FormIdEnum.FormList;
+        public static Constants.FormIdEnum processRequest(CPBaseClass cp, Controllers.ApplicationController ae, RequestModel request) {
+            var result = Constants.FormIdEnum.FormList;
             try {
                 switch (request.Button ?? "") {
-                    case constants.ButtonSearch: {
+                    case Constants.ButtonSearch: {
                             // 
                             if (!string.IsNullOrEmpty(request.SelectionGroupSubTab)) {
                                 // 
@@ -445,10 +445,10 @@ namespace Contensive.Addons.ContactManager.Views {
                                         int fieldType = csField.GetInteger("Type");
                                         string NumericOption;
                                         switch (fieldType) {
-                                            case constants.FieldTypeDate: {
+                                            case Constants.FieldTypeDate: {
                                                     NumericOption = cp.Doc.GetText(FieldName + "_D");
                                                     if (!string.IsNullOrEmpty(NumericOption)) {
-                                                        ContactSearchCriteria = ContactSearchCriteria + Constants.vbCrLf + FieldName + Constants.vbTab + fieldType + Constants.vbTab + FieldValue + Constants.vbTab + NumericOption;
+                                                        ContactSearchCriteria = ContactSearchCriteria + Environment.NewLine + FieldName + "\t" + fieldType + "\t" + FieldValue + "\t" + NumericOption;
 
 
 
@@ -457,12 +457,12 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                                     break;
                                                 }
-                                            case constants.FieldTypeCurrency:
-                                            case constants.FieldTypeFloat:
-                                            case constants.FieldTypeInteger: {
+                                            case Constants.FieldTypeCurrency:
+                                            case Constants.FieldTypeFloat:
+                                            case Constants.FieldTypeInteger: {
                                                     NumericOption = cp.Doc.GetText(FieldName + "_N");
                                                     if (!string.IsNullOrEmpty(NumericOption)) {
-                                                        ContactSearchCriteria = ContactSearchCriteria + Constants.vbCrLf + FieldName + Constants.vbTab + fieldType + Constants.vbTab + FieldValue + Constants.vbTab + NumericOption;
+                                                        ContactSearchCriteria = ContactSearchCriteria + Environment.NewLine + FieldName + "\t" + fieldType + "\t" + FieldValue + "\t" + NumericOption;
 
 
 
@@ -471,9 +471,9 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                                     break;
                                                 }
-                                            case constants.FieldTypeBoolean: {
+                                            case Constants.FieldTypeBoolean: {
                                                     if (!string.IsNullOrEmpty(FieldValue)) {
-                                                        ContactSearchCriteria = ContactSearchCriteria + Constants.vbCrLf + FieldName + Constants.vbTab + fieldType + Constants.vbTab + FieldValue + Constants.vbTab + "";
+                                                        ContactSearchCriteria = ContactSearchCriteria + Environment.NewLine + FieldName + "\t" + fieldType + "\t" + FieldValue + "\t" + "";
 
 
 
@@ -482,10 +482,10 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                                     break;
                                                 }
-                                            case constants.FieldTypeText: {
+                                            case Constants.FieldTypeText: {
                                                     string TextOption = cp.Doc.GetText(FieldName + "_T");
                                                     if (!string.IsNullOrEmpty(TextOption)) {
-                                                        ContactSearchCriteria = ContactSearchCriteria + Constants.vbCrLf + FieldName + Constants.vbTab + fieldType.ToString() + Constants.vbTab + FieldValue + Constants.vbTab + TextOption;
+                                                        ContactSearchCriteria = ContactSearchCriteria + Environment.NewLine + FieldName + "\t" + fieldType.ToString() + "\t" + FieldValue + "\t" + TextOption;
 
 
 
@@ -494,9 +494,9 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                                     break;
                                                 }
-                                            case constants.FieldTypeLookup: {
+                                            case Constants.FieldTypeLookup: {
                                                     if (!string.IsNullOrEmpty(FieldValue)) {
-                                                        ContactSearchCriteria = ContactSearchCriteria + Constants.vbCrLf + FieldName + Constants.vbTab + fieldType + Constants.vbTab + FieldValue + Constants.vbTab + "";
+                                                        ContactSearchCriteria = ContactSearchCriteria + Environment.NewLine + FieldName + "\t" + fieldType + "\t" + FieldValue + "\t" + "";
 
 
 

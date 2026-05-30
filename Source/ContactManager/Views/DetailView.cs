@@ -1,36 +1,34 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Contensive.Addons.ContactManagerTools;
+using Contensive.Addons.ContactManager.Controllers;
 using Contensive.BaseClasses;
 using Contensive.Models.Db;
-using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace Contensive.Addons.ContactManager.Views {
     public sealed class DetailView {
         // 
         // =================================================================================
         // 
-        public static constants.FormIdEnum processRequest(CPBaseClass cp, RequestModel request) {
-            request.DetailMemberID = cp.Doc.GetInteger(constants.RequestNameMemberID);
+        public static Constants.FormIdEnum processRequest(CPBaseClass cp, RequestModel request) {
+            request.DetailMemberID = cp.Doc.GetInteger(Constants.RequestNameMemberID);
             switch (request.Button ?? "") {
-                case constants.ButtonCancel: {
-                        return constants.FormIdEnum.FormList;
+                case Constants.ButtonCancel: {
+                        return Constants.FormIdEnum.FormList;
                     }
-                case constants.ButtonSave: {
+                case Constants.ButtonSave: {
                         savePersonFromStream(cp, request.DetailMemberID);
-                        return constants.FormIdEnum.FormDetails;
+                        return Constants.FormIdEnum.FormDetails;
                     }
-                case constants.ButtonOK: {
+                case Constants.ButtonOK: {
                         savePersonFromStream(cp, request.DetailMemberID);
-                        return constants.FormIdEnum.FormList;
+                        return Constants.FormIdEnum.FormList;
                     }
-                case constants.ButtonNewSearch: {
-                        return constants.FormIdEnum.FormSearch;
+                case Constants.ButtonNewSearch: {
+                        return Constants.FormIdEnum.FormSearch;
                     }
             }
-            return constants.FormIdEnum.FormDetails;
+            return Constants.FormIdEnum.FormDetails;
         }
         // 
         // =================================================================================
@@ -42,7 +40,7 @@ namespace Contensive.Addons.ContactManager.Views {
                     csPerson.Open("people", "ID=" + DetailMemberID, "", false);
                     string memberName = csPerson.GetText("name");
                     if (string.IsNullOrEmpty(memberName)) {
-                        memberName = Strings.Trim(csPerson.GetText("FirstName") + " " + csPerson.GetText("LastName"));
+                        memberName = (csPerson.GetText("FirstName") + " " + csPerson.GetText("LastName")).Trim();
                         if (string.IsNullOrEmpty(memberName)) {
                             memberName = "Record " + csPerson.GetText("ID");
                         }
@@ -50,7 +48,7 @@ namespace Contensive.Addons.ContactManager.Views {
                     // 
                     // Determine current Subtab
                     // 
-                    int SubTab = cp.Doc.GetInteger(constants.RequestNameDetailSubtab);
+                    int SubTab = cp.Doc.GetInteger(Constants.RequestNameDetailSubtab);
                     if (SubTab == 0) {
                         SubTab = ae.userProperties.subTab;
                         if (SubTab == 0) {
@@ -60,12 +58,12 @@ namespace Contensive.Addons.ContactManager.Views {
                     } else {
                         ae.userProperties.subTab = SubTab;
                     }
-                    cp.Doc.AddRefreshQueryString(constants.RequestNameDetailSubtab, SubTab.ToString());
+                    cp.Doc.AddRefreshQueryString(Constants.RequestNameDetailSubtab, SubTab.ToString());
                     // 
                     // SubTab Menu
                     // 
                     cp.Doc.AddRefreshQueryString("tab", "");
-                    string ButtonList = constants.ButtonCancel + "," + constants.ButtonSave + "," + constants.ButtonOK + "," + constants.ButtonNewSearch;
+                    string ButtonList = Constants.ButtonCancel + "," + Constants.ButtonSave + "," + Constants.ButtonOK + "," + Constants.ButtonNewSearch;
                     string Header = "<div>" + memberName + "</div>";
                     // 
                     var Nav = new TabController();
@@ -77,8 +75,8 @@ namespace Contensive.Addons.ContactManager.Views {
                     csPerson.Close();
                     // 
                     string Content = Nav.getTabs(cp);
-                    Content += cp.Html.Hidden(constants.RequestNameFormID, Convert.ToInt32((int)constants.FormIdEnum.FormDetails).ToString());
-                    Content += cp.Html.Hidden(constants.RequestNameMemberID, DetailMemberID.ToString());
+                    Content += cp.Html.Hidden(Constants.RequestNameFormID, Convert.ToInt32((int)Constants.FormIdEnum.FormDetails).ToString());
+                    Content += cp.Html.Hidden(Constants.RequestNameMemberID, DetailMemberID.ToString());
                     // 
                     result = AdminUIController.getBody(cp, "Contact Manager &gt;&gt; Contact Details", ButtonList, "", true, true, Header, "", Content);
                 }
@@ -132,7 +130,7 @@ namespace Contensive.Addons.ContactManager.Views {
                     // Right Side
                     // 
                     string copy = cp.Html.InputText("AppendNotes", "", 255);
-                    copy = Strings.Replace(copy, " cols=\"100\"", " style=\"width:100%;\"", Compare: Microsoft.VisualBasic.Constants.vbTextCompare);
+                    copy = copy.Replace(" cols=\"100\"", " style=\"width:100%;\"");
                     // 
                     right += "<table border=0 width=100% cellspacing=0 cellpadding=0><TR><td width=200><img src=/cclib/images/spacer.gif width=150 height=1></TD><td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD></TR>";
 
@@ -330,7 +328,7 @@ namespace Contensive.Addons.ContactManager.Views {
         // 
         public static string getFormDetail_DividerRow(CPBaseClass cp, string Caption) {
             try {
-                string result = Strings.Replace(Caption, " ", "&nbsp;");
+                string result = Caption.Replace(" ", "&nbsp;");
                 result = "<TR><td colspan=2 style=\"Padding-top:10px;\"><TABLE border=0 width=100% cellspacing=0 cellpadding=0><TR><td width=1 style=\"white-space:nowrap;\">" + result + "&nbsp;&nbsp;</TD><td width=100%><HR></TD></TABLE></tr>";
 
 
@@ -379,7 +377,7 @@ namespace Contensive.Addons.ContactManager.Views {
                         // 
                         string Copy = cp.Doc.GetText("AppendNotes");
                         if (!string.IsNullOrEmpty(Copy)) {
-                            Copy = "<div style=\"margin-top:10px;border-top:1px dashed black;\">Added " + Conversions.ToString(DateTime.Now) + " by " + cp.Content.GetRecordName("people", cp.User.Id) + "</div><div style=\"margin-left:20px;margin-top:5px;\">" + Copy + "</div>";
+                            Copy = $"<div style=\"margin-top:10px;border-top:1px dashed black;\">Added {DateTime.Now} by {cp.Content.GetRecordName("people", cp.User.Id)}</div><div style=\"margin-left:20px;margin-top:5px;\">{Copy}</div>";
 
                         }
                         csPerson.SetField("NotesFilename", cp.Doc.GetText("NotesFilename") + Copy);
@@ -396,12 +394,12 @@ namespace Contensive.Addons.ContactManager.Views {
                         if (!string.IsNullOrEmpty(originalFilename)) {
                             string Filename = csPerson.GetFilename(thumbnailFieldName, originalFilename);
                             Path = Filename;
-                            Path = Strings.Replace(Path, "/", @"\");
-                            Path = Strings.Replace(Path, @"\" + originalFilename, "");
+                            Path = Path.Replace("/", @"\");
+                            Path = Path.Replace(@"\" + originalFilename, "");
                             csPerson.SetField(thumbnailFieldName, Filename);
                             // Call CS.SetFile(FieldName, Path)
                         }
-                        // 
+                        //
                         string imageFieldName = "ImageFilename";
                         if (cp.Doc.GetBoolean(imageFieldName + ".DeleteFlag")) {
                             csPerson.SetField(imageFieldName, "");
@@ -410,8 +408,8 @@ namespace Contensive.Addons.ContactManager.Views {
                         if (!string.IsNullOrEmpty(originalFilename)) {
                             string Filename = csPerson.GetFilename(imageFieldName, originalFilename);
                             Path = Filename;
-                            Path = Strings.Replace(Path, "/", @"\");
-                            Path = Strings.Replace(Path, @"\" + originalFilename, "");
+                            Path = Path.Replace("/", @"\");
+                            Path = Path.Replace(@"\" + originalFilename, "");
                             csPerson.SetField(imageFieldName, Filename);
                             // Call CS.SetFile(FieldName, Path)
                         }
@@ -447,7 +445,7 @@ namespace Contensive.Addons.ContactManager.Views {
                 int PrimaryContentID = cp.Content.GetID("People");
                 int SecondaryContentID = cp.Content.GetID("Groups");
                 var sb = new StringBuilder();
-                sb.Append(Microsoft.VisualBasic.Constants.vbCrLf + "<!-- GroupRule Table --><table border=0 width=100% cellspacing=0 cellpadding=0><TR><td width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD><td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD></TR>");
+                sb.Append(Environment.NewLine + "<!-- GroupRule Table --><table border=0 width=100% cellspacing=0 cellpadding=0><TR><td width=150><img src=/cclib/images/spacer.gif width=150 height=1></TD><td width=99%><img src=/cclib/images/spacer.gif width=1 height=1></TD></TR>");
 
 
 
@@ -500,7 +498,7 @@ namespace Contensive.Addons.ContactManager.Views {
                         bool CanSeeHiddenGroups = cp.User.IsDeveloper;
                         while (CS.OK()) {
                             string GroupName = CS.GetText("GroupName");
-                            if (Strings.Mid(GroupName, 1, 1) != "_" | CanSeeHiddenGroups) {
+                            if (!GroupName.StartsWith("_") | CanSeeHiddenGroups) {
                                 string GroupCaption = CS.GetText("GroupCaption");
                                 int GroupID = CS.GetInteger("ID");
                                 if (string.IsNullOrEmpty(GroupCaption)) {
@@ -538,8 +536,8 @@ namespace Contensive.Addons.ContactManager.Views {
                                     Caption = "&nbsp;";
                                 }
                                 sb.Append(cp.Html.Hidden("Memberrules." + GroupCount + ".ID", GroupID.ToString()));
-                                GroupCaption = Strings.Replace(GroupCaption, " ", "&nbsp;");
-                                sb.Append(Microsoft.VisualBasic.Constants.vbCrLf + "<!-- GroupRule Row --><TR><td style=\"TEXT-ALIGN:left;PADDING-LEFT:20px;border-top:1px solid white;\">" + cp.Html.CheckBox("MemberRules." + GroupCount, GroupActive) + GroupCaption + "</TD><td style=\"TEXT-ALIGN:left;PADDING-LEFT:10px;border-top:1px solid white;\">Expires " + cp.Html.InputText("MemberRules." + GroupCount + ".DateExpires", DateExpireValue, 255) + "</TD></TR>");
+                                GroupCaption = GroupCaption.Replace(" ", "&nbsp;");
+                                sb.Append(Environment.NewLine + "<!-- GroupRule Row --><TR><td style=\"TEXT-ALIGN:left;PADDING-LEFT:20px;border-top:1px solid white;\">" + cp.Html.CheckBox("MemberRules." + GroupCount, GroupActive) + GroupCaption + "</TD><td style=\"TEXT-ALIGN:left;PADDING-LEFT:10px;border-top:1px solid white;\">Expires " + cp.Html.InputText("MemberRules." + GroupCount + ".DateExpires", DateExpireValue, 255) + "</TD></TR>");
 
 
 
@@ -561,7 +559,7 @@ namespace Contensive.Addons.ContactManager.Views {
                 } else {
                     sb.Append("<input type=\"hidden\" name=\"MemberRules.RowCount\" value=\"" + GroupCount + "\">");
                 }
-                sb.Append(Microsoft.VisualBasic.Constants.vbCrLf + "<!-- GroupRule Table End --></table>");
+                sb.Append(Environment.NewLine + "<!-- GroupRule Table End --></table>");
                 result = "<div STYLE=\"width:100%;\" class=\"cmBody ccPanel3DReverse\">" + sb.ToString() + "</div>";
                 return result;
             } catch (Exception ex) {

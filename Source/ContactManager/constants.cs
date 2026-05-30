@@ -1,13 +1,21 @@
-﻿
-namespace Contensive.Addons.ContactManager {
+﻿namespace Contensive.Addons.ContactManager {
 
 
 
 
-    public static class constants {
+    public static class Constants {
         // 
         // 
         public const int Version = 1;
+        //
+        public const string unixNewLine = "\n";
+        public const string macNewLine = "\r";
+        public const string windowsNewLine = "\r\n";
+        public const string RequestNamePageNumber = "PageNumber";
+        public const string RequestNamePageSize = "PageSize";
+        public const string kmaEndTable = "</table >";
+        public const string tableCellEnd = "</td>";
+        public const string kmaEndTableRow = "</tr>";
         // 
         public const string addonGuidExportCSV = "{5C25F35D-A2A8-4791-B510-B1FFE0645004}";
         // 
@@ -15,8 +23,6 @@ namespace Contensive.Addons.ContactManager {
         public const string rnInputValue = "inputValue";
         public const string RequestNameMemberID = "memberId";
         public const string RequestNameFormID = "formId";
-        public const string RequestNamePageSize = "pageSize";
-        public const string RequestNamePageNumber = "pageNumber";
         public const string RequestNameDetailSubtab = "subtab";
         // 
         public const string ButtonSearch = "Search";

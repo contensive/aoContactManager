@@ -1,15 +1,14 @@
 ﻿
 using Contensive.BaseClasses;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using static Contensive.Addons.ContactManagerTools.Controllers.GenericController;
-using static Contensive.Addons.ContactManagerTools.Constants;
-using static Contensive.Addons.ContactManagerTools.HtmlController;
+using static Contensive.Addons.ContactManager.Controllers.GenericController;
+using static Contensive.Addons.ContactManager.Constants;
+using static Contensive.Addons.ContactManager.Controllers.HtmlController;
 
-namespace Contensive.Addons.ContactManagerTools {
+
+
+namespace Contensive.Addons.ContactManager.Controllers {
     public static  class AdminUIController {
         public enum SortingStateEnum {
             NotSortable = 0,
@@ -488,7 +487,7 @@ namespace Contensive.Addons.ContactManagerTools {
             // Build ButtonBar
             //
             if (!string.IsNullOrEmpty(ButtonListLeft.Trim(' '))) {
-                LeftButtons = getButtonsFromList( ButtonListLeft, AllowDelete, AllowAdd);
+                LeftButtons = HtmlController.getButtonsFromList( ButtonListLeft, AllowDelete, AllowAdd);
             }
             if (!string.IsNullOrEmpty(ButtonListRight.Trim(' '))) {
                 RightButtons = getButtonsFromList( ButtonListRight, AllowDelete, AllowAdd);

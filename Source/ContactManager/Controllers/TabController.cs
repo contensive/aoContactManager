@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using Contensive.BaseClasses;
-using Contensive.Addons.ContactManagerTools;
 
-namespace Contensive.Addons.ContactManagerTools {
+namespace Contensive.Addons.ContactManager.Controllers {
     /// <summary>
     /// create admin tab system
     /// use https://www.w3schools.com/bootstrap4/bootstrap_navs.asp

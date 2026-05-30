@@ -1,29 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using Contensive.Addons.ContactManager.Controllers;
 using Contensive.BaseClasses;
 using Contensive.Models.Db;
-using Microsoft.VisualBasic;
 
 namespace Contensive.Addons.ContactManager.Views {
     public sealed class ListView {
         // 
         // =================================================================================
         // 
-        public static constants.FormIdEnum processRequest(CPBaseClass cp, Controllers.ApplicationController ae, RequestModel request) {
-            var resultFormId = constants.FormIdEnum.FormList;
+        public static Constants.FormIdEnum processRequest(CPBaseClass cp, Controllers.ApplicationController ae, RequestModel request) {
+            var resultFormId = Constants.FormIdEnum.FormList;
             try {
                 // 
                 cp.Utils.AppendLog("ListFormController.ProcessRequest, enter");
                 // 
                 switch (request.Button ?? "") {
-                    case constants.ButtonNewSearch: {
+                    case Constants.ButtonNewSearch: {
                             ae.userProperties.contactSearchCriteria = "";
                             ae.userProperties.contactGroupCriteria = "";
-                            request.FormID = constants.FormIdEnum.FormSearch;
-                            resultFormId = constants.FormIdEnum.FormSearch;
+                            request.FormID = Constants.FormIdEnum.FormSearch;
+                            resultFormId = Constants.FormIdEnum.FormSearch;
                             break;
                         }
-                    case constants.ButtonApply: {
+                    case Constants.ButtonApply: {
                             // 
                             // Add to or remove from group
                             // 
@@ -35,7 +35,7 @@ namespace Contensive.Addons.ContactManager.Views {
                             int memberID;
                             string SQL;
                             switch (request.GroupToolAction) {
-                                case constants.GroupToolActionEnum.AddToGroup: {
+                                case Constants.GroupToolActionEnum.AddToGroup: {
                                         // 
                                         // ----- Add to Group
                                         // 
@@ -73,10 +73,10 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                             cp.Db.ExecuteNonQuery(SQL);
                                         }
-                                        resultFormId = constants.FormIdEnum.FormList;
+                                        resultFormId = Constants.FormIdEnum.FormList;
                                         break;
                                     }
-                                case constants.GroupToolActionEnum.RemoveFromGroup: {
+                                case Constants.GroupToolActionEnum.RemoveFromGroup: {
                                         // 
                                         // ----- Remove From Group
                                         // 
@@ -113,7 +113,7 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                         break;
                                     }
-                                case constants.GroupToolActionEnum.ExportGroup: {
+                                case Constants.GroupToolActionEnum.ExportGroup: {
                                         // 
                                         // ----- Export
                                         // 
@@ -148,12 +148,12 @@ namespace Contensive.Addons.ContactManager.Views {
                                                         // 
                                                         // This is the only criteria
                                                         // 
-                                                        SQLCriteria = " WHERE(" + Strings.Mid(RowSQL, 3) + ")";
+                                                        SQLCriteria = $" WHERE({RowSQL.Substring(2)})";
                                                     } else {
-                                                        // 
+                                                        //
                                                         // Add this criteria to the previous
-                                                        // 
-                                                        SQLCriteria = SQLCriteria + " And(" + Strings.Mid(RowSQL, 3) + ")";
+                                                        //
+                                                        SQLCriteria = $"{SQLCriteria} And({RowSQL.Substring(2)})";
                                                     }
                                                 }
                                             } else {
@@ -175,7 +175,7 @@ namespace Contensive.Addons.ContactManager.Views {
                                                 while (cs.OK()) {
                                                     string FieldName = cs.GetText("name");
                                                     switch (cs.GetInteger("type")) {
-                                                        case constants.FieldTypeLookup: {
+                                                        case Constants.FieldTypeLookup: {
                                                                 // 
                                                                 // just add the ID into the list
                                                                 // 
@@ -183,15 +183,15 @@ namespace Contensive.Addons.ContactManager.Views {
                                                                 FieldNameList = FieldNameList + "," + FieldName;
                                                                 break;
                                                             }
-                                                        case constants.FieldTypeFileText: {
+                                                        case Constants.FieldTypeFileText: {
                                                                 break;
                                                             }
                                                         // 
                                                         // read file for text - skip field
                                                         // 
                                                         // no field involved, skip it
-                                                        case constants.FieldTypeRedirect:
-                                                        case constants.FieldTypeManyToMany: {
+                                                        case Constants.FieldTypeRedirect:
+                                                        case Constants.FieldTypeManyToMany: {
                                                                 break;
                                                             }
 
@@ -209,16 +209,16 @@ namespace Contensive.Addons.ContactManager.Views {
                                                 if (string.IsNullOrEmpty(SelectList)) {
                                                     ae.statusMessage = "<P>There was a problem requesting your download.<P>";
                                                 } else {
-                                                    SelectList = Strings.Mid(SelectList, 2);
+                                                    SelectList = SelectList.Substring(1);
                                                     if (!string.IsNullOrEmpty(FieldNameList)) {
-                                                        FieldNameList = Strings.Mid(FieldNameList, 2);
+                                                        FieldNameList = FieldNameList.Substring(1);
                                                     }
                                                     // ExportName = CStr(Now()) & " snapshot of " & LCase(ExportName)
                                                     SQL = "select Distinct " + SelectList + " from " + SQLFrom + " where " + SQLCriteria;
                                                     // 
                                                     // --- tmp only -- need a new api method to cp.addon,executeAsync( addonid, dictionaryofArgs, DownloadName, downloadfilename )
                                                     // 
-                                                    var addon = DbBaseModel.create<AddonModel>(cp, constants.addonGuidExportCSV);
+                                                    var addon = DbBaseModel.create<AddonModel>(cp, Constants.addonGuidExportCSV);
                                                     if (addon is null) {
                                                         // 
                                                         ae.statusMessage = "<P>There was a problem requesting your download. The Csv Export Addon is not installed.<P>";
@@ -229,8 +229,8 @@ namespace Contensive.Addons.ContactManager.Views {
                                                         download.name = "Contact Manager Export by " + cp.User.Name + ", " + DateTime.Now.ToString();
                                                         download.requestedBy = cp.User.Id;
                                                         download.dateRequested = DateTime.Now;
-                                                        download.filename.content = Constants.vbCrLf;
-                                                        download.filename.filename = ContactManagerTools.Controllers.GenericController.getVirtualRecordUnixPathFilename(DownloadModel.tableMetadata.tableNameLower, "filename", download.id, "export.csv");
+                                                        download.filename.content = Environment.NewLine;
+                                                        download.filename.filename = ContactManager.Controllers.GenericController.getVirtualRecordUnixPathFilename(DownloadModel.tableMetadata.tableNameLower, "filename", download.id, "export.csv");
                                                         download.save(cp);
                                                         // 
                                                         var args = new Dictionary<string, string>() { { "sql", SQL } };
@@ -250,10 +250,10 @@ namespace Contensive.Addons.ContactManager.Views {
                                                 }
                                             }
                                         }
-                                        resultFormId = constants.FormIdEnum.FormList;
+                                        resultFormId = Constants.FormIdEnum.FormList;
                                         break;
                                     }
-                                case constants.GroupToolActionEnum.SetGroupEmail: {
+                                case Constants.GroupToolActionEnum.SetGroupEmail: {
                                         // 
                                         // ----- Set AllowBulkEmail field
                                         // 
@@ -317,7 +317,7 @@ namespace Contensive.Addons.ContactManager.Views {
                     var layout = cp.AdminUI.CreateLayoutBuilder();
                     // 
                     bool IsAdmin = cp.User.IsAdmin;
-                    string TextTest = cp.Doc.GetText(constants.RequestNamePageSize);
+                    string TextTest = cp.Doc.GetText(Constants.RequestNamePageSize);
                     int pageSize;
                     if (string.IsNullOrEmpty(TextTest)) {
                         pageSize = cp.Utils.EncodeInteger(cp.Visit.GetText("cmPageSize", "50"));
@@ -328,7 +328,7 @@ namespace Contensive.Addons.ContactManager.Views {
                     if (pageSize == 0) {
                         pageSize = 50;
                     }
-                    int PageNumber = cp.Doc.GetInteger(constants.RequestNamePageNumber);
+                    int PageNumber = cp.Doc.GetInteger(Constants.RequestNamePageNumber);
                     if (PageNumber == 0) {
                         PageNumber = 1;
                     }
@@ -355,12 +355,12 @@ namespace Contensive.Addons.ContactManager.Views {
                     if (!string.IsNullOrEmpty(TextTest)) {
                         SortColPtr = cp.Utils.EncodeInteger(TextTest);
                     }
-                    SortColPtr = ContactManagerTools.AdminUIController.getReportSortColumnPtr(cp, SortColPtr);
+                    SortColPtr = AdminUIController.getReportSortColumnPtr(cp, SortColPtr);
                     if ((SortColPtr.ToString() ?? "") != (TextTest ?? "")) {
                         cp.Visit.SetProperty("cmSortColumn", SortColPtr.ToString());
                     }
                     string SQLOrderDir = "";
-                    if (ContactManagerTools.AdminUIController.getReportSortType(cp) == 2) {
+                    if (AdminUIController.getReportSortType(cp) == 2) {
                         SQLOrderDir = " Desc";
                     }
                     // 
@@ -462,7 +462,7 @@ namespace Contensive.Addons.ContactManager.Views {
                                 if (string.IsNullOrEmpty(RecordName)) {
                                     RecordName = DefaultName + "&nbsp;" + RecordID;
                                 }
-                                Cells[RowPointer, CPtr] = "<a href=\"?" + RQS + "&" + constants.RequestNameMemberID + "=" + RecordID + "\">" + RecordName + "</a>";
+                                Cells[RowPointer, CPtr] = "<a href=\"?" + RQS + "&" + Constants.RequestNameMemberID + "=" + RecordID + "\">" + RecordName + "</a>";
                                 CPtr += 1;
                                 Cells[RowPointer, CPtr] = CS.GetText("OrgName");
                                 CPtr += 1;
@@ -477,7 +477,7 @@ namespace Contensive.Addons.ContactManager.Views {
                         CS.Close();
                         result += cp.Html.Hidden("M.Count", RowPointer.ToString());
                         string BlankPanel = "<div class=\"cmBody ccPanel3DReverse\">x</div>";
-                        string RowPageSize = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500><TR><td class=\"p-1\" class=APLeft>Rows Per Page</TD><td class=\"p-1\" class=apright>" + cp.Html5.InputText(constants.RequestNamePageSize, 4, pageSize.ToString()) + "</TD></TR></Table>";
+                        string RowPageSize = "<TABLE border=0 cellpadding=4 cellspacing=0 width=500><TR><td class=\"p-1\" class=APLeft>Rows Per Page</TD><td class=\"p-1\" class=apright>" + cp.Html5.InputText(Constants.RequestNamePageSize, 4, pageSize.ToString()) + "</TD></TR></Table>";
 
 
 
@@ -502,7 +502,7 @@ namespace Contensive.Addons.ContactManager.Views {
 
 
 
-                        string ActionPanel = "" + Constants.vbCrLf + "<style>.APLeft{width:100px;text-align:left;}.APRight{text-align:left;}.APRightIndent{text-align:left;padding-left:10px;}</style>" + Constants.vbCrLf + Strings.Replace(BlankPanel, "x", RowPageSize) + Strings.Replace(BlankPanel, "x", RowGroups) + "";
+                        string ActionPanel = "" + Environment.NewLine + "<style>.APLeft{width:100px;text-align:left;}.APRight{text-align:left;}.APRightIndent{text-align:left;padding-left:10px;}</style>" + Environment.NewLine + BlankPanel.Replace("x", RowPageSize) + BlankPanel.Replace("x", RowGroups) + "";
 
 
 
@@ -512,7 +512,7 @@ namespace Contensive.Addons.ContactManager.Views {
 
 
 
-                        string PostTableCopy = "<div class=\"cmBody ccPanel3D\">" + ActionPanel + "</div>" + cp.Html.Hidden("M.Count", RowPointer.ToString()) + cp.Html.Hidden(constants.RequestNameFormID, Convert.ToInt32((int)constants.FormIdEnum.FormList).ToString()) + "";
+                        string PostTableCopy = "<div class=\"cmBody ccPanel3D\">" + ActionPanel + "</div>" + cp.Html.Hidden("M.Count", RowPointer.ToString()) + cp.Html.Hidden(Constants.RequestNameFormID, Convert.ToInt32((int)Constants.FormIdEnum.FormList).ToString()) + "";
 
 
 
@@ -523,9 +523,9 @@ namespace Contensive.Addons.ContactManager.Views {
                             "<p>" + DataRowCount + " Matches found" + ae.statusMessage;
 
 
-                        string ButtonList = constants.ButtonApply + "," + constants.ButtonNewSearch;
+                        string ButtonList = Constants.ButtonApply + "," + Constants.ButtonNewSearch;
                         string PreTableCopy = "";
-                        string Body = ContactManagerTools.AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, pageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr);
+                        string Body = AdminUIController.getReport2(cp, RowPointer, ColCaption, ColAlign, ColWidth, Cells, pageSize, PageNumber, PreTableCopy, PostTableCopy, DataRowCount, "ccPanel", ColSortable, SortColPtr);
                         // 
                         // Assemble page
                         layout.body = Body;
@@ -539,8 +539,8 @@ namespace Contensive.Addons.ContactManager.Views {
                         layout.successMessage = "";
                         layout.title = "Contact Manager";
                         layout.warningMessage = "";
-                        layout.addFormButton(constants.ButtonApply);
-                        layout.addFormButton(constants.ButtonNewSearch);
+                        layout.addFormButton(Constants.ButtonApply);
+                        layout.addFormButton(Constants.ButtonNewSearch);
                         // 
                         result = layout.getHtml();
                     }
@@ -590,15 +590,15 @@ namespace Contensive.Addons.ContactManager.Views {
                 // 
                 if (!string.IsNullOrEmpty(ContactSearchCriteria)) {
                     hint += ",110";
-                    CriteriaValues = Strings.Split(ContactSearchCriteria, Constants.vbCrLf);
-                    CriteriaCount = Information.UBound(CriteriaValues) + 1;
+                    CriteriaValues = ContactSearchCriteria.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                    CriteriaCount = CriteriaValues.Length;
                     var loopTo = CriteriaCount - 1;
                     for (CriteriaPointer = 0; CriteriaPointer <= loopTo; CriteriaPointer++) {
                         hint += ",120";
                         if (!string.IsNullOrEmpty(CriteriaValues[CriteriaPointer])) {
                             hint += ",130";
-                            FieldParms = Strings.Split(CriteriaValues[CriteriaPointer], Constants.vbTab);
-                            if (Information.UBound(FieldParms) >= 3) {
+                            FieldParms = CriteriaValues[CriteriaPointer].Split('\t');
+                            if (FieldParms.Length - 1 >= 3) {
                                 // 
                                 // Look up caption
                                 // 
@@ -617,8 +617,8 @@ namespace Contensive.Addons.ContactManager.Views {
                                     FieldContentLookupID = 0;
                                 }
                                 switch (cp.Utils.EncodeInteger(FieldParms[1])) {
-                                    case constants.FieldTypeLongText:
-                                    case constants.FieldTypeText: {
+                                    case Constants.FieldTypeLongText:
+                                    case Constants.FieldTypeText: {
                                             // 
                                             // text
                                             // 
@@ -659,7 +659,7 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                             break;
                                         }
-                                    case constants.FieldTypeLookup: {
+                                    case Constants.FieldTypeLookup: {
                                             // 
                                             // Lookup
                                             // 
@@ -668,7 +668,7 @@ namespace Contensive.Addons.ContactManager.Views {
                                                 LookupName = "";
                                                 if (FieldContentLookupID != 0) {
                                                     FieldContentLookupName = cp.Content.GetRecordName("Content", FieldContentLookupID);
-                                                    if (!string.IsNullOrEmpty(FieldContentLookupName) & FieldParms[2].IsNumeric()) {
+                                                    if (!string.IsNullOrEmpty(FieldContentLookupName) && int.TryParse(FieldParms[2], out _)) {
                                                         LookupName = cp.Content.GetRecordName(FieldContentLookupName, cp.Utils.EncodeInteger(FieldParms[2]));
                                                     }
                                                 }
@@ -681,7 +681,7 @@ namespace Contensive.Addons.ContactManager.Views {
                                             }
                                             break;
                                         }
-                                    case constants.FieldTypeDate: {
+                                    case Constants.FieldTypeDate: {
                                             // 
                                             // date
                                             // 
@@ -706,10 +706,10 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                             break;
                                         }
-                                    case constants.FieldTypeCurrency:
-                                    case constants.FieldTypeFloat:
-                                    case constants.FieldTypeInteger:
-                                    case var @case when @case == constants.FieldTypeLookup: {
+                                    case Constants.FieldTypeCurrency:
+                                    case Constants.FieldTypeFloat:
+                                    case Constants.FieldTypeInteger:
+                                    case var @case when @case == Constants.FieldTypeLookup: {
                                             // 
                                             // number
                                             // 
@@ -734,7 +734,7 @@ namespace Contensive.Addons.ContactManager.Views {
 
                                             break;
                                         }
-                                    case constants.FieldTypeBoolean: {
+                                    case Constants.FieldTypeBoolean: {
                                             // 
                                             // boolean
                                             // 
@@ -770,25 +770,25 @@ namespace Contensive.Addons.ContactManager.Views {
                 }
                 if (!string.IsNullOrEmpty(return_SearchCaption)) {
                     hint += ",210";
-                    return_SearchCaption = Strings.Mid(return_SearchCaption, 3);
+                    return_SearchCaption = return_SearchCaption.Substring(2);
                     return_SearchCaption = " where " + return_SearchCaption;
                 }
                 // 
                 // Group Rules Criteria
                 // 
                 hint += ",220";
-                if (Strings.Left(ContactGroupCriteria, 1) == ",") {
-                    ContactGroupCriteria = Strings.Mid(ContactGroupCriteria, 2);
+                if (ContactGroupCriteria.StartsWith(",")) {
+                    ContactGroupCriteria = ContactGroupCriteria.Substring(1);
                 }
-                if (Strings.Right(ContactGroupCriteria, 1) == ",") {
-                    ContactGroupCriteria = Strings.Mid(ContactGroupCriteria, 1, Strings.Len(ContactGroupCriteria) - 1);
+                if (ContactGroupCriteria.EndsWith(",")) {
+                    ContactGroupCriteria = ContactGroupCriteria.Substring(0, ContactGroupCriteria.Length - 1);
                 }
                 if (!string.IsNullOrEmpty(ContactGroupCriteria)) {
                     hint += ",230";
-                    GroupIDs = Strings.Split(ContactGroupCriteria, ",");
+                    GroupIDs = ContactGroupCriteria.Split(',');
                     GroupDelimiter = "";
                     SQLNow = cp.Db.EncodeSQLDate(DateTime.Now);
-                    if (Information.UBound(GroupIDs) == 0) {
+                    if (GroupIDs.Length - 1 == 0) {
                         hint += ",240";
                         if (string.IsNullOrEmpty(return_SearchCaption)) {
                             return_SearchCaption = " in group '" + getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs[GroupPtr])) + "'";
@@ -804,12 +804,12 @@ namespace Contensive.Addons.ContactManager.Views {
                             return_SearchCaption = " in group(s) ";
                         }
                         string GroupCriteria = "";
-                        var loopTo1 = Information.UBound(GroupIDs);
+                        var loopTo1 = GroupIDs.Length - 1;
                         for (GroupPtr = 0; GroupPtr <= loopTo1; GroupPtr++) {
                             hint += ",260";
                             GroupCriteria = GroupCriteria + "OR((ccMemberRules.GroupID=" + GroupIDs[GroupPtr] + ")and((ccMemberRules.DateExpires is null)or(ccMemberRules.DateExpires>" + SQLNow + ")))";
                             // Criteria = Criteria & "AND(ccMemberRules.GroupID=GroupIDs(GroupPtr))"
-                            if (GroupPtr == Information.UBound(GroupIDs) & GroupPtr != 0) {
+                            if (GroupPtr == GroupIDs.Length - 1 & GroupPtr != 0) {
                                 hint += ",270";
                                 return_SearchCaption += " or '" + getGroupCaption(cp, cp.Utils.EncodeInteger(GroupIDs[GroupPtr])) + "'";
                             } else {
@@ -818,7 +818,7 @@ namespace Contensive.Addons.ContactManager.Views {
                             }
                             GroupDelimiter = ", ";
                         }
-                        return_Criteria = return_Criteria + "and(" + Strings.Mid(GroupCriteria, 3) + ")";
+                        return_Criteria = return_Criteria + "and(" + GroupCriteria.Substring(2) + ")";
                     }
                 }
                 // 

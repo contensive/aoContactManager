@@ -23,23 +23,23 @@ namespace Contensive.Addons.ContactManager.Views {
                     var request = new RequestModel(cp);
                     cp.Doc.AddRefreshQueryString("tab", request.TabNumber.ToString());
                     // 
-                    request.FormID = request.FormID != constants.FormIdEnum.FormUnknown ? request.FormID : getDefaultFormId(request);
+                    request.FormID = request.FormID != Constants.FormIdEnum.FormUnknown ? request.FormID : getDefaultFormId(request);
                     if (!string.IsNullOrEmpty(request.Button)) {
                         // 
                         // ----- Process Previous Forms
                         // 
                         switch (request.FormID) {
-                            case constants.FormIdEnum.FormSearch: {
+                            case Constants.FormIdEnum.FormSearch: {
                                     // 
                                     request.FormID = SearchView.processRequest(cp, ae, request);
                                     break;
                                 }
-                            case constants.FormIdEnum.FormList: {
+                            case Constants.FormIdEnum.FormList: {
                                     // 
                                     request.FormID = ListView.processRequest(cp, ae, request);
                                     break;
                                 }
-                            case constants.FormIdEnum.FormDetails: {
+                            case Constants.FormIdEnum.FormDetails: {
                                     // 
                                     request.FormID = DetailView.processRequest(cp, request);
                                     break;
@@ -50,12 +50,12 @@ namespace Contensive.Addons.ContactManager.Views {
                     // 
                     // ----- Output the next form
                     switch (request.FormID) {
-                        case constants.FormIdEnum.FormDetails: {
+                        case Constants.FormIdEnum.FormDetails: {
                                 // 
                                 result += DetailView.getResponse(cp, ae, request.DetailMemberID);
                                 break;
                             }
-                        case constants.FormIdEnum.FormList: {
+                        case Constants.FormIdEnum.FormList: {
                                 // 
                                 result += ListView.getResponse(cp, ae);
                                 break;
@@ -85,10 +85,10 @@ namespace Contensive.Addons.ContactManager.Views {
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        private constants.FormIdEnum getDefaultFormId(RequestModel request) {
+        private Constants.FormIdEnum getDefaultFormId(RequestModel request) {
             if (request.DetailMemberID != 0)
-                return constants.FormIdEnum.FormDetails;
-            return constants.FormIdEnum.FormList;
+                return Constants.FormIdEnum.FormDetails;
+            return Constants.FormIdEnum.FormList;
             // If ((ae.userProperties.contactSearchCriteria <> "") Or (ae.userProperties.contactGroupCriteria <> "")) Then Return FormIdEnum.FormList
             // Return FormIdEnum.FormSearch
         }
