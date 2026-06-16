@@ -1,10 +1,13 @@
 #Requires -Version 5.1
 [CmdletBinding()]
-param()
+param(
+    [string]   $LocalDeployTarget  = '',
+    [hashtable]$RemoteDeployTarget = $null
+)
 
 $ErrorActionPreference = 'Stop'
 
-Import-Module (Join-Path $PSScriptRoot '..\..\Contensive5\scripts\contensive-build.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot '..\..\Contensive5\scripts\build-addon-collection.psm1') -Force
 
 $projectRoot = (Resolve-Path "$PSScriptRoot\..").Path
 
@@ -18,4 +21,6 @@ Invoke-ContensiveBuild `
                            "$projectRoot\source\ContactManager\bin"
                            "$projectRoot\source\ContactManager\obj"
                        ) `
-    -DotnetProjectPath "$projectRoot\source\ContactManager\ContactManager.csproj"
+    -UiPath            "$projectRoot\ui" `
+    -LocalDeployTarget  $LocalDeployTarget `
+    -RemoteDeployTarget $RemoteDeployTarget

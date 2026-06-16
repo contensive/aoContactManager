@@ -46,6 +46,5 @@
 		<styleslinkhref><![CDATA[/ContactManager/ContactManager.css]]></styleslinkhref>
 		<Scripting Language="VBScript" EntryPoint="" Timeout="5000"/>
 	</Addon>
-	<Resource name="ContactManager.css" type="www" path="/ContactManager" />
-	<Resource name="ContactManager.js" type="www" path="/ContactManager" />
+	<Resource name="wwwFiles.zip" type="wwwFiles" />
 </Collection>
