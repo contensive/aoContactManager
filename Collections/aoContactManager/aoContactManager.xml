@@ -47,4 +47,20 @@
 		<Scripting Language="VBScript" EntryPoint="" Timeout="5000"/>
 	</Addon>
 	<Resource Name="wwwFiles.zip" Type="wwwFiles" />
+	<!--
+		CRM Portal Feature: places Contact Manager under Tools in the CRM portal.
+		Portal GUID {ebf26a0a-e058-4933-a57c-baf7d46e6543} = CRM Portal (defined in aoCRM collection).
+		Parent feature {D8E2F4A6-3B7C-4D1E-9F5A-2C8B6E4A7D3F} = CRM Tools heading.
+	-->
+	<Data>
+		<Record Content="Portal Features" Guid="{375f0cd2-1dd7-442f-a8f6-2755d1880dd9}" Name="CRM - Tools - Contact Manager">
+			<field Name="sortorder"><![CDATA[Contact Manager]]></field>
+			<field Name="portalid">{ebf26a0a-e058-4933-a57c-baf7d46e6543}</field>
+			<field Name="addonid">{57602963-CA46-41EB-8053-8ACB8C47C2F2}</field>
+			<field Name="heading"><![CDATA[Contact Manager]]></field>
+			<field Name="parentfeatureid">{D8E2F4A6-3B7C-4D1E-9F5A-2C8B6E4A7D3F}</field>
+			<field Name="datacontentid"></field>
+			<field Name="addpadding">False</field>
+		</Record>
+	</Data>
 </Collection>

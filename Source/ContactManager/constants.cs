@@ -16,7 +16,11 @@
         public const string kmaEndTable = "</table >";
         public const string tableCellEnd = "</td>";
         public const string kmaEndTableRow = "</tr>";
-        // 
+        //
+        // -- CRM portal integration
+        public const string guidCRMPortal = "{ebf26a0a-e058-4933-a57c-baf7d46e6543}";
+        public const string guidPortalFeatureContactManager = "{375f0cd2-1dd7-442f-a8f6-2755d1880dd9}";
+        //
         public const string addonGuidExportCSV = "{5C25F35D-A2A8-4791-B510-B1FFE0645004}";
         // 
         // -- sample

@@ -17,7 +17,12 @@ namespace Contensive.Addons.ContactManager.Views {
             var sw = new Stopwatch();
             sw.Start();
             try {
-                // 
+                //
+                // -- if not running inside a portal, redirect to run within the CRM portal
+                if (!cp.AdminUI.EndpointContainsPortal()) {
+                    return cp.AdminUI.RedirectToPortalFeature(Constants.guidCRMPortal, Constants.guidPortalFeatureContactManager, "");
+                }
+                //
                 // -- initialize application. If authentication needed and not login page, pass true
                 using (var ae = new Controllers.ApplicationController(cp, false)) {
                     var request = new RequestModel(cp);
