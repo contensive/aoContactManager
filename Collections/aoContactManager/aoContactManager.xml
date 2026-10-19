@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="windows-1252"?>
-<Collection name="Contact Manager" guid="{51a67cb6-ea94-497c-896a-979a851be3db}" system="No" updatable="Yes" blockNavigatorNode="No"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:noNamespaceSchemaLocation="https://contensive.s3.amazonaws.com/xsd/Collection.xsd"
->
-	<HelpLink></HelpLink>
-	<Help></Help>
-	<Addon name="Contact Manager" guid="{57602963-CA46-41EB-8053-8ACB8C47C2F2}" type="Tool">
+<Collection Name="Contact Manager" Guid="{51a67cb6-ea94-497c-896a-979a851be3db}" 
+	System="No" 
+	Updatable="Yes" 
+	BlockNavigatorNode="No"
+  	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  	xsi:noNamespaceSchemaLocation="https://contensive.s3.amazonaws.com/xsd/Collection.xsd"
+>	<Help></Help>
+	<Addon Name="Contact Manager" Guid="{57602963-CA46-41EB-8053-8ACB8C47C2F2}" Type="Tool">
 		<Copy></Copy>
 		<CopyText></CopyText>
 		<DotNetClass><![CDATA[Contensive.Addons.ContactManager.Views.ContactManagerAddon]]></DotNetClass>
@@ -18,8 +19,7 @@
 		<InIframe>No</InIframe>
 		<BlockEditTools>Yes</BlockEditTools>
 		<FormXML></FormXML>
-		<IncludeAddon name="Bootstrap Popper" guid="{78AB19D3-A148-4189-BE0F-C0029A8A0042}"/>
-		<IncludeAddon name="Bootstrap" guid="{EF1FD66C-D62F-4BD2-BF07-38F47996EBB3}"/>
+		<IncludeAddon Name="Bootstrap" Guid="{EF1FD66C-D62F-4BD2-BF07-38F47996EBB3}"/>
 		<IsInline>No</IsInline>
 		<JavascriptInHead></JavascriptInHead>
 		<javascriptForceHead>No</javascriptForceHead>
@@ -46,5 +46,5 @@
 		<styleslinkhref><![CDATA[/ContactManager/ContactManager.css]]></styleslinkhref>
 		<Scripting Language="VBScript" EntryPoint="" Timeout="5000"/>
 	</Addon>
-	<Resource name="wwwFiles.zip" type="wwwFiles" />
+	<Resource Name="wwwFiles.zip" Type="wwwFiles" />
 </Collection>
