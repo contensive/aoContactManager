@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs:*)",
+      "Bash(grep:*)",
+      "WebFetch(domain:contensive.s3.amazonaws.com)"
+    ]
+  }
+}
