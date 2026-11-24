@@ -218,35 +218,37 @@ namespace Contensive.Addons.ContactManager.Views {
                                                     // 
                                                     // --- tmp only -- need a new api method to cp.addon,executeAsync( addonid, dictionaryofArgs, DownloadName, downloadfilename )
                                                     // 
-                                                    var addon = DbBaseModel.create<AddonModel>(cp, Constants.addonGuidExportCSV);
-                                                    if (addon is null) {
-                                                        // 
-                                                        ae.statusMessage = "<P>There was a problem requesting your download. The Csv Export Addon is not installed.<P>";
-                                                    } else {
-                                                        ae.statusMessage = "<P>Your download request has been submitted and will be available on the <a href=" + cp.Site.GetText("adminurl") + "?af=30>Download Requests</a> page shortly.<P>";
-                                                        // 
-                                                        var download = DbBaseModel.addDefault<DownloadModel>(cp);
-                                                        download.name = "Contact Manager Export by " + cp.User.Name + ", " + DateTime.Now.ToString();
-                                                        download.requestedBy = cp.User.Id;
-                                                        download.dateRequested = DateTime.Now;
-                                                        download.filename.content = Environment.NewLine;
-                                                        download.filename.filename = ContactManager.Controllers.GenericController.getVirtualRecordUnixPathFilename(DownloadModel.tableMetadata.tableNameLower, "filename", download.id, "export.csv");
-                                                        download.save(cp);
-                                                        // 
-                                                        var args = new Dictionary<string, string>() { { "sql", SQL } };
-                                                        // 
-                                                        var cmdDetail = new TaskModel.CmdDetailClass() {
-                                                            addonId = addon.id,
-                                                            addonName = addon.name,
-                                                            args = args
-                                                        };
-                                                        // 
-                                                        var task = DbBaseModel.addDefault<TaskModel>(cp);
-                                                        task.name = "addon [#" + cmdDetail.addonId + "," + cmdDetail.addonName + "]";
-                                                        task.cmdDetail = cp.JSON.Serialize(cmdDetail);
-                                                        task.resultDownloadId = download.id;
-                                                        task.save(cp);
-                                                    }
+                                                    // todo - download feature disabled, DownloadModel and TaskModel.resultDownloadId removed from platform
+                                                    ae.statusMessage = "<P>The download feature is temporarily disabled.<P>";
+                                                    //var addon = DbBaseModel.create<AddonModel>(cp, Constants.addonGuidExportCSV);
+                                                    //if (addon is null) {
+                                                    //    //
+                                                    //    ae.statusMessage = "<P>There was a problem requesting your download. The Csv Export Addon is not installed.<P>";
+                                                    //} else {
+                                                    //    ae.statusMessage = "<P>Your download request has been submitted and will be available on the <a href=" + cp.Site.GetText("adminurl") + "?af=30>Download Requests</a> page shortly.<P>";
+                                                    //    //
+                                                    //    var download = DbBaseModel.addDefault<DownloadModel>(cp);
+                                                    //    download.name = "Contact Manager Export by " + cp.User.Name + ", " + DateTime.Now.ToString();
+                                                    //    download.requestedBy = cp.User.Id;
+                                                    //    download.dateRequested = DateTime.Now;
+                                                    //    download.filename.content = Environment.NewLine;
+                                                    //    download.filename.filename = ContactManager.Controllers.GenericController.getVirtualRecordUnixPathFilename(DownloadModel.tableMetadata.tableNameLower, "filename", download.id, "export.csv");
+                                                    //    download.save(cp);
+                                                    //    //
+                                                    //    var args = new Dictionary<string, string>() { { "sql", SQL } };
+                                                    //    //
+                                                    //    var cmdDetail = new TaskModel.CmdDetailClass() {
+                                                    //        addonId = addon.id,
+                                                    //        addonName = addon.name,
+                                                    //        args = args
+                                                    //    };
+                                                    //    //
+                                                    //    var task = DbBaseModel.addDefault<TaskModel>(cp);
+                                                    //    task.name = "addon [#" + cmdDetail.addonId + "," + cmdDetail.addonName + "]";
+                                                    //    task.cmdDetail = cp.JSON.Serialize(cmdDetail);
+                                                    //    task.resultDownloadId = download.id;
+                                                    //    task.save(cp);
+                                                    //}
                                                 }
                                             }
                                         }

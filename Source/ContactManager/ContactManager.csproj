@@ -17,8 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Contensive.CPBaseClass" Version="26.5.30.24764" />
-    <PackageReference Include="Contensive.DbModels" Version="26.5.30.24764" />
+    <PackageReference Include="Contensive.CPBaseClass" Version="26.11.15.30529" />
+    <PackageReference Include="Contensive.DbModels" Version="26.11.15.30529" />
   </ItemGroup>
 
 </Project>
