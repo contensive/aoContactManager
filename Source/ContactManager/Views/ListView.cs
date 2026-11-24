@@ -45,30 +45,28 @@ namespace Contensive.Addons.ContactManager.Views {
                                             // 
                                             cp.UserError.Add("Please select a Target Group for this operation");
                                         } else if (request.GroupToolSelect == 0) {
-                                            // 
-                                            // Add selection to Group
-                                            // 
+                                            //
+                                            // Add selection to Group (only if not already a member)
+                                            //
                                             if (request.RowCount > 0) {
                                                 GroupName = cp.Group.GetName(request.GroupID.ToString());
                                                 var loopTo = request.RowCount - 1;
                                                 for (RowPointer = 0; RowPointer <= loopTo; RowPointer++) {
                                                     if (cp.Doc.GetBoolean("M." + RowPointer)) {
                                                         memberID = cp.Doc.GetInteger("MID." + RowPointer);
-                                                        cp.Group.AddUser(GroupName, memberID);
+                                                        var existingRules = DbBaseModel.createList<MemberRuleModel>(cp, $"(MemberID={memberID})and(GroupID={request.GroupID})");
+                                                        if (existingRules.Count == 0) {
+                                                            cp.Group.AddUser(GroupName, memberID);
+                                                        }
                                                     }
                                                 }
                                             }
                                         } else {
-                                            // 
-                                            // Add everyone in search criteria to this group
-                                            // 
-
+                                            //
+                                            // Add everyone in search criteria to this group (only members not already in group)
+                                            //
                                             int CCID = cp.Content.GetID("Member Rules");
-                                            SQL = "insert into ccMemberRules (Active,ContentControlID,GroupID,MemberID ) select 1," + CCID + "," + request.GroupID + ",ccMembers.ID from (ccMembers left join ccMemberRules on ccMemberRules.MemberID=ccMembers.ID ) left join ( select MemberID  from ccMemberRules where GroupID in (" + request.GroupID + ")) as InGroups on InGroups.MemberID=ccMembers.ID where " + SQLCriteria + " and InGroups.MemberID is null";
-
-
-
-
+                                            SQL = $"insert into ccMemberRules (Active,ContentControlID,GroupID,MemberID) select 1,{CCID},{request.GroupID},ccMembers.ID from ccMembers where {SQLCriteria} and ccMembers.ID not in (select MemberID from ccMemberRules where GroupID={request.GroupID})";
 
 
                                             cp.Db.ExecuteNonQuery(SQL);
